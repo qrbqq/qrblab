@@ -86,4 +86,42 @@ export interface ResearchPaper {
  *   },
  * }
  */
-export const papers: ResearchPaper[] = [];
+export const papers: ResearchPaper[] = export const papers: ResearchPaper[] = [
+  {
+    id: "qrb-2017-001",
+    slug: "attention-is-all-you-need",
+    title: {
+      en: "Attention Is All You Need",
+      ar: "الانتباه هو كل ما تحتاجه (معمارية المحولات)",
+    },
+    abstract: {
+      en: "The foundational research paper proposing the Transformer architecture, replacing recurrent and convolutional layers entirely with self-attention mechanisms.",
+      ar: "الورقة البحثية التأسيسية التي اقترحت معمارية المحولات التوليدية، مستبدلة الشبكات العصبية المتكررة بالكامل بآليات الانتباه الذاتي.",
+    },
+    explanation: {
+      en: "A comprehensive breakdown of multi-head self-attention, positional encoding, and feed-forward networks that revolutionized modern deep learning and large language models.",
+      ar: "شرح تفصيلي لآليات الانتباه المتعدد الرؤوس، والترميز الموضعي، والشبكات الأمامية التي أحدثت ثورة في التعلم العميق ونماذج اللغة الكبيرة الحديثة.",
+    },
+    authors: [
+      "Ashish Vaswani",
+      "Noam Shazeer",
+      "Niki Parmar",
+      "Jakob Uszkoreit",
+      "Llion Jones",
+      "Aidan N. Gomez",
+      "Łukasz Kaiser",
+      "Illia Polosukhin",
+    ],
+    publishedDate: "2017-06-12",
+    version: "v1.0",
+    category: {
+      en: "Artificial Intelligence",
+      ar: "الذكاء الاصطناعي",
+    },
+    tags: ["Transformer", "Self-Attention", "Deep Learning", "NLP"],
+    pdfPath: "papers/attention-is-all-you-need.pdf.pdf",
+    thumbnail: "",
+    previewImages: [],
+    doi: "10.48550/arXiv.1706.03762",
+  },
+];
