@@ -86,7 +86,7 @@ export interface ResearchPaper {
  *   },
  * }
  */
-export const papers: ResearchPaper[] = export const papers: ResearchPaper[] = [
+export const papers: ResearchPaper[] = [
   {
     id: "qrb-2017-001",
     slug: "attention-is-all-you-need",
