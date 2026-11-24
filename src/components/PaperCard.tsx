@@ -1,5 +1,5 @@
 import {Link} from 'react-router-dom';
-import {ArrowRight, FileText} from 'lucide-react';
+import {ArrowRight} from 'lucide-react';
 import type {ResearchPaper} from '../data/papers';
 import {useLanguage} from '../context/LanguageContext';
 import {
@@ -9,7 +9,6 @@ import {
   resolveAssetUrl,
 } from '../utils/papers';
 import {getPaperRating} from '../utils/ratings';
-import {GlassIcon} from './GlassIcon';
 import {StarRating} from './StarRating';
 
 interface PaperCardProps {
@@ -51,8 +50,13 @@ export function PaperCard({paper, staticMode = false}: PaperCardProps) {
               }
             />
           ) : (
-            <div className="flex aspect-video w-full items-center justify-center bg-[var(--bg-surface-elevated)]">
-              <GlassIcon icon={FileText} size="lg" staticMode={staticMode} />
+            <div className="flex aspect-video w-full flex-col items-center justify-center gap-1 bg-[var(--bg-surface-elevated)] px-4 text-center">
+              <span className="font-mono-tabular text-xs font-medium tracking-[0.12em] text-[var(--text-eyebrow)]">
+                {paper.version}
+              </span>
+              <span className="text-xs font-medium text-[var(--text-secondary)]">
+                {category}
+              </span>
             </div>
           )}
         </div>

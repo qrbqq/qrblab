@@ -6,6 +6,7 @@ import {LanguageProvider} from './context/LanguageContext';
 import {ThemeProvider} from './context/ThemeContext';
 import {AboutPage} from './pages/AboutPage';
 import {HomePage} from './pages/HomePage';
+import {LabLogPage} from './pages/LabLogPage';
 import {NotFoundPage} from './pages/NotFoundPage';
 import {PaperDetailPage} from './pages/PaperDetailPage';
 import {ResearchPage} from './pages/ResearchPage';
@@ -31,6 +32,7 @@ export default function App() {
             <main className="flex flex-1 flex-col">
               <Routes>
                 <Route path="/" element={<HomePage />} />
+                <Route path="/log" element={<LabLogPage />} />
                 <Route path="/research" element={<ResearchPage />} />
                 <Route path="/research/:slug" element={<PaperDetailPage />} />
                 <Route path="/about" element={<AboutPage />} />

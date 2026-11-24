@@ -3,18 +3,14 @@ import {Link, useParams} from 'react-router-dom';
 import {
   ArrowLeft,
   BookOpen,
-  Check,
   Copy,
   Download,
   ExternalLink,
-  FileText,
-  Images,
   Link2,
   Maximize2,
   Quote,
 } from 'lucide-react';
 import {EmptyStateCard} from '../components/EmptyStateCard';
-import {GlassIcon} from '../components/GlassIcon';
 import {ScreenshotLightbox} from '../components/ScreenshotLightbox';
 import {StarRating} from '../components/StarRating';
 import {Toast, type ToastMessage} from '../components/Toast';
@@ -89,7 +85,7 @@ export function PaperDetailPage() {
     return (
       <div className="mx-auto max-w-4xl px-4 py-16 sm:px-6 lg:px-8">
         <EmptyStateCard
-          icon={FileText}
+          eyebrow={t.paperDetail.notFoundStatus}
           title={t.paperDetail.notFoundTitle}
           description={t.paperDetail.notFoundDescription}
           actionLabel={t.paperDetail.backToArchive}
@@ -232,8 +228,10 @@ export function PaperDetailPage() {
                   key={idx}
                   className="flex items-start gap-3 text-sm leading-relaxed text-[var(--text-primary)]/90"
                 >
-                  <GlassIcon icon={Check} size="sm" />
-                  <span className="pt-2">{item}</span>
+                  <span className="font-mono-tabular mt-0.5 shrink-0 text-xs font-medium tracking-wider text-[var(--text-eyebrow)]">
+                    {String(idx + 1).padStart(2, '0')}
+                  </span>
+                  <span>{item}</span>
                 </li>
               ))}
             </ul>
@@ -251,16 +249,13 @@ export function PaperDetailPage() {
 
         {/* 3. Horizontal PDF Preview Screenshots + Lightbox */}
         <section className="mt-10 border-t border-[var(--border-hairline)] pt-8">
-          <div className="mb-4 flex items-start gap-3">
-            <GlassIcon icon={Images} size="sm" />
-            <div>
-              <h2 className="text-lg font-semibold tracking-tight text-[var(--text-primary)]">
-                {t.paperDetail.screenshotsHeading}
-              </h2>
-              <p className="mt-0.5 text-xs text-[var(--text-secondary)]">
-                {t.paperDetail.screenshotsSubheading}
-              </p>
-            </div>
+          <div className="mb-4">
+            <h2 className="text-lg font-semibold tracking-tight text-[var(--text-primary)]">
+              {t.paperDetail.screenshotsHeading}
+            </h2>
+            <p className="mt-0.5 text-xs text-[var(--text-secondary)]">
+              {t.paperDetail.screenshotsSubheading}
+            </p>
           </div>
 
           {previewImages.length > 0 ? (
@@ -379,12 +374,9 @@ export function PaperDetailPage() {
         {/* Optional Embedded Inline PDF Reader */}
         {showInlinePdf ? (
           <section className="mt-8 border-t border-[var(--border-hairline)] pt-8">
-            <div className="mb-4 flex items-center gap-3">
-              <GlassIcon icon={FileText} size="sm" />
-              <h2 className="text-lg font-semibold tracking-tight text-[var(--text-primary)]">
-                {t.paperDetail.pdfPreviewHeading}
-              </h2>
-            </div>
+            <h2 className="mb-4 text-lg font-semibold tracking-tight text-[var(--text-primary)]">
+              {t.paperDetail.pdfPreviewHeading}
+            </h2>
 
             <div className="overflow-hidden rounded-2xl border border-[var(--border-hairline)] bg-[var(--bg-surface-elevated)]">
               <object

@@ -1,9 +1,7 @@
 import {Link} from 'react-router-dom';
-import type {LucideIcon} from 'lucide-react';
-import {GlassIcon} from './GlassIcon';
 
 interface EmptyStateCardProps {
-  icon: LucideIcon;
+  eyebrow?: string;
   title: string;
   description: string;
   actionLabel?: string;
@@ -13,7 +11,7 @@ interface EmptyStateCardProps {
 }
 
 export function EmptyStateCard({
-  icon,
+  eyebrow,
   title,
   description,
   actionLabel,
@@ -29,12 +27,14 @@ export function EmptyStateCard({
   return (
     <div className={`${cardClass} rounded-3xl p-8 text-center sm:p-12`}>
       <div className="mx-auto flex max-w-md flex-col items-center">
-        <GlassIcon
-          icon={icon}
-          size="lg"
-          tone="neutral"
-          staticMode={staticMode}
-          className="mb-5"
+        {eyebrow ? (
+          <p className="font-mono-tabular text-[11px] font-medium tracking-[0.12em] text-[var(--text-eyebrow)]">
+            {eyebrow}
+          </p>
+        ) : null}
+        <span
+          aria-hidden="true"
+          className="my-4 h-px w-12 bg-[var(--border-strong)]"
         />
         <h3 className="text-lg font-semibold tracking-tight text-[var(--text-primary)]">
           {title}

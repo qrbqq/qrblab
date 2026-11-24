@@ -1,7 +1,6 @@
 import {useEffect, useMemo, useRef, useState} from 'react';
-import {FileSearch, Search, X} from 'lucide-react';
+import {Search, X} from 'lucide-react';
 import {EmptyStateCard} from '../components/EmptyStateCard';
-import {GlassIcon} from '../components/GlassIcon';
 import {PaperCard} from '../components/PaperCard';
 import {useLanguage} from '../context/LanguageContext';
 import {papers} from '../data/papers';
@@ -53,16 +52,16 @@ export function ResearchPage() {
   return (
     <div className="mx-auto w-full max-w-7xl px-4 py-12 sm:px-6 sm:py-16 lg:px-8">
       <header className="mb-8 flex flex-col gap-6 border-b border-[var(--border-hairline)] pb-8 sm:flex-row sm:items-end sm:justify-between">
-        <div className="flex items-start gap-4">
-          <GlassIcon icon={FileSearch} size="lg" staticMode />
-          <div>
-            <h1 className="text-3xl font-semibold tracking-tight text-[var(--text-primary)] sm:text-4xl text-balance">
-              {t.research.title}
-            </h1>
-            <p className="mt-2 max-w-2xl text-sm leading-relaxed text-[var(--text-secondary)] sm:text-base">
-              {t.research.subtitle}
-            </p>
-          </div>
+        <div>
+          <p className="font-mono-tabular text-[11px] font-medium tracking-[0.12em] text-[var(--text-eyebrow)]">
+            {t.research.eyebrow}
+          </p>
+          <h1 className="mt-2 text-3xl font-semibold tracking-tight text-[var(--text-primary)] sm:text-4xl text-balance">
+            {t.research.title}
+          </h1>
+          <p className="mt-2 max-w-2xl text-sm leading-relaxed text-[var(--text-secondary)] sm:text-base">
+            {t.research.subtitle}
+          </p>
         </div>
 
         {hasPapers ? (
@@ -158,7 +157,7 @@ export function ResearchPage() {
 
       {!hasPapers ? (
         <EmptyStateCard
-          icon={FileSearch}
+          eyebrow={t.research.emptyStatus}
           title={t.research.emptyTitle}
           description={t.research.emptyDescription}
           actionLabel={t.research.emptyHint}
@@ -167,7 +166,7 @@ export function ResearchPage() {
         />
       ) : filteredPapers.length === 0 ? (
         <EmptyStateCard
-          icon={Search}
+          eyebrow={t.research.noMatchesStatus}
           title={t.research.noMatchesTitle}
           description={t.research.noMatchesDescription}
           actionLabel={t.research.resetFilters}

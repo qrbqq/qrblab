@@ -1,14 +1,10 @@
 import type {CSSProperties} from 'react';
-import {Bot, Brain, Car, Cog} from 'lucide-react';
 import {useLanguage} from '../context/LanguageContext';
 import {
   handleSpotlightMouseMove,
   useScrollReveal,
 } from '../hooks/useScrollReveal';
 import {ArchitecturalFrame} from './ArchitecturalFrame';
-import {GlassIcon} from './GlassIcon';
-
-const MATRIX_ICONS = [Brain, Cog, Bot, Car];
 
 interface CoreResearchMatrixProps {
   id?: string;
@@ -44,13 +40,9 @@ export function CoreResearchMatrix({
             animated ? 'home-reveal-item' : ''
           }`}
         >
-          <div className="inline-flex items-center gap-2 font-mono-tabular text-[11px] font-medium tracking-[0.12em] text-[var(--text-eyebrow)]">
-            <span
-              className="h-1.5 w-1.5 rounded-full bg-[var(--text-primary)]"
-              aria-hidden="true"
-            />
-            <span>{eyebrow}</span>
-          </div>
+          <p className="font-mono-tabular text-[11px] font-medium tracking-[0.12em] text-[var(--text-eyebrow)]">
+            {eyebrow}
+          </p>
 
           {heading ? (
             <h2 className="text-2xl font-semibold tracking-tight text-[var(--text-primary)]">
@@ -65,7 +57,6 @@ export function CoreResearchMatrix({
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 lg:gap-5">
           {t.about.focusAreas.map((area, index) => {
-            const Icon = MATRIX_ICONS[index] ?? Cog;
             const staggerStyle = animated
               ? ({'--reveal-delay': `${index * 70}ms`} as CSSProperties)
               : undefined;
@@ -83,12 +74,7 @@ export function CoreResearchMatrix({
                 }`}
               >
                 <div className="relative z-10">
-                  <div className="flex items-center justify-between gap-3">
-                    <GlassIcon
-                      icon={Icon}
-                      size="md"
-                      className={animated ? 'home-card-icon' : ''}
-                    />
+                  <div className="flex items-center gap-2.5">
                     <span
                       className={`font-mono-tabular text-xs font-semibold tracking-wider text-[var(--text-secondary)] ${
                         animated ? 'home-card-code' : ''
@@ -96,9 +82,13 @@ export function CoreResearchMatrix({
                     >
                       {area.code}
                     </span>
+                    <span
+                      aria-hidden="true"
+                      className="h-px flex-1 bg-[var(--border-hairline)]"
+                    />
                   </div>
 
-                  <h3 className="mt-5 text-base font-bold tracking-tight text-[var(--text-primary)]">
+                  <h3 className="mt-4 text-base font-bold tracking-tight text-[var(--text-primary)]">
                     {area.title}
                   </h3>
 

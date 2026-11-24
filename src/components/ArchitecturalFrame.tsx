@@ -5,6 +5,7 @@ interface ArchitecturalFrameProps {
   ariaLabel?: string;
   children: ReactNode;
   livingBorder?: boolean;
+  compact?: boolean;
   className?: string;
 }
 
@@ -13,13 +14,15 @@ export function ArchitecturalFrame({
   ariaLabel,
   children,
   livingBorder = false,
+  compact = false,
   className = '',
 }: ArchitecturalFrameProps) {
+  const paddingClass = compact ? 'p-4 sm:p-5 lg:p-6' : 'p-6 sm:p-8 lg:p-10';
   return (
     <section
       id={id}
       aria-label={ariaLabel}
-      className={`glass-surface relative scroll-mt-24 overflow-hidden rounded-[2rem] p-6 sm:p-8 lg:p-10 ${className}`}
+      className={`glass-surface relative scroll-mt-24 overflow-hidden rounded-[2rem] ${paddingClass} ${className}`}
     >
       {livingBorder ? (
         <>

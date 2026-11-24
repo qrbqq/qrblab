@@ -1,6 +1,6 @@
 import type {CSSProperties} from 'react';
 import {Link} from 'react-router-dom';
-import {ArrowRight, BookOpen, FileText} from 'lucide-react';
+import {ArrowRight} from 'lucide-react';
 import {useLanguage} from '../context/LanguageContext';
 import {papers} from '../data/papers';
 import {
@@ -16,7 +16,6 @@ import {
 } from '../utils/papers';
 import {getPaperRating} from '../utils/ratings';
 import {ArchitecturalFrame} from './ArchitecturalFrame';
-import {GlassIcon} from './GlassIcon';
 import {StarRating} from './StarRating';
 
 interface LatestPublicationsSectionProps {
@@ -44,13 +43,9 @@ export function LatestPublicationsSection({
           data-revealed={isVisible}
           className="home-reveal-item mb-6 flex flex-col gap-2 sm:mb-8"
         >
-          <div className="inline-flex items-center gap-2 font-mono-tabular text-[11px] font-medium tracking-[0.12em] text-[var(--text-eyebrow)]">
-            <span
-              className="h-1.5 w-1.5 rounded-full bg-[var(--text-primary)]"
-              aria-hidden="true"
-            />
-            <span>{t.home.latestEyebrow}</span>
-          </div>
+          <p className="font-mono-tabular text-[11px] font-medium tracking-[0.12em] text-[var(--text-eyebrow)]">
+            {t.home.latestEyebrow}
+          </p>
 
           <h2 className="text-2xl font-semibold tracking-tight text-[var(--text-primary)]">
             {t.home.latestHeading}
@@ -68,10 +63,12 @@ export function LatestPublicationsSection({
             className="home-reveal-item home-spotlight-card glass-card rounded-3xl p-7 text-center sm:p-9"
           >
             <div className="relative z-10 mx-auto flex max-w-md flex-col items-center">
-              <GlassIcon
-                icon={BookOpen}
-                size="md"
-                className="home-card-icon mb-4"
+              <p className="font-mono-tabular text-[11px] font-medium tracking-[0.12em] text-[var(--text-eyebrow)]">
+                {t.home.latestEmptyStatus}
+              </p>
+              <span
+                aria-hidden="true"
+                className="my-3.5 h-px w-10 bg-[var(--border-strong)]"
               />
               <h3 className="text-base font-semibold tracking-tight text-[var(--text-primary)]">
                 {t.home.latestEmptyTitle}
@@ -112,12 +109,13 @@ export function LatestPublicationsSection({
                           className="aspect-video w-full object-cover"
                         />
                       ) : (
-                        <div className="flex aspect-video w-full items-center justify-center bg-[var(--bg-surface-elevated)]">
-                          <GlassIcon
-                            icon={FileText}
-                            size="md"
-                            className="home-card-icon"
-                          />
+                        <div className="flex aspect-video w-full flex-col items-center justify-center gap-1 bg-[var(--bg-surface-elevated)] px-4 text-center">
+                          <span className="font-mono-tabular text-[11px] font-medium tracking-[0.12em] text-[var(--text-eyebrow)]">
+                            {paper.version}
+                          </span>
+                          <span className="text-xs font-medium text-[var(--text-secondary)]">
+                            {category}
+                          </span>
                         </div>
                       )}
                     </div>

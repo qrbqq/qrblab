@@ -11,6 +11,7 @@ export const LANGUAGE_ENDONYMS: Record<SupportedLanguage, string> = {
 export interface TranslationDictionary {
   nav: {
     home: string;
+    labLog: string;
     research: string;
     about: string;
     archiveCta: string;
@@ -36,34 +37,65 @@ export interface TranslationDictionary {
   };
   home: {
     eyebrow: string;
+    heroEyebrow: string;
     heroTitle: string;
+    heroHeadline: string;
     readFullStatement: string;
     collapseStatement: string;
     exploreResearch: string;
+    exploreArchiveShort: string;
     matrixEyebrow: string;
+    timelineDomains: Array<{
+      code: string;
+      id: string;
+      title: string;
+      scope: string;
+    }>;
     principlesEyebrow: string;
     principlesHeading: string;
     principlesSubheading: string;
+    principlesToggleLabel: string;
     principles: Array<{
       code: string;
       id: string;
       title: string;
       description: string;
     }>;
+    labLogEyebrow: string;
+    labLogHeading: string;
+    labLogEmptyStatus: string;
+    labLogEmptyTitle: string;
+    labLogEmptyDescription: string;
+    viewAllLogs: string;
     latestEyebrow: string;
     latestHeading: string;
     latestSubheading: string;
+    latestEmptyStatus: string;
     latestEmptyTitle: string;
     latestEmptyDescription: string;
     sectionIndexLabel: string;
     sections: {
       overview: string;
       architecture: string;
-      principles: string;
+      labLog: string;
       publications: string;
     };
   };
+  labLog: {
+    eyebrow: string;
+    title: string;
+    subtitle: string;
+    countSingular: string;
+    countPlural: string;
+    emptyStatus: string;
+    emptyTitle: string;
+    emptyDescription: string;
+    emptyHint: string;
+    sourceLink: string;
+    zoomImage: string;
+  };
   research: {
+    eyebrow: string;
     title: string;
     subtitle: string;
     searchPlaceholder: string;
@@ -76,9 +108,11 @@ export interface TranslationDictionary {
     readPaper: string;
     ratingUnrated: string;
     ratingYourLabel: string;
+    emptyStatus: string;
     emptyTitle: string;
     emptyDescription: string;
     emptyHint: string;
+    noMatchesStatus: string;
     noMatchesTitle: string;
     noMatchesDescription: string;
     resetFilters: string;
@@ -121,10 +155,12 @@ export interface TranslationDictionary {
     linkCopied: string;
     copyFailed: string;
     pdfFallbackText: string;
+    notFoundStatus: string;
     notFoundTitle: string;
     notFoundDescription: string;
   };
   about: {
+    eyebrow: string;
     title: string;
     subtitle: string;
     focusEyebrow: string;
@@ -164,6 +200,7 @@ export const translations: Record<SupportedLanguage, TranslationDictionary> = {
   en: {
     nav: {
       home: 'Home',
+      labLog: 'Lab Log',
       research: 'Research',
       about: 'About',
       archiveCta: 'Archive',
@@ -189,14 +226,44 @@ export const translations: Record<SupportedLanguage, TranslationDictionary> = {
     },
     home: {
       eyebrow: 'AI · MECHATRONICS · ROBOTICS · AUTONOMOUS VEHICLES',
+      heroEyebrow: '00 / INDEPENDENT RESEARCH LAB',
       heroTitle: 'qrblab',
+      heroHeadline: 'Intelligence, Mechatronics & Autonomous Systems',
       readFullStatement: 'Read full statement',
       collapseStatement: 'Show less',
       exploreResearch: 'Explore Research Archive',
+      exploreArchiveShort: 'Explore Archive',
       matrixEyebrow: '01 / CORE ARCHITECTURE',
+      timelineDomains: [
+        {
+          code: '01',
+          id: 'ai',
+          title: 'Artificial Intelligence',
+          scope: 'Perception models & decision systems',
+        },
+        {
+          code: '02',
+          id: 'mechatronics',
+          title: 'Mechatronics',
+          scope: 'Electro-mechanical actuation & drives',
+        },
+        {
+          code: '03',
+          id: 'robotics',
+          title: 'Robotics',
+          scope: 'Kinematics & embedded control',
+        },
+        {
+          code: '04',
+          id: 'autonomous',
+          title: 'Autonomous Vehicles',
+          scope: 'Sensor fusion & path planning',
+        },
+      ],
       principlesEyebrow: '02 / PRINCIPLES',
       principlesHeading: 'Research Principles',
       principlesSubheading: 'Foundational commitments guiding every note and technical study.',
+      principlesToggleLabel: 'Principles',
       principles: [
         {
           code: '01',
@@ -227,9 +294,17 @@ export const translations: Record<SupportedLanguage, TranslationDictionary> = {
             'Static, account-free publishing with direct PDF downloads, preview galleries, and transparent local storage.',
         },
       ],
+      labLogEyebrow: '02 / LAB LOG',
+      labLogHeading: 'Latest from Lab Log',
+      labLogEmptyStatus: '00 / LOG STATUS',
+      labLogEmptyTitle: 'No dispatches logged yet',
+      labLogEmptyDescription:
+        'Field notes, schematics, and rapid technical observations will appear here once logged.',
+      viewAllLogs: 'View all logs',
       latestEyebrow: '03 / LATEST PUBLICATIONS',
       latestHeading: 'Latest Publications',
       latestSubheading: 'Recent technical monographs, notes, and systems analyses.',
+      latestEmptyStatus: '00 / ARCHIVE STATUS',
       latestEmptyTitle: 'No publications yet',
       latestEmptyDescription:
         'Independent studies and engineering papers will appear here as soon as they are published.',
@@ -237,11 +312,26 @@ export const translations: Record<SupportedLanguage, TranslationDictionary> = {
       sections: {
         overview: 'Overview',
         architecture: 'Architecture',
-        principles: 'Principles',
+        labLog: 'Lab Log',
         publications: 'Publications',
       },
     },
+    labLog: {
+      eyebrow: 'DISPATCH STREAM',
+      title: 'Lab Log',
+      subtitle: 'Chronological stream of field notes, bench schematics, and rapid technical observations.',
+      countSingular: 'dispatch',
+      countPlural: 'dispatches',
+      emptyStatus: '00 / LOG STATUS',
+      emptyTitle: 'No dispatches logged yet',
+      emptyDescription:
+        'Chronological field notes, bench schematics, and technical observations will appear here once added.',
+      emptyHint: 'Explore Research Archive',
+      sourceLink: 'Reference',
+      zoomImage: 'Inspect dispatch visual',
+    },
     research: {
+      eyebrow: 'PUBLICATION INDEX',
       title: 'Research Archive',
       subtitle: 'Search and browse published engineering, AI, robotics, and mechatronics studies.',
       searchPlaceholder: 'Search papers by title, description, explanation, or tag...',
@@ -254,10 +344,12 @@ export const translations: Record<SupportedLanguage, TranslationDictionary> = {
       readPaper: 'Read paper',
       ratingUnrated: 'Not rated yet',
       ratingYourLabel: 'Your rating',
+      emptyStatus: '00 / ARCHIVE STATUS',
       emptyTitle: 'The research archive is currently empty',
       emptyDescription:
         'No technical papers or monographs have been published yet. New entries will appear here once added.',
       emptyHint: 'About qrblab',
+      noMatchesStatus: '00 / QUERY RESULT',
       noMatchesTitle: 'No matching publications',
       noMatchesDescription:
         'Try adjusting your search query or selecting a different category filter.',
@@ -301,11 +393,13 @@ export const translations: Record<SupportedLanguage, TranslationDictionary> = {
       linkCopied: 'Publication link copied to clipboard',
       copyFailed: 'Unable to copy to clipboard',
       pdfFallbackText: 'Inline PDF preview is unavailable in this browser.',
+      notFoundStatus: '404 / DOCUMENT',
       notFoundTitle: 'Publication not found',
       notFoundDescription:
         'The requested document could not be located in the archive.',
     },
     about: {
+      eyebrow: 'INSTITUTIONAL NOTE',
       title: 'About qrblab',
       subtitle:
         'Independent personal research exploring Artificial Intelligence, Mechatronics, Robotics, and Autonomous Vehicles.',
@@ -368,6 +462,7 @@ export const translations: Record<SupportedLanguage, TranslationDictionary> = {
   ar: {
     nav: {
       home: 'الرئيسية',
+      labLog: 'سجل المختبر',
       research: 'الأبحاث',
       about: 'حول',
       archiveCta: 'الأرشيف',
@@ -393,14 +488,44 @@ export const translations: Record<SupportedLanguage, TranslationDictionary> = {
     },
     home: {
       eyebrow: 'الذكاء الاصطناعي · الميكاترونيكس · الروبوتات · المركبات ذاتية القيادة',
+      heroEyebrow: '00 / مختبر أبحاث مستقل',
       heroTitle: 'qrblab',
+      heroHeadline: 'الذكاء الاصطناعي والميكاترونيكس والأنظمة الذاتية',
       readFullStatement: 'قراءة البيان كاملاً',
       collapseStatement: 'عرض أقل',
       exploreResearch: 'استكشاف أرشيف الأبحاث',
+      exploreArchiveShort: 'تصفح الأرشيف',
       matrixEyebrow: '01 / البنية الأساسية',
+      timelineDomains: [
+        {
+          code: '01',
+          id: 'ai',
+          title: 'الذكاء الاصطناعي',
+          scope: 'نماذج الإدراك وأنظمة القرار',
+        },
+        {
+          code: '02',
+          id: 'mechatronics',
+          title: 'الميكاترونيكس',
+          scope: 'المشغلات والأنظمة الكهروميكانيكية',
+        },
+        {
+          code: '03',
+          id: 'robotics',
+          title: 'الروبوتات',
+          scope: 'الكينماتيكا والتحكم المدمج',
+        },
+        {
+          code: '04',
+          id: 'autonomous',
+          title: 'المركبات ذاتية القيادة',
+          scope: 'دمج الحساسات وتخطيط المسار',
+        },
+      ],
       principlesEyebrow: '02 / المبادئ',
       principlesHeading: 'مبادئ البحث',
       principlesSubheading: 'التزامات أساسية توجه كل ورقة تقنية ودراسة منشورة.',
+      principlesToggleLabel: 'المبادئ',
       principles: [
         {
           code: '01',
@@ -431,9 +556,17 @@ export const translations: Record<SupportedLanguage, TranslationDictionary> = {
             'نشر ساكن دون حسابات مع تنزيل فوري لملفات PDF ومعاينة واضحة وتخزين محلي شفاف.',
         },
       ],
+      labLogEyebrow: '02 / سجل المختبر',
+      labLogHeading: 'أحدث تدوينة في سجل المختبر',
+      labLogEmptyStatus: '00 / حالة السجل',
+      labLogEmptyTitle: 'لا توجد تدوينات في السجل بعد',
+      labLogEmptyDescription:
+        'ستظهر الملاحظات الميدانية والمخططات الهندسية والتدوينات التقنية السريعة هنا فور نشرها.',
+      viewAllLogs: 'عرض كل السجل',
       latestEyebrow: '03 / أحدث المنشورات',
       latestHeading: 'أحدث المنشورات',
       latestSubheading: 'أحدث الأوراق التقنية والدراسات التحليلية المنشورة.',
+      latestEmptyStatus: '00 / حالة الأرشيف',
       latestEmptyTitle: 'لا توجد منشورات بعد',
       latestEmptyDescription:
         'ستظهر الدراسات المستقلة والأوراق الهندسية هنا فور نشرها.',
@@ -441,11 +574,26 @@ export const translations: Record<SupportedLanguage, TranslationDictionary> = {
       sections: {
         overview: 'نظرة عامة',
         architecture: 'البنية',
-        principles: 'المبادئ',
+        labLog: 'سجل المختبر',
         publications: 'المنشورات',
       },
     },
+    labLog: {
+      eyebrow: 'سجل التدوينات الميدانية',
+      title: 'سجل المختبر',
+      subtitle: 'بث زمني للملاحظات الميدانية والمخططات الهندسية والمشاهدات التقنية السريعة.',
+      countSingular: 'تدوينة',
+      countPlural: 'تدوينات',
+      emptyStatus: '00 / حالة السجل',
+      emptyTitle: 'لا توجد تدوينات في السجل بعد',
+      emptyDescription:
+        'ستظهر الملاحظات الميدانية والمخططات الهندسية والمشاهدات التقنية في تسلسل زمني فور إضافتها.',
+      emptyHint: 'استكشاف أرشيف الأبحاث',
+      sourceLink: 'المصدر',
+      zoomImage: 'تكبير الصورة المرفقة',
+    },
     research: {
+      eyebrow: 'فهرس المنشورات',
       title: 'أرشيف الأبحاث',
       subtitle: 'تصفح وابحث في دراسات الهندسة والذكاء الاصطناعي والروبوتات والميكاترونيكس.',
       searchPlaceholder: 'ابحث بالعنوان أو الوصف أو الشرح أو الكلمات المفتاحية...',
@@ -458,10 +606,12 @@ export const translations: Record<SupportedLanguage, TranslationDictionary> = {
       readPaper: 'قراءة البحث',
       ratingUnrated: 'لا يوجد تقييم بعد',
       ratingYourLabel: 'تقييمك',
+      emptyStatus: '00 / حالة الأرشيف',
       emptyTitle: 'أرشيف الأبحاث فارغ حالياً',
       emptyDescription:
         'لم يتم نشر أي أوراق تقنية أو دراسات حتى الآن. ستظهر الإدخالات الجديدة هنا فور إضافتها.',
       emptyHint: 'عن qrblab',
+      noMatchesStatus: '00 / نتيجة البحث',
       noMatchesTitle: 'لا توجد نتائج مطابقة',
       noMatchesDescription:
         'جرّب تعديل عبارة البحث أو اختيار تصنيف مختلف.',
@@ -505,10 +655,12 @@ export const translations: Record<SupportedLanguage, TranslationDictionary> = {
       linkCopied: 'تم نسخ رابط المنشور إلى الحافظة',
       copyFailed: 'تعذّر النسخ إلى الحافظة',
       pdfFallbackText: 'معاينة ملف PDF المدمجة غير مدعومة في هذا المتصفح.',
+      notFoundStatus: '404 / الوثيقة',
       notFoundTitle: 'المنشور غير موجود',
       notFoundDescription: 'تعذّر العثور على الوثيقة المطلوبة في الأرشيف.',
     },
     about: {
+      eyebrow: 'بيان المشروع',
       title: 'عن qrblab',
       subtitle:
         'مشروع بحثي شخصي مستقل يستكشف الذكاء الاصطناعي والميكاترونيكس والروبوتات والمركبات ذاتية القيادة.',
@@ -571,6 +723,7 @@ export const translations: Record<SupportedLanguage, TranslationDictionary> = {
   fr: {
     nav: {
       home: 'Accueil',
+      labLog: 'Journal du labo',
       research: 'Recherches',
       about: 'À propos',
       archiveCta: 'Archives',
@@ -596,14 +749,44 @@ export const translations: Record<SupportedLanguage, TranslationDictionary> = {
     },
     home: {
       eyebrow: 'IA · MÉCATRONIQUE · ROBOTIQUE · VÉHICULES AUTONOMES',
+      heroEyebrow: '00 / LABORATOIRE DE RECHERCHE INDÉPENDANT',
       heroTitle: 'qrblab',
+      heroHeadline: 'Intelligence, Mécatronique & Systèmes Autonomes',
       readFullStatement: 'Lire la déclaration complète',
       collapseStatement: 'Réduire',
       exploreResearch: 'Explorer les archives',
+      exploreArchiveShort: 'Explorer les archives',
       matrixEyebrow: '01 / ARCHITECTURE CENTRALE',
+      timelineDomains: [
+        {
+          code: '01',
+          id: 'ai',
+          title: 'Intelligence Artificielle',
+          scope: 'Modèles de perception et décision',
+        },
+        {
+          code: '02',
+          id: 'mechatronics',
+          title: 'Mécatronique',
+          scope: 'Actionnement et systèmes intégrés',
+        },
+        {
+          code: '03',
+          id: 'robotics',
+          title: 'Robotique',
+          scope: 'Cinématique et contrôle embarqué',
+        },
+        {
+          code: '04',
+          id: 'autonomous',
+          title: 'Véhicules Autonomes',
+          scope: 'Fusion de capteurs et trajectoires',
+        },
+      ],
       principlesEyebrow: '02 / PRINCIPES',
       principlesHeading: 'Principes de recherche',
       principlesSubheading: 'Engagements fondamentaux qui guident chaque note et étude technique.',
+      principlesToggleLabel: 'Principes',
       principles: [
         {
           code: '01',
@@ -634,9 +817,17 @@ export const translations: Record<SupportedLanguage, TranslationDictionary> = {
             'Publication statique sans compte, téléchargement direct en PDF, aperçus et stockage local transparent.',
         },
       ],
+      labLogEyebrow: '02 / JOURNAL DU LABO',
+      labLogHeading: 'Dernier journal du labo',
+      labLogEmptyStatus: '00 / ÉTAT DU JOURNAL',
+      labLogEmptyTitle: 'Aucune note enregistrée pour le moment',
+      labLogEmptyDescription:
+        'Les notes de terrain, schémas et observations techniques rapides apparaîtront ici dès leur ajout.',
+      viewAllLogs: 'Voir tout le journal',
       latestEyebrow: '03 / DERNIÈRES PUBLICATIONS',
       latestHeading: 'Dernières publications',
       latestSubheading: 'Monographies techniques, notes et analyses de systèmes récentes.',
+      latestEmptyStatus: '00 / ÉTAT DES ARCHIVES',
       latestEmptyTitle: 'Aucune publication pour le moment',
       latestEmptyDescription:
         'Les études indépendantes et articles techniques apparaîtront ici dès leur publication.',
@@ -644,11 +835,26 @@ export const translations: Record<SupportedLanguage, TranslationDictionary> = {
       sections: {
         overview: 'Aperçu',
         architecture: 'Architecture',
-        principles: 'Principes',
+        labLog: 'Journal',
         publications: 'Publications',
       },
     },
+    labLog: {
+      eyebrow: 'FLUX DE TERRAIN',
+      title: 'Journal du labo',
+      subtitle: 'Flux chronologique de notes de terrain, schémas de banc et observations techniques rapides.',
+      countSingular: 'entrée',
+      countPlural: 'entrées',
+      emptyStatus: '00 / ÉTAT DU JOURNAL',
+      emptyTitle: 'Aucune note enregistrée pour le moment',
+      emptyDescription:
+        'Les notes de terrain chronologiques, schémas et observations techniques apparaîtront ici dès leur ajout.',
+      emptyHint: 'Explorer les archives',
+      sourceLink: 'Référence',
+      zoomImage: 'Agrandir le visuel',
+    },
     research: {
+      eyebrow: 'INDEX DES PUBLICATIONS',
       title: 'Archives de recherche',
       subtitle: 'Recherchez et consultez les études publiées en ingénierie, IA, robotique et mécatronique.',
       searchPlaceholder: 'Rechercher par titre, description, explication ou mot-clé...',
@@ -661,10 +867,12 @@ export const translations: Record<SupportedLanguage, TranslationDictionary> = {
       readPaper: 'Lire le document',
       ratingUnrated: 'Pas encore noté',
       ratingYourLabel: 'Votre note',
+      emptyStatus: '00 / ÉTAT DES ARCHIVES',
       emptyTitle: 'Les archives de recherche sont actuellement vides',
       emptyDescription:
         "Aucun document technique n'a encore été publié. Les nouvelles études apparaîtront ici dès leur ajout.",
       emptyHint: 'À propos de qrblab',
+      noMatchesStatus: '00 / RÉSULTAT DE RECHERCHE',
       noMatchesTitle: 'Aucune publication correspondante',
       noMatchesDescription:
         'Essayez de modifier votre requête ou de sélectionner une autre catégorie.',
@@ -708,10 +916,12 @@ export const translations: Record<SupportedLanguage, TranslationDictionary> = {
       linkCopied: 'Lien de publication copié dans le presse-papiers',
       copyFailed: 'Impossible de copier dans le presse-papiers',
       pdfFallbackText: "La prévisualisation PDF intégrée n'est pas disponible dans ce navigateur.",
+      notFoundStatus: '404 / DOCUMENT',
       notFoundTitle: 'Publication introuvable',
       notFoundDescription: "Le document demandé n'a pas été trouvé dans les archives.",
     },
     about: {
+      eyebrow: 'NOTE INSTITUTIONNELLE',
       title: 'À propos de qrblab',
       subtitle:
         "Recherche personnelle et indépendante explorant l'Intelligence Artificielle, la Mécatronique, la Robotique et les Véhicules Autonomes.",
@@ -774,6 +984,7 @@ export const translations: Record<SupportedLanguage, TranslationDictionary> = {
   de: {
     nav: {
       home: 'Start',
+      labLog: 'Labor-Logbuch',
       research: 'Forschung',
       about: 'Über',
       archiveCta: 'Archiv',
@@ -799,14 +1010,44 @@ export const translations: Record<SupportedLanguage, TranslationDictionary> = {
     },
     home: {
       eyebrow: 'KI · MECHATRONIK · ROBOTIK · AUTONOME FAHRZEUGE',
+      heroEyebrow: '00 / UNABHÄNGIGES FORSCHUNGSLABOR',
       heroTitle: 'qrblab',
+      heroHeadline: 'Intelligenz, Mechatronik & Autonome Systeme',
       readFullStatement: 'Vollständige Erklärung lesen',
       collapseStatement: 'Weniger anzeigen',
       exploreResearch: 'Forschungsarchiv öffnen',
+      exploreArchiveShort: 'Archiv öffnen',
       matrixEyebrow: '01 / KERNARCHITEKTUR',
+      timelineDomains: [
+        {
+          code: '01',
+          id: 'ai',
+          title: 'Künstliche Intelligenz',
+          scope: 'Wahrnehmungs- & Entscheidungssysteme',
+        },
+        {
+          code: '02',
+          id: 'mechatronics',
+          title: 'Mechatronik',
+          scope: 'Elektromechanische Aktorik & Antriebe',
+        },
+        {
+          code: '03',
+          id: 'robotics',
+          title: 'Robotik',
+          scope: 'Kinematik & eingebettete Regelung',
+        },
+        {
+          code: '04',
+          id: 'autonomous',
+          title: 'Autonome Fahrzeuge',
+          scope: 'Sensordatenfusion & Pfadplanung',
+        },
+      ],
       principlesEyebrow: '02 / PRINZIPIEN',
       principlesHeading: 'Forschungsprinzipien',
       principlesSubheading: 'Grundsätze, die jede technische Notiz und Analyse leiten.',
+      principlesToggleLabel: 'Prinzipien',
       principles: [
         {
           code: '01',
@@ -837,9 +1078,17 @@ export const translations: Record<SupportedLanguage, TranslationDictionary> = {
             'Statische Veröffentlichung ohne Konto mit direktem PDF-Download, Vorschauen und transparentem Lokal-Speicher.',
         },
       ],
+      labLogEyebrow: '02 / LABOR-LOGBUCH',
+      labLogHeading: 'Neuestes aus dem Labor-Logbuch',
+      labLogEmptyStatus: '00 / LOGBUCH-STATUS',
+      labLogEmptyTitle: 'Noch keine Einträge im Labor-Logbuch',
+      labLogEmptyDescription:
+        'Feldnotizen, Schaltpläne und schnelle technische Beobachtungen erscheinen hier, sobald sie protokolliert wurden.',
+      viewAllLogs: 'Alle Einträge ansehen',
       latestEyebrow: '03 / NEUESTE PUBLIKATIONEN',
       latestHeading: 'Neueste Publikationen',
       latestSubheading: 'Aktuelle technische Berichte, Notizen und Systemanalysen.',
+      latestEmptyStatus: '00 / ARCHIV-STATUS',
       latestEmptyTitle: 'Noch keine Publikationen',
       latestEmptyDescription:
         'Unabhängige Studien und Fachberichte erscheinen hier, sobald sie veröffentlicht sind.',
@@ -847,11 +1096,26 @@ export const translations: Record<SupportedLanguage, TranslationDictionary> = {
       sections: {
         overview: 'Überblick',
         architecture: 'Architektur',
-        principles: 'Prinzipien',
+        labLog: 'Logbuch',
         publications: 'Publikationen',
       },
     },
+    labLog: {
+      eyebrow: 'FELDNOTIZEN-STROM',
+      title: 'Labor-Logbuch',
+      subtitle: 'Chronologischer Strom aus Feldnotizen, Prüfstands-Schaltplänen und schnellen technischen Beobachtungen.',
+      countSingular: 'Eintrag',
+      countPlural: 'Einträge',
+      emptyStatus: '00 / LOGBUCH-STATUS',
+      emptyTitle: 'Noch keine Einträge im Labor-Logbuch',
+      emptyDescription:
+        'Chronologische Feldnotizen, Schaltpläne und technische Beobachtungen erscheinen hier nach dem Hinzufügen.',
+      emptyHint: 'Forschungsarchiv öffnen',
+      sourceLink: 'Quelle',
+      zoomImage: 'Abbildung vergrößern',
+    },
     research: {
+      eyebrow: 'PUBLIKATIONSINDEX',
       title: 'Forschungsarchiv',
       subtitle: 'Durchsuchen und lesen Sie Studien zu Ingenieurwesen, KI, Robotik und Mechatronik.',
       searchPlaceholder: 'Nach Titel, Beschreibung, Erklärung oder Schlagwort suchen...',
@@ -864,10 +1128,12 @@ export const translations: Record<SupportedLanguage, TranslationDictionary> = {
       readPaper: 'Dokument lesen',
       ratingUnrated: 'Noch nicht bewertet',
       ratingYourLabel: 'Ihre Bewertung',
+      emptyStatus: '00 / ARCHIV-STATUS',
       emptyTitle: 'Das Forschungsarchiv ist derzeit leer',
       emptyDescription:
         'Es wurden noch keine technischen Berichte veröffentlicht. Neue Beiträge erscheinen hier nach dem Hinzufügen.',
       emptyHint: 'Über qrblab',
+      noMatchesStatus: '00 / SUCHERGEBNIS',
       noMatchesTitle: 'Keine passenden Publikationen',
       noMatchesDescription:
         'Passen Sie Ihren Suchbegriff an oder wählen Sie einen anderen Kategoriefilter.',
@@ -911,10 +1177,12 @@ export const translations: Record<SupportedLanguage, TranslationDictionary> = {
       linkCopied: 'Publikationslink in die Zwischenablage kopiert',
       copyFailed: 'Kopieren in die Zwischenablage fehlgeschlagen',
       pdfFallbackText: 'Die eingebettete PDF-Vorschau ist in diesem Browser nicht verfügbar.',
+      notFoundStatus: '404 / DOKUMENT',
       notFoundTitle: 'Publikation nicht gefunden',
       notFoundDescription: 'Das angeforderte Dokument konnte im Archiv nicht gefunden werden.',
     },
     about: {
+      eyebrow: 'PROJEKTBESCHREIBUNG',
       title: 'Über qrblab',
       subtitle:
         'Unabhängige persönliche Forschung zu Künstlicher Intelligenz, Mechatronik, Robotik und Autonomen Fahrzeugen.',
@@ -977,6 +1245,7 @@ export const translations: Record<SupportedLanguage, TranslationDictionary> = {
   es: {
     nav: {
       home: 'Inicio',
+      labLog: 'Registro del lab',
       research: 'Investigación',
       about: 'Acerca de',
       archiveCta: 'Archivo',
@@ -1002,14 +1271,44 @@ export const translations: Record<SupportedLanguage, TranslationDictionary> = {
     },
     home: {
       eyebrow: 'IA · MECATRÓNICA · ROBÓTICA · VEHÍCULOS AUTÓNOMOS',
+      heroEyebrow: '00 / LABORATORIO DE INVESTIGACIÓN INDEPENDIENTE',
       heroTitle: 'qrblab',
+      heroHeadline: 'Inteligencia, Mecatrónica y Sistemas Autónomos',
       readFullStatement: 'Leer declaración completa',
       collapseStatement: 'Mostrar menos',
       exploreResearch: 'Explorar archivo de investigación',
+      exploreArchiveShort: 'Explorar archivo',
       matrixEyebrow: '01 / ARQUITECTURA CENTRAL',
+      timelineDomains: [
+        {
+          code: '01',
+          id: 'ai',
+          title: 'Inteligencia Artificial',
+          scope: 'Modelos de percepción y decisión',
+        },
+        {
+          code: '02',
+          id: 'mechatronics',
+          title: 'Mecatrónica',
+          scope: 'Actuación y sistemas electromecánicos',
+        },
+        {
+          code: '03',
+          id: 'robotics',
+          title: 'Robótica',
+          scope: 'Cinemática y control embebido',
+        },
+        {
+          code: '04',
+          id: 'autonomous',
+          title: 'Vehículos Autónomos',
+          scope: 'Fusión sensorial y trayectorias',
+        },
+      ],
       principlesEyebrow: '02 / PRINCIPIOS',
       principlesHeading: 'Principios de investigación',
       principlesSubheading: 'Compromisos esenciales que guían cada nota técnica y estudio.',
+      principlesToggleLabel: 'Principios',
       principles: [
         {
           code: '01',
@@ -1040,9 +1339,17 @@ export const translations: Record<SupportedLanguage, TranslationDictionary> = {
             'Publicación estática sin cuentas, descarga directa en PDF, vistas previas y almacenamiento local transparente.',
         },
       ],
+      labLogEyebrow: '02 / REGISTRO DEL LAB',
+      labLogHeading: 'Último del registro del lab',
+      labLogEmptyStatus: '00 / ESTADO DEL REGISTRO',
+      labLogEmptyTitle: 'Aún no hay registros publicados',
+      labLogEmptyDescription:
+        'Las notas de campo, esquemas y observaciones técnicas rápidas aparecerán aquí en cuanto se registren.',
+      viewAllLogs: 'Ver todo el registro',
       latestEyebrow: '03 / ÚLTIMAS PUBLICACIONES',
       latestHeading: 'Últimas publicaciones',
       latestSubheading: 'Monografías técnicas, notas y análisis de sistemas recientes.',
+      latestEmptyStatus: '00 / ESTADO DEL ARCHIVO',
       latestEmptyTitle: 'Aún no hay publicaciones',
       latestEmptyDescription:
         'Los estudios independientes y artículos técnicos aparecerán aquí en cuanto se publiquen.',
@@ -1050,11 +1357,26 @@ export const translations: Record<SupportedLanguage, TranslationDictionary> = {
       sections: {
         overview: 'Resumen',
         architecture: 'Arquitectura',
-        principles: 'Principios',
+        labLog: 'Registro',
         publications: 'Publicaciones',
       },
     },
+    labLog: {
+      eyebrow: 'FLUJO DE CAMPO',
+      title: 'Registro del lab',
+      subtitle: 'Flujo cronológico de notas de campo, esquemas de banco y observaciones técnicas rápidas.',
+      countSingular: 'registro',
+      countPlural: 'registros',
+      emptyStatus: '00 / ESTADO DEL REGISTRO',
+      emptyTitle: 'Aún no hay registros publicados',
+      emptyDescription:
+        'Las notas de campo cronológicas, esquemas y observaciones técnicas aparecerán aquí en cuanto se añadan.',
+      emptyHint: 'Explorar archivo de investigación',
+      sourceLink: 'Referencia',
+      zoomImage: 'Ampliar imagen',
+    },
     research: {
+      eyebrow: 'ÍNDICE DE PUBLICACIONES',
       title: 'Archivo de investigación',
       subtitle: 'Busca y explora estudios publicados sobre ingeniería, IA, robótica y mecatrónica.',
       searchPlaceholder: 'Buscar por título, descripción, explicación o etiqueta...',
@@ -1067,10 +1389,12 @@ export const translations: Record<SupportedLanguage, TranslationDictionary> = {
       readPaper: 'Leer documento',
       ratingUnrated: 'Sin valorar aún',
       ratingYourLabel: 'Tu valoración',
+      emptyStatus: '00 / ESTADO DEL ARCHIVO',
       emptyTitle: 'El archivo de investigación está vacío',
       emptyDescription:
         'Todavía no se han publicado artículos ni notas técnicas. Aparecerán aquí en cuanto se añadan.',
       emptyHint: 'Acerca de qrblab',
+      noMatchesStatus: '00 / RESULTADO DE BÚSQUEDA',
       noMatchesTitle: 'No hay publicaciones coincidentes',
       noMatchesDescription:
         'Prueba ajustando los términos de búsqueda o seleccionando otra categoría.',
@@ -1114,10 +1438,12 @@ export const translations: Record<SupportedLanguage, TranslationDictionary> = {
       linkCopied: 'Enlace copiado al portapapeles',
       copyFailed: 'No se pudo copiar al portapapeles',
       pdfFallbackText: 'La vista previa integrada de PDF no está disponible en este navegador.',
+      notFoundStatus: '404 / DOCUMENTO',
       notFoundTitle: 'Publicación no encontrada',
       notFoundDescription: 'No se pudo localizar el documento solicitado en el archivo.',
     },
     about: {
+      eyebrow: 'NOTA INSTITUCIONAL',
       title: 'Acerca de qrblab',
       subtitle:
         'Investigación personal independiente que explora la Inteligencia Artificial, la Mecatrónica, la Robótica y los Vehículos Autónomos.',

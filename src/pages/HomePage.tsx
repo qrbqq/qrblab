@@ -1,9 +1,9 @@
-import {useEffect, useState, type CSSProperties} from 'react';
+import {useEffect, useRef, useState, type CSSProperties} from 'react';
 import {Link} from 'react-router-dom';
 import {ArrowRight, ChevronDown, ChevronUp} from 'lucide-react';
-import {CoreResearchMatrix} from '../components/CoreResearchMatrix';
+import {ArchitectureTimelineStrip} from '../components/ArchitectureTimelineStrip';
+import {LatestLabLogSection} from '../components/LatestLabLogSection';
 import {LatestPublicationsSection} from '../components/LatestPublicationsSection';
-import {PrinciplesSection} from '../components/PrinciplesSection';
 import {useLanguage} from '../context/LanguageContext';
 import {siteConfig} from '../data/siteConfig';
 import {
@@ -15,54 +15,70 @@ import {
 type HomeSectionId =
   | 'overview'
   | 'architecture'
-  | 'principles'
+  | 'lab-log'
   | 'publications';
 
-const SECTION_ORDER: Array<{id: HomeSectionId; code: string}> = [
-  {id: 'overview', code: ''},
-  {id: 'architecture', code: '01'},
-  {id: 'principles', code: '02'},
-  {id: 'publications', code: '03'},
+const SECTION_ORDER: Array<{
+  id: HomeSectionId;
+  code: string;
+  labelKey: keyof typeof SECTION_LABEL_KEYS;
+}> = [
+  {id: 'overview', code: '', labelKey: 'overview'},
+  {id: 'architecture', code: '01', labelKey: 'architecture'},
+  {id: 'lab-log', code: '02', labelKey: 'labLog'},
+  {id: 'publications', code: '03', labelKey: 'publications'},
 ];
 
-const HERO_PERIPHERY_MARKERS: Array<{
-  className: string;
-  duration: string;
-  delay: string;
-  symbol: string;
-}> = [
-  {
-    className: 'start-2 top-6 sm:start-6 sm:top-8',
-    duration: '9s',
-    delay: '0s',
-    symbol: '+',
-  },
-  {
-    className: 'end-2 top-10 sm:end-6 sm:top-12',
-    duration: '11s',
-    delay: '1.8s',
-    symbol: '+',
-  },
-  {
-    className: 'start-4 bottom-24 hidden sm:block lg:start-8',
-    duration: '10.5s',
-    delay: '3.2s',
-    symbol: '+',
-  },
-  {
-    className: 'end-4 bottom-20 hidden sm:block lg:end-8',
-    duration: '8.5s',
-    delay: '4.5s',
-    symbol: '+',
-  },
-];
+const SECTION_LABEL_KEYS = {
+  overview: 'overview',
+  architecture: 'architecture',
+  labLog: 'labLog',
+  publications: 'publications',
+} as const;
 
 export function HomePage() {
   const {lang, t} = useLanguage();
   const [statementExpanded, setStatementExpanded] = useState(false);
-  const [heroLogoError, setHeroLogoError] = useState(false);
+  const [videoFailed, setVideoFailed] = useState(false);
+  const [posterFailed, setPosterFailed] = useState(false);
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState<boolean>(() => {
+    if (typeof window === 'undefined' || !window.matchMedia) {
+      return false;
+    }
+    return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  });
   const [activeSection, setActiveSection] = useState<HomeSectionId>('overview');
-  const logoSrc = resolveAssetUrl('images/logo.png', import.meta.env.BASE_URL);
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+
+  const heroVideoUrl = resolveAssetUrl(
+    'images/founder-hero.mp4',
+    import.meta.env.BASE_URL,
+  );
+  const heroPosterUrl = resolveAssetUrl(
+    'images/founder-portrait.png',
+    import.meta.env.BASE_URL,
+  );
+
+  useEffect(() => {
+    if (typeof window === 'undefined' || !window.matchMedia) {
+      return;
+    }
+    const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const handleChange = () => setPrefersReducedMotion(mediaQuery.matches);
+    handleChange();
+    mediaQuery.addEventListener('change', handleChange);
+    return () => mediaQuery.removeEventListener('change', handleChange);
+  }, []);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video || prefersReducedMotion || videoFailed) {
+      return;
+    }
+    video.muted = true;
+    video.defaultMuted = true;
+    video.play().catch(() => {});
+  }, [prefersReducedMotion, videoFailed]);
 
   useEffect(() => {
     const updateActiveSection = () => {
@@ -106,6 +122,8 @@ export function HomePage() {
     0,
     SECTION_ORDER.findIndex((item) => item.id === activeSection),
   );
+  const progressRatio =
+    SECTION_ORDER.length > 1 ? activeIndex / (SECTION_ORDER.length - 1) : 0;
 
   const statement = siteConfig.projectStatement;
   const statementTitle = getLocalizedText(statement.title, lang);
@@ -117,161 +135,229 @@ export function HomePage() {
   const closingParagraphs = allParagraphs.slice(purposeIndex + 1);
 
   return (
-    <div className="relative mx-auto w-full max-w-6xl px-4 py-10 sm:px-6 sm:py-14 lg:px-8 lg:py-16 xl:pe-44 min-[1420px]:pe-8">
-      {/* Desktop-Only Animated Sticky Right-Edge Section Navigator */}
+    <div className="relative w-full">
+      {/* Desktop-Only Minimalist Sticky Right-Edge Progress Tracker */}
       <nav
         aria-label={t.home.sectionIndexLabel}
-        className="glass-surface fixed end-4 top-1/2 z-30 hidden -translate-y-1/2 flex-col rounded-2xl p-1.5 xl:flex"
+        className="fixed end-5 top-1/2 z-30 hidden -translate-y-1/2 flex-col items-center xl:flex"
       >
-        <div className="relative flex flex-col gap-1">
+        <div className="relative flex flex-col items-center gap-2 py-1">
           <span
             aria-hidden="true"
-            style={{transform: `translate3d(0, ${activeIndex * 38}px, 0)`}}
-            className="home-nav-pill pointer-events-none absolute inset-x-0 top-0 h-[34px] rounded-xl bg-[var(--btn-primary-bg)] shadow-xs"
+            className="pointer-events-none absolute top-4 bottom-4 left-1/2 w-px -translate-x-1/2 bg-[var(--border-strong)]/60"
+          />
+          <span
+            aria-hidden="true"
+            style={{transform: `scaleY(${progressRatio})`}}
+            className="home-nav-pill pointer-events-none absolute top-4 bottom-4 left-1/2 w-px -translate-x-1/2 origin-top bg-[var(--text-primary)]/50"
           />
 
           {SECTION_ORDER.map((item) => {
             const isActive = activeSection === item.id;
-            const label = t.home.sections[item.id];
+            const label = t.home.sections[item.labelKey];
             return (
               <button
                 key={item.id}
                 type="button"
                 onClick={() => handleJumpToSection(item.id)}
+                aria-label={label}
                 aria-current={isActive ? 'location' : undefined}
-                className={`relative z-10 flex h-[34px] items-center gap-2 rounded-xl px-2.5 text-start text-[11px] transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--focus-ring)] ${
-                  isActive
-                    ? 'font-semibold text-[var(--btn-primary-text)]'
-                    : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
-                }`}
+                className="group relative flex h-7 w-7 items-center justify-center rounded-full focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--focus-ring)]"
               >
-                {item.code ? (
-                  <span className="font-mono-tabular text-[10px] tracking-wider">
-                    {item.code}
-                  </span>
-                ) : null}
-                <span className="whitespace-nowrap">{label}</span>
+                <span
+                  aria-hidden="true"
+                  className="pointer-events-none absolute end-full me-2.5 inline-flex translate-x-1.5 items-center gap-1.5 whitespace-nowrap rounded-full border border-[var(--border-hairline)] bg-[var(--bg-surface-glass)] px-3 py-1 text-[11px] font-medium text-[var(--text-primary)] opacity-0 shadow-xs backdrop-blur-md transition-all duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:translate-x-0 group-hover:opacity-100 group-focus-visible:translate-x-0 group-focus-visible:opacity-100 rtl:-translate-x-1.5 rtl:group-hover:translate-x-0 rtl:group-focus-visible:translate-x-0"
+                >
+                  {item.code ? (
+                    <span className="font-mono-tabular text-[10px] text-[var(--text-secondary)]">
+                      {item.code}
+                    </span>
+                  ) : null}
+                  <span>{label}</span>
+                </span>
+
+                <span
+                  aria-hidden="true"
+                  className={`home-tracker-dot relative z-10 rounded-full ${
+                    isActive
+                      ? 'home-tracker-dot-active h-2.5 w-2.5 scale-110 bg-[var(--text-primary)] ring-2 ring-[var(--bg-canvas)]'
+                      : 'h-1.5 w-1.5 bg-[var(--text-secondary)]/45 group-hover:scale-125 group-hover:bg-[var(--text-primary)]'
+                  }`}
+                />
               </button>
             );
           })}
         </div>
       </nav>
 
-      {/* Overview & Statement Showcase with Staggered Mount Choreography */}
+      {/* Full-Bleed Top Ambient Visual Showcase (Sits Directly Behind Transparent Overlay Navbar) */}
       <section
         id="overview"
-        className="relative mx-auto max-w-4xl scroll-mt-24 text-center"
+        aria-label={siteConfig.brandName}
+        className="relative flex min-h-[78vh] w-full items-end overflow-hidden bg-[#0B0C0F]"
       >
-        {/* Living Architectural Blueprint Periphery (Outer Hero Margins) */}
+        {/* Architectural Obsidian Monogram / Radial Backdrop */}
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute -inset-x-6 -inset-y-4 overflow-hidden sm:-inset-x-10"
-        >
-          {HERO_PERIPHERY_MARKERS.map((marker, idx) => (
-            <span
-              key={idx}
-              style={
-                {
-                  '--float-duration': marker.duration,
-                  '--float-delay': marker.delay,
-                } as CSSProperties
-              }
-              className={`home-periphery-marker font-mono-tabular absolute select-none text-xs leading-none ${marker.className}`}
-            >
-              {marker.symbol}
-            </span>
-          ))}
-          <span
-            style={{'--tick-delay': '1.5s'} as CSSProperties}
-            className="home-border-tick absolute top-0 start-0 hidden h-[1px] w-24 sm:block"
-          />
-        </div>
+          className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_28%,#1c1f28_0%,#0b0c0f_76%)]"
+        />
 
-        {/* Step 1 (0ms): Eyebrow tag & centered Q logo */}
-        <div
-          style={{'--stagger-delay': '0ms'} as CSSProperties}
-          className="home-hero-stagger relative z-10"
-        >
-          <div className="glass-surface-subtle inline-flex items-center gap-2 rounded-full px-3.5 py-1.5 font-mono-tabular text-[11px] font-medium tracking-[0.08em] text-[var(--text-eyebrow)]">
-            <span
-              className="h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--text-primary)]"
-              aria-hidden="true"
-            />
-            <span>{t.home.eyebrow}</span>
-          </div>
-
-          <h1 className="sr-only">{siteConfig.brandName}</h1>
-          {!heroLogoError ? (
-            <img
-              src={logoSrc}
-              alt={siteConfig.brandName}
-              onError={() => setHeroLogoError(true)}
-              className="brand-logo-img mx-auto mt-6 h-16 w-auto object-contain sm:h-20"
-            />
-          ) : (
-            <p className="mt-6 text-4xl font-bold tracking-tight text-[var(--text-primary)] sm:text-5xl">
-              {siteConfig.brandName}
-            </p>
-          )}
-        </div>
-
-        {/* Step 2 (90ms): Centered Research Disclaimer & Project Statement card */}
-        <div
-          style={{'--stagger-delay': '90ms'} as CSSProperties}
-          className="home-hero-stagger glass-surface relative z-10 mx-auto mt-7 overflow-hidden rounded-[2rem] p-6 text-start sm:p-8"
-        >
-          <span
+        {/* Chromeless, Silent Looping Video or Reduced-Motion Static Poster */}
+        {!prefersReducedMotion && !videoFailed ? (
+          <video
+            ref={videoRef}
+            src={heroVideoUrl}
+            poster={posterFailed ? undefined : heroPosterUrl}
+            autoPlay
+            loop
+            muted
+            playsInline
+            preload="auto"
+            disablePictureInPicture
+            controlsList="nodownload noplaybackrate noremoteplayback"
             aria-hidden="true"
-            style={{'--tick-delay': '3s'} as CSSProperties}
-            className="home-border-tick pointer-events-none absolute top-0 start-0 h-[1px] w-28"
+            tabIndex={-1}
+            onEnded={() => {
+              const video = videoRef.current;
+              if (video) {
+                video.currentTime = 0;
+                video.play().catch(() => {});
+              }
+            }}
+            onError={() => setVideoFailed(true)}
+            className="pointer-events-none absolute inset-0 h-full w-full select-none object-cover object-[center_12%]"
           />
-
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <h2 className="text-sm font-semibold tracking-tight text-[var(--text-primary)] sm:text-base">
-              {statementTitle}
-            </h2>
-
-            <button
-              type="button"
-              onClick={() => setStatementExpanded((prev) => !prev)}
-              aria-expanded={statementExpanded}
-              className="glass-surface-subtle inline-flex min-h-[38px] shrink-0 items-center justify-center gap-1.5 self-start rounded-full px-4 py-1.5 text-xs font-medium text-[var(--text-primary)] transition-colors hover:bg-[var(--bg-surface-elevated)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--focus-ring)] sm:self-auto whitespace-nowrap"
-            >
-              <span>
-                {statementExpanded
-                  ? t.home.collapseStatement
-                  : t.home.readFullStatement}
-              </span>
-              {statementExpanded ? (
-                <ChevronUp className="h-3.5 w-3.5" strokeWidth={1.75} />
-              ) : (
-                <ChevronDown className="h-3.5 w-3.5" strokeWidth={1.75} />
-              )}
-            </button>
+        ) : !posterFailed ? (
+          <img
+            src={heroPosterUrl}
+            alt=""
+            aria-hidden="true"
+            referrerPolicy="no-referrer"
+            onError={() => setPosterFailed(true)}
+            className="pointer-events-none absolute inset-0 h-full w-full select-none object-cover object-[center_12%]"
+          />
+        ) : (
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-0 flex items-center justify-center select-none"
+          >
+            <span className="font-mono-tabular text-7xl font-semibold tracking-tight text-white/10 sm:text-8xl">
+              Q
+            </span>
           </div>
+        )}
 
-          <div className="mt-4 text-sm leading-relaxed text-[var(--text-secondary)] sm:text-[15px]">
-            <p>{openingParagraph}</p>
+        {/* Top & Bottom Contrast Scrims for Effortless Overlay Legibility */}
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/60 via-transparent to-black/80"
+        />
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_top,rgba(11,12,15,0.82)_0%,rgba(11,12,15,0.28)_34%,transparent_65%)]"
+        />
 
-            <div
-              data-expanded={statementExpanded}
-              aria-hidden={!statementExpanded}
-              className="statement-collapse-grid"
-            >
-              <div className="statement-collapse-inner">
-                <div className="space-y-3.5 pt-3.5">
-                  {middleParagraphs.map((paragraph, index) => (
-                    <p key={index}>{paragraph}</p>
-                  ))}
-                </div>
-              </div>
+        {/* Subtle Architectural Registration Marks */}
+        <span
+          aria-hidden="true"
+          className="font-mono-tabular pointer-events-none absolute top-20 end-6 hidden select-none text-xs text-white/25 sm:block"
+        >
+          +
+        </span>
+        <span
+          aria-hidden="true"
+          className="font-mono-tabular pointer-events-none absolute bottom-6 end-6 hidden select-none text-xs text-white/25 sm:block"
+        >
+          +
+        </span>
+
+        {/* Uncluttered Lower-Start Editorial Overlay */}
+        <div className="relative z-10 mx-auto w-full max-w-7xl px-3 pt-24 pb-8 sm:px-6 sm:pb-12 lg:px-8 lg:pb-14">
+          <div
+            style={{'--stagger-delay': '0ms'} as CSSProperties}
+            className="home-hero-stagger max-w-md lg:max-w-lg"
+          >
+            <p className="font-mono-tabular text-[11px] font-medium tracking-[0.12em] text-white/75">
+              {t.home.heroEyebrow}
+            </p>
+
+            <h1 className="mt-2 text-2xl font-semibold leading-[1.12] tracking-tight text-white sm:text-4xl lg:text-[2.65rem] text-balance">
+              {t.home.heroHeadline}
+            </h1>
+
+            <p className="font-mono-tabular mt-2.5 text-[11px] font-medium tracking-[0.08em] text-white/65">
+              {t.home.eyebrow}
+            </p>
+
+            <div className="mt-5 flex flex-wrap items-center gap-3">
+              <Link
+                to="/research"
+                className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-full bg-white px-6 py-2.5 text-xs font-semibold text-[#0B0C0F] shadow-xs transition-all duration-200 hover:bg-white/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white whitespace-nowrap sm:text-sm"
+              >
+                <span>{t.home.exploreArchiveShort}</span>
+                <ArrowRight className="h-4 w-4 rtl:rotate-180" strokeWidth={1.85} />
+              </Link>
+
+              <Link
+                to="/log"
+                className="inline-flex min-h-[44px] items-center justify-center rounded-full border border-white/25 bg-white/12 px-5 py-2.5 text-xs font-medium text-white backdrop-blur-md transition-colors duration-200 hover:border-white/40 hover:bg-white/18 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white whitespace-nowrap sm:text-sm"
+              >
+                {t.nav.labLog}
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Content Directly Below the Visual Showcase */}
+      <div className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 sm:py-10 lg:px-8 lg:py-12">
+        {/* 1. Slim Iconless Timeline / Spec Strip */}
+        <div className="scroll-mt-24">
+          <ArchitectureTimelineStrip id="architecture" />
+        </div>
+
+        {/* 2. Research Disclaimer & Project Statement Card */}
+        <section
+          aria-labelledby="statement-heading"
+          className="mx-auto mt-7 w-full max-w-5xl scroll-mt-24 sm:mt-8"
+        >
+          <div className="glass-surface relative overflow-hidden rounded-[2rem] p-6 text-start sm:p-8">
+            <span
+              aria-hidden="true"
+              style={{'--tick-delay': '3s'} as CSSProperties}
+              className="home-border-tick pointer-events-none absolute top-0 start-0 h-[1px] w-28"
+            />
+
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <h2
+                id="statement-heading"
+                className="text-sm font-semibold tracking-tight text-[var(--text-primary)] sm:text-base"
+              >
+                {statementTitle}
+              </h2>
+
+              <button
+                type="button"
+                onClick={() => setStatementExpanded((prev) => !prev)}
+                aria-expanded={statementExpanded}
+                className="glass-surface-subtle inline-flex min-h-[38px] shrink-0 items-center justify-center gap-1.5 self-start rounded-full px-4 py-1.5 text-xs font-medium text-[var(--text-primary)] transition-colors hover:bg-[var(--bg-surface-elevated)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--focus-ring)] sm:self-auto whitespace-nowrap"
+              >
+                <span>
+                  {statementExpanded
+                    ? t.home.collapseStatement
+                    : t.home.readFullStatement}
+                </span>
+                {statementExpanded ? (
+                  <ChevronUp className="h-3.5 w-3.5" strokeWidth={1.75} />
+                ) : (
+                  <ChevronDown className="h-3.5 w-3.5" strokeWidth={1.75} />
+                )}
+              </button>
             </div>
 
-            <p className="mt-3.5 font-semibold text-[var(--text-primary)]">
-              {purposeParagraph}
-            </p>
+            <div className="mt-4 text-sm leading-relaxed text-[var(--text-secondary)] sm:text-[15px]">
+              <p>{openingParagraph}</p>
 
-            {closingParagraphs.length > 0 ? (
               <div
                 data-expanded={statementExpanded}
                 aria-hidden={!statementExpanded}
@@ -279,48 +365,45 @@ export function HomePage() {
               >
                 <div className="statement-collapse-inner">
                   <div className="space-y-3.5 pt-3.5">
-                    {closingParagraphs.map((paragraph, index) => (
+                    {middleParagraphs.map((paragraph, index) => (
                       <p key={index}>{paragraph}</p>
                     ))}
                   </div>
                 </div>
               </div>
-            ) : null}
+
+              <p className="mt-3.5 font-semibold text-[var(--text-primary)]">
+                {purposeParagraph}
+              </p>
+
+              {closingParagraphs.length > 0 ? (
+                <div
+                  data-expanded={statementExpanded}
+                  aria-hidden={!statementExpanded}
+                  className="statement-collapse-grid"
+                >
+                  <div className="statement-collapse-inner">
+                    <div className="space-y-3.5 pt-3.5">
+                      {closingParagraphs.map((paragraph, index) => (
+                        <p key={index}>{paragraph}</p>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              ) : null}
+            </div>
           </div>
+        </section>
+
+        {/* 3. Lab Log Preview */}
+        <div className="mt-7 scroll-mt-24 sm:mt-8">
+          <LatestLabLogSection id="lab-log" />
         </div>
 
-        {/* Step 3 (180ms): Primary CTA button */}
-        <div
-          style={{'--stagger-delay': '180ms'} as CSSProperties}
-          className="home-hero-stagger relative z-10 mt-7 flex justify-center"
-        >
-          <Link
-            to="/research"
-            className="inline-flex min-h-[48px] items-center justify-center gap-2.5 rounded-full bg-[var(--btn-primary-bg)] px-7 py-3 text-sm font-medium text-[var(--btn-primary-text)] shadow-xs transition-all duration-200 hover:-translate-y-0.5 hover:bg-[var(--btn-primary-hover)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--focus-ring)] whitespace-nowrap"
-          >
-            <span>{t.home.exploreResearch}</span>
-            <ArrowRight className="h-4 w-4 rtl:rotate-180" strokeWidth={1.85} />
-          </Link>
+        {/* 4. Latest Publications Showcase */}
+        <div className="mt-7 scroll-mt-24 sm:mt-8">
+          <LatestPublicationsSection id="publications" />
         </div>
-      </section>
-
-      {/* Section 01: Core Architecture Framed Matrix */}
-      <div className="mt-16 scroll-mt-24 sm:mt-20">
-        <CoreResearchMatrix
-          id="architecture"
-          eyebrow={t.home.matrixEyebrow}
-          animated
-        />
-      </div>
-
-      {/* Section 02: Principles Framed Matrix */}
-      <div className="mt-14 scroll-mt-24 sm:mt-16">
-        <PrinciplesSection id="principles" animated />
-      </div>
-
-      {/* Section 03: Latest Publications Showcase */}
-      <div className="mt-14 scroll-mt-24 sm:mt-16">
-        <LatestPublicationsSection id="publications" />
       </div>
     </div>
   );

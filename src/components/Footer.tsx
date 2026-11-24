@@ -47,6 +47,12 @@ export function Footer() {
             {t.nav.home}
           </Link>
           <Link
+            to="/log"
+            className="transition-colors hover:text-[var(--text-primary)] whitespace-nowrap"
+          >
+            {t.nav.labLog}
+          </Link>
+          <Link
             to="/research"
             className="transition-colors hover:text-[var(--text-primary)] whitespace-nowrap"
           >
