@@ -1,10 +1,7 @@
-import type {CSSProperties} from 'react';
-import {useLanguage} from '../context/LanguageContext';
-import {
-  handleSpotlightMouseMove,
-  useScrollReveal,
-} from '../hooks/useScrollReveal';
+import {siteCopy} from '../data/i18n';
+import {handleSpotlightMouseMove} from '../hooks/useScrollReveal';
 import {ArchitecturalFrame} from './ArchitecturalFrame';
+import {ScrollReveal} from './ScrollReveal';
 
 interface CoreResearchMatrixProps {
   id?: string;
@@ -21,56 +18,52 @@ export function CoreResearchMatrix({
   subheading,
   animated = false,
 }: CoreResearchMatrixProps) {
-  const {t} = useLanguage();
-  const {ref, isVisible} = useScrollReveal<HTMLDivElement>({
-    threshold: 0.12,
-    disabled: !animated,
-  });
-
   return (
     <ArchitecturalFrame
       id={id}
       ariaLabel={heading || eyebrow}
       livingBorder={animated}
     >
-      <div ref={ref}>
-        <div
-          data-revealed={isVisible}
-          className={`mb-6 flex flex-col gap-2 sm:mb-8 ${
-            animated ? 'home-reveal-item' : ''
-          }`}
-        >
-          <p className="font-mono-tabular text-[11px] font-medium tracking-[0.12em] text-[var(--text-eyebrow)]">
-            {eyebrow}
-          </p>
+      <div>
+        <div className="mb-6 flex flex-col gap-2 sm:mb-8">
+          <ScrollReveal staggerIndex={0} className="flex items-center gap-3">
+            <p className="font-mono-tabular shrink-0 text-[11px] font-medium tracking-[0.12em] text-[var(--text-eyebrow)]">
+              {eyebrow}
+            </p>
+            <span
+              aria-hidden="true"
+              className="h-px flex-1 bg-[var(--border-hairline)]"
+            />
+          </ScrollReveal>
 
           {heading ? (
-            <h2 className="text-2xl font-semibold tracking-tight text-[var(--text-primary)]">
-              {heading}
-            </h2>
+            <ScrollReveal staggerIndex={1}>
+              <h2 className="font-display-heading text-2xl font-semibold text-[var(--text-primary)]">
+                {heading}
+              </h2>
+            </ScrollReveal>
           ) : null}
 
           {subheading ? (
-            <p className="text-sm text-[var(--text-secondary)]">{subheading}</p>
+            <ScrollReveal staggerIndex={2}>
+              <p className="font-body-prose text-sm text-[var(--text-secondary)]">
+                {subheading}
+              </p>
+            </ScrollReveal>
           ) : null}
         </div>
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 lg:gap-5">
-          {t.about.focusAreas.map((area, index) => {
-            const staggerStyle = animated
-              ? ({'--reveal-delay': `${index * 70}ms`} as CSSProperties)
-              : undefined;
-
-            return (
+          {siteCopy.about.focusAreas.map((area, index) => (
+            <ScrollReveal
+              key={area.id}
+              staggerIndex={index % 4}
+              className="h-full"
+            >
               <div
-                key={area.id}
-                data-revealed={isVisible}
-                style={staggerStyle}
                 onMouseMove={animated ? handleSpotlightMouseMove : undefined}
-                className={`glass-card group flex flex-col justify-between rounded-3xl p-5 sm:p-6 ${
-                  animated
-                    ? 'home-reveal-item home-spotlight-card'
-                    : 'glass-card-interactive'
+                className={`rounded-sm border border-white/[0.08] bg-[var(--bg-surface)] group flex h-full flex-col justify-between p-5 sm:p-6 ${
+                  animated ? 'home-spotlight-card' : 'glass-card-interactive'
                 }`}
               >
                 <div className="relative z-10">
@@ -88,17 +81,17 @@ export function CoreResearchMatrix({
                     />
                   </div>
 
-                  <h3 className="mt-4 text-base font-bold tracking-tight text-[var(--text-primary)]">
+                  <h3 className="font-display-card mt-4 text-base font-bold text-[var(--text-primary)]">
                     {area.title}
                   </h3>
 
-                  <p className="mt-2 text-sm leading-relaxed text-[var(--text-secondary)]">
+                  <p className="font-body-prose mt-2 text-sm text-[var(--text-secondary)]">
                     {area.description}
                   </p>
                 </div>
               </div>
-            );
-          })}
+            </ScrollReveal>
+          ))}
         </div>
       </div>
     </ArchitecturalFrame>

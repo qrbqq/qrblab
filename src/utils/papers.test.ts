@@ -1,42 +1,32 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {LANGUAGE_ENDONYMS, translations} from '../data/i18n';
-import type {ResearchPaper, SupportedLanguage} from '../data/papers';
+import {siteCopy} from '../data/i18n';
+import type {ResearchPaper} from '../data/papers';
 import {papers} from '../data/papers';
 import {siteConfig} from '../data/siteConfig';
 import {
   extractCategories,
+  extractFolders,
   filterPapers,
   findPaperBySlug,
   formatBibtexCitation,
   formatPlainCitation,
   getActiveChannels,
-  getDirection,
   getLatestPapers,
   getLocalizedList,
   getLocalizedText,
   getPaperSummary,
-  readStoredLanguage,
   resolveAssetUrl,
-  saveStoredLanguage,
-  SUPPORTED_LANGUAGES,
 } from './papers';
 import {
   clampStars,
   clearAllLocalData,
   clearPaperRating,
   getPaperRating,
-  LANG_STORAGE_KEY,
   RATING_STORAGE_PREFIX,
   savePaperRating,
   type StorageLike,
 } from './ratings';
-import {
-  readStoredTheme,
-  resolveEffectiveTheme,
-  saveStoredTheme,
-  THEME_STORAGE_KEY,
-} from './theme';
 
 const sampleFixtures: ResearchPaper[] = [
   {
@@ -77,22 +67,18 @@ const sampleFixtures: ResearchPaper[] = [
     slug: 'kalman-imu-fusion',
     title: {
       en: 'Error-State Kalman Filtering for IMU Odometry',
-      ar: 'مرشح كالمان لحالة الخطأ لقياس الحركة بالقصور الذاتي',
     },
     shortDescription: {
       en: 'Sensor fusion under vibration disturbances.',
-      ar: 'دمج الحساسات تحت اضطرابات الاهتزاز.',
     },
     explanation: {
       en: 'Quaternion error-state kinematics and covariance propagation across MEMS IMUs.',
-      ar: 'كينماتيكا حالة الخطأ الرباعية وانتشار التغاير عبر وحدات القصور الذاتي.',
     },
     authors: ['Tariq Al-Mansoor'],
     publishedDate: '2026-06-18',
     version: 'v1.2',
     category: {
       en: 'Control Systems',
-      ar: 'أنظمة التحكم',
     },
     tags: ['Kalman', 'IMU', 'Estimation'],
     pdfPath: '/papers/kalman-imu.pdf',
@@ -117,14 +103,12 @@ function createMemoryStorage(): StorageLike & {dump: () => Map<string, string>} 
   };
 }
 
-test('production papers array starts empty and siteConfig preserves qrblab 7-paragraph statement across all 5 languages', () => {
+test('production papers array starts empty and siteConfig preserves qrblab 7-paragraph English statement', () => {
   assert.equal(papers.length, 0);
   assert.equal(siteConfig.brandName, 'qrblab');
-  for (const lang of SUPPORTED_LANGUAGES) {
-    const paragraphs = getLocalizedList(siteConfig.projectStatement.paragraphs, lang);
-    assert.equal(paragraphs.length, 7, `Expected 7 paragraphs for ${lang}`);
-    assert.ok(getLocalizedText(siteConfig.projectStatement.title, lang).length > 0);
-  }
+  const paragraphs = getLocalizedList(siteConfig.projectStatement.paragraphs);
+  assert.equal(paragraphs.length, 7);
+  assert.ok(getLocalizedText(siteConfig.projectStatement.title).length > 0);
   assert.equal(
     siteConfig.projectStatement.paragraphs.en[
       siteConfig.projectStatement.purposeParagraphIndex
@@ -134,28 +118,18 @@ test('production papers array starts empty and siteConfig preserves qrblab 7-par
   assert.equal(getActiveChannels(siteConfig).length, 0);
 });
 
-test('getDirection maps LTR and RTL languages cleanly', () => {
-  assert.equal(getDirection('en'), 'ltr');
-  assert.equal(getDirection('fr'), 'ltr');
-  assert.equal(getDirection('de'), 'ltr');
-  assert.equal(getDirection('es'), 'ltr');
-  assert.equal(getDirection('ar'), 'rtl');
-});
-
-test('getLocalizedText and getLocalizedList fall back gracefully to English for optional fr/de/es', () => {
+test('getLocalizedText and getLocalizedList resolve .en cleanly and support legacy multi-language or plain strings', () => {
   const paper = sampleFixtures[0]!;
   assert.equal(
-    getLocalizedText(paper.title, 'fr'),
-    'Contrôle vectoriel pour actionneurs BLDC compacts',
-  );
-  assert.equal(
-    getLocalizedText(paper.title, 'de'),
+    getLocalizedText(paper.title),
     'Field-Oriented Control for Compact BLDC Actuators',
   );
+  assert.equal(getLocalizedText('Plain String Title'), 'Plain String Title');
   assert.deepEqual(
-    getLocalizedList(paper.highlights, 'es'),
+    getLocalizedList(paper.highlights),
     ['Closed-loop FOC benchmark'],
   );
+  assert.deepEqual(getLocalizedList(['Direct Array']), ['Direct Array']);
 });
 
 test('getLatestPapers returns empty for empty input and sorts newest first', () => {
@@ -165,16 +139,12 @@ test('getLatestPapers returns empty for empty input and sorts newest first', () 
   assert.equal(latest[0]?.slug, 'kalman-imu-fusion');
 });
 
-test('extractCategories returns unique localized categories', () => {
-  assert.deepEqual(extractCategories(sampleFixtures, 'en'), [
+test('extractCategories and extractFolders return unique English collections', () => {
+  assert.deepEqual(extractCategories(sampleFixtures), [
     'Mechatronics',
     'Control Systems',
   ]);
-  assert.deepEqual(extractCategories(sampleFixtures, 'ar'), [
-    'الميكاترونيكس',
-    'أنظمة التحكم',
-  ]);
-  assert.deepEqual(extractCategories(sampleFixtures, 'fr'), [
+  assert.deepEqual(extractFolders(sampleFixtures), [
     'Mechatronics',
     'Control Systems',
   ]);
@@ -182,41 +152,30 @@ test('extractCategories returns unique localized categories', () => {
 
 test('getPaperSummary and filterPapers work across shortDescription, explanation, tags, and category', () => {
   assert.equal(
-    getPaperSummary(sampleFixtures[0]!, 'en'),
+    getPaperSummary(sampleFixtures[0]!),
     'Real-time current loop tuning and thermal characterization.',
   );
 
-  const enMatch = filterPapers(sampleFixtures, {
+  const thermalMatch = filterPapers(sampleFixtures, {
     query: 'thermal',
     category: null,
-    lang: 'en',
   });
-  assert.equal(enMatch.length, 1);
-  assert.equal(enMatch[0]?.id, 'p1');
+  assert.equal(thermalMatch.length, 1);
+  assert.equal(thermalMatch[0]?.id, 'p1');
 
   const explanationMatch = filterPapers(sampleFixtures, {
     query: 'clarke-park',
     category: null,
-    lang: 'en',
   });
   assert.equal(explanationMatch.length, 1);
   assert.equal(explanationMatch[0]?.id, 'p1');
 
-  const arMatch = filterPapers(sampleFixtures, {
-    query: 'كالمان',
-    category: 'أنظمة التحكم',
-    lang: 'ar',
+  const categoryMatch = filterPapers(sampleFixtures, {
+    query: 'kalman',
+    category: 'Control Systems',
   });
-  assert.equal(arMatch.length, 1);
-  assert.equal(arMatch[0]?.id, 'p2');
-
-  const frFallbackMatch = filterPapers(sampleFixtures, {
-    query: 'vectoriel',
-    category: 'Mechatronics',
-    lang: 'fr',
-  });
-  assert.equal(frFallbackMatch.length, 1);
-  assert.equal(frFallbackMatch[0]?.id, 'p1');
+  assert.equal(categoryMatch.length, 1);
+  assert.equal(categoryMatch[0]?.id, 'p2');
 });
 
 test('findPaperBySlug locates exact slug or returns undefined', () => {
@@ -238,12 +197,12 @@ test('resolveAssetUrl handles relative, root-relative, and subpath GitHub Pages 
 });
 
 test('citation formatters emit plain text and BibTeX with qrblab attribution', () => {
-  const plain = formatPlainCitation(sampleFixtures[0]!, 'en', 'qrblab');
+  const plain = formatPlainCitation(sampleFixtures[0]!, 'qrblab');
   assert.ok(plain.includes('Tariq Al-Mansoor, Layla Hassan (2026).'));
   assert.ok(plain.includes('qrblab (v1.0)'));
   assert.ok(plain.includes('DOI: 10.1234/qrblab.001'));
 
-  const bibtex = formatBibtexCitation(sampleFixtures[1]!, 'en', 'qrblab');
+  const bibtex = formatBibtexCitation(sampleFixtures[1]!, 'qrblab');
   assert.ok(bibtex.startsWith('@techreport{kalman_imu_fusion,'));
   assert.ok(bibtex.includes('institution = {qrblab}'));
   assert.ok(!bibtex.includes('doi ='));
@@ -287,111 +246,45 @@ test('localStorage star rating helpers clamp, persist, read, and clear cleanly',
   assert.equal(getPaperRating('bldc-foc-control', storage), null);
 });
 
-test('theme helpers default to light, persist preferences, and resolve system mode', () => {
-  const storage = createMemoryStorage();
-  assert.equal(readStoredTheme(storage), 'light');
-
-  saveStoredTheme('dark', storage);
-  assert.equal(readStoredTheme(storage), 'dark');
-
-  assert.equal(resolveEffectiveTheme('light', true), 'light');
-  assert.equal(resolveEffectiveTheme('dark', false), 'dark');
-  assert.equal(resolveEffectiveTheme('system', true), 'dark');
-  assert.equal(resolveEffectiveTheme('system', false), 'light');
-});
-
-test('language helpers default to en, validate supported codes, and persist cleanly', () => {
-  const storage = createMemoryStorage();
-  assert.equal(readStoredLanguage(storage), 'en');
-
-  storage.setItem(LANG_STORAGE_KEY, 'invalid-code');
-  assert.equal(readStoredLanguage(storage), 'en');
-
-  saveStoredLanguage('fr', storage);
-  assert.equal(readStoredLanguage(storage), 'fr');
-});
-
-test('clearAllLocalData removes all rating keys and restores light theme and en language', () => {
+test('clearAllLocalData removes all rating keys and legacy theme/lang keys', () => {
   const storage = createMemoryStorage();
   savePaperRating('paper-a', 5, storage);
   savePaperRating('paper-b', 3, storage);
-  saveStoredTheme('dark', storage);
-  saveStoredLanguage('de', storage);
+  storage.setItem('qrblab:theme', 'dark');
+  storage.setItem('qrblab:lang', 'ar');
   storage.setItem('unrelated-key', 'keep-me');
 
   const clearedCount = clearAllLocalData(storage);
   assert.equal(clearedCount, 2);
   assert.equal(storage.getItem(`${RATING_STORAGE_PREFIX}paper-a`), null);
   assert.equal(storage.getItem(`${RATING_STORAGE_PREFIX}paper-b`), null);
-  assert.equal(storage.getItem(THEME_STORAGE_KEY), 'light');
-  assert.equal(storage.getItem(LANG_STORAGE_KEY), 'en');
+  assert.equal(storage.getItem('qrblab:theme'), null);
+  assert.equal(storage.getItem('qrblab:lang'), null);
   assert.equal(storage.getItem('unrelated-key'), 'keep-me');
 });
 
-test('every English UI translation key has a non-empty counterpart across all 5 languages and native endonyms match', () => {
-  assert.deepEqual(LANGUAGE_ENDONYMS, {
-    en: 'English',
-    ar: 'العربية',
-    fr: 'Français',
-    de: 'Deutsch',
-    es: 'Español',
-  });
+test('siteCopy English UI strings are all non-empty, keep strict lowercase qrb lab, and exclude language/theme settings', () => {
+  assert.equal('themeLabel' in siteCopy.settings, false);
+  assert.equal('languageLabel' in siteCopy.settings, false);
+  assert.equal('research' in siteCopy.nav, false);
+  assert.equal(siteCopy.nav.qrbLab, 'qrb lab');
+  assert.equal(siteCopy.qrbLab.title, 'qrb lab');
 
-  function assertTreeMatches(
-    enNode: unknown,
-    targetNode: unknown,
-    targetLang: SupportedLanguage,
-    path: string,
-  ): void {
-    if (typeof enNode === 'string') {
-      assert.equal(
-        typeof targetNode,
-        'string',
-        `Expected string at ${targetLang}.${path}`,
-      );
-      assert.ok(enNode.trim().length > 0, `Empty en string at ${path}`);
-      assert.ok(
-        (targetNode as string).trim().length > 0,
-        `Empty ${targetLang} string at ${path}`,
-      );
+  function assertNonEmpty(node: unknown, path: string): void {
+    if (typeof node === 'string') {
+      assert.ok(node.trim().length > 0, `Empty string at ${path}`);
       return;
     }
-    if (Array.isArray(enNode)) {
-      assert.ok(
-        Array.isArray(targetNode),
-        `Expected array at ${targetLang}.${path}`,
-      );
-      assert.equal(
-        enNode.length,
-        (targetNode as unknown[]).length,
-        `Length mismatch at ${targetLang}.${path}`,
-      );
-      enNode.forEach((item, index) =>
-        assertTreeMatches(
-          item,
-          (targetNode as unknown[])[index],
-          targetLang,
-          `${path}[${index}]`,
-        ),
-      );
+    if (Array.isArray(node)) {
+      assert.ok(node.length > 0, `Empty array at ${path}`);
+      node.forEach((item, index) => assertNonEmpty(item, `${path}[${index}]`));
       return;
     }
-    assert.ok(enNode && typeof enNode === 'object');
-    assert.ok(targetNode && typeof targetNode === 'object');
-    const enRecord = enNode as Record<string, unknown>;
-    const targetRecord = targetNode as Record<string, unknown>;
-    for (const key of Object.keys(enRecord)) {
-      assert.ok(key in targetRecord, `Missing key ${targetLang}.${path}.${key}`);
-      assertTreeMatches(
-        enRecord[key],
-        targetRecord[key],
-        targetLang,
-        `${path}.${key}`,
-      );
+    assert.ok(node && typeof node === 'object', `Expected object at ${path}`);
+    for (const [k, v] of Object.entries(node as Record<string, unknown>)) {
+      assertNonEmpty(v, `${path}.${k}`);
     }
   }
 
-  for (const lang of ['ar', 'fr', 'de', 'es'] as const) {
-    assertTreeMatches(translations.en, translations[lang], lang, 'translations');
-  }
+  assertNonEmpty(siteCopy, 'siteCopy');
 });

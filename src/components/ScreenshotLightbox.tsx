@@ -1,6 +1,6 @@
 import {useEffect} from 'react';
 import {ChevronLeft, ChevronRight, X} from 'lucide-react';
-import {useLanguage} from '../context/LanguageContext';
+import {siteCopy} from '../data/i18n';
 
 interface ScreenshotLightboxProps {
   images: string[];
@@ -17,8 +17,6 @@ export function ScreenshotLightbox({
   onClose,
   onSelectIndex,
 }: ScreenshotLightboxProps) {
-  const {t} = useLanguage();
-
   useEffect(() => {
     if (activeIndex === null) {
       return;
@@ -55,7 +53,7 @@ export function ScreenshotLightbox({
       role="dialog"
       aria-modal="true"
       aria-label={`${title} — ${activeIndex + 1} / ${images.length}`}
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/55 p-4 backdrop-blur-md"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm"
       onClick={onClose}
     >
       <div
@@ -70,14 +68,14 @@ export function ScreenshotLightbox({
           <button
             type="button"
             onClick={onClose}
-            aria-label={t.paperDetail.closeLightbox}
-            className="inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-[var(--border-hairline)] bg-[var(--bg-surface)] text-[var(--text-primary)] transition-colors hover:border-[var(--border-strong)] hover:bg-[var(--bg-surface-elevated)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--focus-ring)]"
+            aria-label={siteCopy.paperDetail.closeLightbox}
+            className="inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-[var(--border-hairline)] bg-[var(--bg-surface-2)] text-[var(--text-primary)] transition-colors hover:border-[var(--border-strong)] hover:bg-[var(--bg-surface-hover)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--focus-ring)]"
           >
             <X className="h-5 w-5" strokeWidth={1.75} />
           </button>
         </div>
 
-        <div className="relative flex flex-1 items-center justify-center overflow-hidden rounded-2xl border border-[var(--border-hairline)] bg-[var(--bg-surface-elevated)]">
+        <div className="relative flex flex-1 items-center justify-center overflow-hidden rounded-2xl border border-[var(--border-hairline)] bg-[var(--bg-canvas)]">
           <img
             src={images[activeIndex]}
             alt={`${title} — ${activeIndex + 1}`}
@@ -91,21 +89,21 @@ export function ScreenshotLightbox({
             <button
               type="button"
               onClick={handlePrev}
-              aria-label={t.paperDetail.prevScreenshot}
-              className="inline-flex min-h-[44px] items-center gap-1.5 rounded-2xl border border-[var(--border-hairline)] bg-[var(--bg-surface)] px-4 py-2 text-xs font-medium text-[var(--text-primary)] transition-colors hover:bg-[var(--bg-surface-elevated)]"
+              aria-label={siteCopy.paperDetail.prevScreenshot}
+              className="inline-flex min-h-[44px] items-center gap-1.5 rounded-2xl border border-[var(--border-hairline)] bg-[var(--bg-surface-2)] px-4 py-2 text-xs font-medium text-[var(--text-primary)] transition-colors hover:border-[var(--border-strong)] hover:bg-[var(--bg-surface-hover)]"
             >
-              <ChevronLeft className="h-4 w-4 rtl:rotate-180" strokeWidth={1.75} />
-              <span>{t.paperDetail.prevScreenshot}</span>
+              <ChevronLeft className="h-4 w-4" strokeWidth={1.75} />
+              <span>{siteCopy.paperDetail.prevScreenshot}</span>
             </button>
 
             <button
               type="button"
               onClick={handleNext}
-              aria-label={t.paperDetail.nextScreenshot}
-              className="inline-flex min-h-[44px] items-center gap-1.5 rounded-2xl border border-[var(--border-hairline)] bg-[var(--bg-surface)] px-4 py-2 text-xs font-medium text-[var(--text-primary)] transition-colors hover:bg-[var(--bg-surface-elevated)]"
+              aria-label={siteCopy.paperDetail.nextScreenshot}
+              className="inline-flex min-h-[44px] items-center gap-1.5 rounded-2xl border border-[var(--border-hairline)] bg-[var(--bg-surface-2)] px-4 py-2 text-xs font-medium text-[var(--text-primary)] transition-colors hover:border-[var(--border-strong)] hover:bg-[var(--bg-surface-hover)]"
             >
-              <span>{t.paperDetail.nextScreenshot}</span>
-              <ChevronRight className="h-4 w-4 rtl:rotate-180" strokeWidth={1.75} />
+              <span>{siteCopy.paperDetail.nextScreenshot}</span>
+              <ChevronRight className="h-4 w-4" strokeWidth={1.75} />
             </button>
           </div>
         ) : null}

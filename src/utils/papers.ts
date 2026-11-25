@@ -2,10 +2,8 @@ import type {
   LocalizedList,
   LocalizedText,
   ResearchPaper,
-  SupportedLanguage,
 } from '../data/papers';
 import type {SiteConfig} from '../data/siteConfig';
-import {LANG_STORAGE_KEY, type StorageLike} from './ratings';
 
 export interface ActiveChannel {
   key: 'email' | 'github' | 'discord' | 'instagram' | 'x' | 'website';
@@ -13,108 +11,48 @@ export interface ActiveChannel {
   label: string;
 }
 
-export const SUPPORTED_LANGUAGES: readonly SupportedLanguage[] = [
-  'en',
-  'ar',
-  'fr',
-  'de',
-  'es',
-];
-
-function getDefaultStorage(): StorageLike | null {
-  if (typeof window === 'undefined') {
-    return null;
-  }
-  try {
-    return window.localStorage;
-  } catch {
-    return null;
-  }
-}
-
-export function isSupportedLanguage(value: unknown): value is SupportedLanguage {
-  return (
-    value === 'en' ||
-    value === 'ar' ||
-    value === 'fr' ||
-    value === 'de' ||
-    value === 'es'
-  );
-}
-
-export function readStoredLanguage(
-  storage: StorageLike | null = getDefaultStorage(),
-): SupportedLanguage {
-  if (!storage) {
-    return 'en';
-  }
-  try {
-    const raw = storage.getItem(LANG_STORAGE_KEY);
-    return isSupportedLanguage(raw) ? raw : 'en';
-  } catch {
-    return 'en';
-  }
-}
-
-export function saveStoredLanguage(
-  lang: SupportedLanguage,
-  storage: StorageLike | null = getDefaultStorage(),
-): void {
-  if (!storage) {
-    return;
-  }
-  try {
-    storage.setItem(LANG_STORAGE_KEY, lang);
-  } catch {
-    // Ignore storage errors cleanly
-  }
-}
-
-export function getDirection(lang: SupportedLanguage): 'ltr' | 'rtl' {
-  return lang === 'ar' ? 'rtl' : 'ltr';
-}
-
-export function getLocalizedText(
-  text: LocalizedText | undefined,
-  lang: SupportedLanguage,
-): string {
+export function getLocalizedText(text: LocalizedText | string | undefined): string {
   if (!text) {
     return '';
   }
-  const candidate = text[lang];
-  if (typeof candidate === 'string' && candidate.trim().length > 0) {
-    return candidate;
+  if (typeof text === 'string') {
+    return text;
   }
   if (typeof text.en === 'string' && text.en.trim().length > 0) {
     return text.en;
   }
-  return text.ar ?? '';
+  for (const value of Object.values(text)) {
+    if (typeof value === 'string' && value.trim().length > 0) {
+      return value;
+    }
+  }
+  return '';
 }
 
 export function getLocalizedList(
-  list: LocalizedList | undefined,
-  lang: SupportedLanguage,
+  list: LocalizedList | string[] | undefined,
 ): string[] {
   if (!list) {
     return [];
   }
-  const candidate = list[lang];
-  if (Array.isArray(candidate) && candidate.length > 0) {
-    return candidate;
+  if (Array.isArray(list)) {
+    return list;
   }
   if (Array.isArray(list.en) && list.en.length > 0) {
     return list.en;
   }
-  return list.ar ?? [];
+  for (const value of Object.values(list)) {
+    if (Array.isArray(value) && value.length > 0) {
+      return value;
+    }
+  }
+  return [];
 }
 
-export function getPaperSummary(
-  paper: ResearchPaper,
-  lang: SupportedLanguage,
-): string {
+export function getPaperSummary(paper: ResearchPaper): string {
   return (
-    getLocalizedText(paper.shortDescription, lang) ||
-    getLocalizedText(paper.abstract, lang) ||
+    getLocalizedText(paper.shortDescription) ||
+    getLocalizedText(paper.abstract) ||
     ''
   );
 }
@@ -133,15 +71,20 @@ export function getLatestPapers(
   return sortPapersByDateDesc(items).slice(0, limit);
 }
 
-export function extractCategories(
-  items: readonly ResearchPaper[],
-  lang: SupportedLanguage,
-): string[] {
+export function getPaperFolder(paper: ResearchPaper): string {
+  const folderName = getLocalizedText(paper.folder).trim();
+  if (folderName) {
+    return folderName;
+  }
+  return getLocalizedText(paper.category).trim();
+}
+
+export function extractCategories(items: readonly ResearchPaper[]): string[] {
   const seen = new Set<string>();
   const categories: string[] = [];
 
   for (const paper of items) {
-    const categoryName = getLocalizedText(paper.category, lang).trim();
+    const categoryName = getLocalizedText(paper.category).trim();
     if (categoryName && !seen.has(categoryName)) {
       seen.add(categoryName);
       categories.push(categoryName);
@@ -151,20 +94,39 @@ export function extractCategories(
   return categories;
 }
 
+export function extractFolders(items: readonly ResearchPaper[]): string[] {
+  const seen = new Set<string>();
+  const folders: string[] = [];
+
+  for (const paper of items) {
+    const folderName = getPaperFolder(paper);
+    if (folderName && !seen.has(folderName)) {
+      seen.add(folderName);
+      folders.push(folderName);
+    }
+  }
+
+  return folders;
+}
+
 export function filterPapers(
   items: readonly ResearchPaper[],
   options: {
     query: string;
     category: string | null;
-    lang: SupportedLanguage;
   },
 ): ResearchPaper[] {
   const normalizedQuery = options.query.trim().toLowerCase();
   const activeCategory = options.category?.trim() || null;
 
   return sortPapersByDateDesc(items).filter((paper) => {
-    const categoryText = getLocalizedText(paper.category, options.lang).trim();
-    if (activeCategory && categoryText !== activeCategory) {
+    const folderText = getPaperFolder(paper);
+    const categoryText = getLocalizedText(paper.category).trim();
+    if (
+      activeCategory &&
+      folderText !== activeCategory &&
+      categoryText !== activeCategory
+    ) {
       return false;
     }
 
@@ -172,18 +134,27 @@ export function filterPapers(
       return true;
     }
 
-    const title = getLocalizedText(paper.title, options.lang).toLowerCase();
-    const summary = getPaperSummary(paper, options.lang).toLowerCase();
-    const explanation = getLocalizedText(paper.explanation, options.lang).toLowerCase();
+    const titleEn = getLocalizedText(paper.title).toLowerCase();
+    const titleAr =
+      typeof paper.title === 'object' && paper.title?.ar
+        ? paper.title.ar.toLowerCase()
+        : '';
+    const summary = getPaperSummary(paper).toLowerCase();
+    const explanation = getLocalizedText(paper.explanation).toLowerCase();
     const category = categoryText.toLowerCase();
+    const folder = folderText.toLowerCase();
     const tags = paper.tags.map((tag) => tag.toLowerCase());
     const authors = paper.authors.map((author) => author.toLowerCase());
+    const slug = paper.slug.toLowerCase();
 
     return (
-      title.includes(normalizedQuery) ||
+      titleEn.includes(normalizedQuery) ||
+      titleAr.includes(normalizedQuery) ||
       summary.includes(normalizedQuery) ||
       explanation.includes(normalizedQuery) ||
       category.includes(normalizedQuery) ||
+      folder.includes(normalizedQuery) ||
+      slug.includes(normalizedQuery) ||
       tags.some((tag) => tag.includes(normalizedQuery)) ||
       authors.some((author) => author.includes(normalizedQuery))
     );
@@ -213,23 +184,12 @@ export function resolveAssetUrl(relativePath: string, baseUrl = './'): string {
   return `${cleanBase}${cleanPath}`;
 }
 
-const DATE_LOCALES: Record<SupportedLanguage, string> = {
-  en: 'en-US',
-  ar: 'ar-SA',
-  fr: 'fr-FR',
-  de: 'de-DE',
-  es: 'es-ES',
-};
-
-export function formatPaperDate(
-  isoDate: string,
-  lang: SupportedLanguage,
-): string {
+export function formatPaperDate(isoDate: string): string {
   const parsed = new Date(`${isoDate}T00:00:00Z`);
   if (Number.isNaN(parsed.getTime())) {
     return isoDate;
   }
-  return new Intl.DateTimeFormat(DATE_LOCALES[lang], {
+  return new Intl.DateTimeFormat('en-US', {
     year: 'numeric',
     month: 'short',
     day: 'numeric',
@@ -239,25 +199,23 @@ export function formatPaperDate(
 
 export function formatPlainCitation(
   paper: ResearchPaper,
-  lang: SupportedLanguage,
   brandName = 'qrblab',
 ): string {
   const authors = paper.authors.join(', ');
   const year = paper.publishedDate.slice(0, 4);
-  const title = getLocalizedText(paper.title, lang);
+  const title = getLocalizedText(paper.title);
   const doiPart = paper.doi ? ` DOI: ${paper.doi}.` : '';
   return `${authors} (${year}). "${title}." ${brandName} (${paper.version}).${doiPart}`;
 }
 
 export function formatBibtexCitation(
   paper: ResearchPaper,
-  lang: SupportedLanguage,
   brandName = 'qrblab',
 ): string {
   const year = paper.publishedDate.slice(0, 4);
   const citationKey = paper.slug.replace(/[^a-zA-Z0-9]+/g, '_');
   const authors = paper.authors.join(' and ');
-  const title = getLocalizedText(paper.title, lang);
+  const title = getLocalizedText(paper.title);
   const lines = [
     `@techreport{${citationKey},`,
     `  title = {${title}},`,

@@ -1,5 +1,3 @@
-import {THEME_STORAGE_KEY} from './theme';
-
 export interface StoredPaperRating {
   stars: number;
   updatedAt: string;
@@ -14,7 +12,7 @@ export interface StorageLike {
 }
 
 export const RATING_STORAGE_PREFIX = 'qrb-lab:rating:';
-export const LANG_STORAGE_KEY = 'qrblab:lang';
+const LEGACY_STORAGE_KEYS = ['qrblab:theme', 'qrblab:lang'];
 
 function getDefaultStorage(): StorageLike | null {
   if (typeof window === 'undefined') {
@@ -124,8 +122,9 @@ export function clearAllLocalData(
         clearedRatings += 1;
       }
     }
-    storage.setItem(THEME_STORAGE_KEY, 'light');
-    storage.setItem(LANG_STORAGE_KEY, 'en');
+    for (const legacyKey of LEGACY_STORAGE_KEYS) {
+      storage.removeItem(legacyKey);
+    }
   } catch {
     // Ignore storage quota or privacy-mode failures cleanly
   }

@@ -1,6 +1,6 @@
 import {useState} from 'react';
 import {Star} from 'lucide-react';
-import {useLanguage} from '../context/LanguageContext';
+import {siteCopy} from '../data/i18n';
 
 interface StarRatingProps {
   value: number | null;
@@ -15,7 +15,6 @@ export function StarRating({
   onClear,
   readOnly = false,
 }: StarRatingProps) {
-  const {t} = useLanguage();
   const [hovered, setHovered] = useState<number | null>(null);
 
   if (readOnly) {
@@ -32,10 +31,10 @@ export function StarRating({
         />
         {value !== null ? (
           <span className="tabular-nums text-[var(--text-primary)]">
-            {value.toFixed(1)} · {t.research.ratingYourLabel}
+            {value.toFixed(1)} · {siteCopy.qrbLab.ratingYourLabel}
           </span>
         ) : (
-          <span>{t.research.ratingUnrated}</span>
+          <span>{siteCopy.qrbLab.ratingUnrated}</span>
         )}
       </div>
     );
@@ -47,13 +46,13 @@ export function StarRating({
     <div className="flex flex-wrap items-center gap-3">
       <div
         role="group"
-        aria-label={t.paperDetail.rateHeading}
+        aria-label={siteCopy.paperDetail.rateHeading}
         className="inline-flex items-center gap-1"
         onMouseLeave={() => setHovered(null)}
       >
         {[1, 2, 3, 4, 5].map((starIndex) => {
           const isFilled = starIndex <= activeScore;
-          const label = t.paperDetail.rateAriaLabel.replace(
+          const label = siteCopy.paperDetail.rateAriaLabel.replace(
             '{n}',
             String(starIndex),
           );
@@ -81,7 +80,7 @@ export function StarRating({
       </div>
 
       <span className="font-mono-tabular text-sm font-medium text-[var(--text-primary)]">
-        {value !== null ? `${value}.0 / 5` : t.research.ratingUnrated}
+        {value !== null ? `${value}.0 / 5` : siteCopy.qrbLab.ratingUnrated}
       </span>
 
       {value !== null && onClear ? (
@@ -90,7 +89,7 @@ export function StarRating({
           onClick={onClear}
           className="min-h-[36px] rounded-xl border border-[var(--border-hairline)] bg-[var(--bg-surface)] px-3 py-1 text-xs font-medium text-[var(--text-secondary)] transition-colors hover:bg-[var(--bg-surface-elevated)] hover:text-[var(--text-primary)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--focus-ring)]"
         >
-          {t.paperDetail.clearRating}
+          {siteCopy.paperDetail.clearRating}
         </button>
       ) : null}
     </div>

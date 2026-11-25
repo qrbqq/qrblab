@@ -1,7 +1,7 @@
 import {Link} from 'react-router-dom';
 import {ArrowRight} from 'lucide-react';
+import {siteCopy} from '../data/i18n';
 import type {ResearchPaper} from '../data/papers';
-import {useLanguage} from '../context/LanguageContext';
 import {
   formatPaperDate,
   getLocalizedText,
@@ -17,11 +17,10 @@ interface PaperCardProps {
 }
 
 export function PaperCard({paper, staticMode = false}: PaperCardProps) {
-  const {lang, t} = useLanguage();
-  const formattedDate = formatPaperDate(paper.publishedDate, lang);
-  const title = getLocalizedText(paper.title, lang);
-  const category = getLocalizedText(paper.category, lang);
-  const summary = getPaperSummary(paper, lang);
+  const formattedDate = formatPaperDate(paper.publishedDate);
+  const title = getLocalizedText(paper.title);
+  const category = getLocalizedText(paper.category);
+  const summary = getPaperSummary(paper);
   const thumbUrl = paper.thumbnail
     ? resolveAssetUrl(paper.thumbnail, import.meta.env.BASE_URL)
     : '';
@@ -33,7 +32,7 @@ export function PaperCard({paper, staticMode = false}: PaperCardProps) {
 
   return (
     <Link
-      to={`/research/${paper.slug}`}
+      to={`/qrb-lab/${paper.slug}`}
       className={`${cardSurfaceClass} flex h-full flex-col justify-between rounded-3xl p-6 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--focus-ring)]`}
     >
       <div>
@@ -64,7 +63,7 @@ export function PaperCard({paper, staticMode = false}: PaperCardProps) {
         <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs font-medium text-[var(--text-secondary)]">
           <span className="font-semibold text-[var(--text-primary)]">{category}</span>
           <span aria-hidden="true">·</span>
-          <time dateTime={paper.publishedDate} className="tabular-nums">
+          <time dateTime={paper.publishedDate} className="font-mono-tabular tabular-nums">
             {formattedDate}
           </time>
           <span aria-hidden="true">·</span>
@@ -74,14 +73,14 @@ export function PaperCard({paper, staticMode = false}: PaperCardProps) {
         <h3
           className={
             staticMode
-              ? 'mt-3 text-lg font-bold leading-snug tracking-tight text-[var(--text-primary)]'
-              : 'mt-3 text-lg font-bold leading-snug tracking-tight text-[var(--text-primary)] transition-opacity group-hover:opacity-75'
+              ? 'font-display-card mt-3 text-lg font-bold text-[var(--text-primary)]'
+              : 'font-display-card mt-3 text-lg font-bold text-[var(--text-primary)] transition-opacity group-hover:opacity-75'
           }
         >
           {title}
         </h3>
 
-        <p className="mt-2 line-clamp-3 text-sm leading-relaxed text-[var(--text-secondary)]">
+        <p className="font-body-prose mt-2 line-clamp-3 text-sm text-[var(--text-secondary)]">
           {summary}
         </p>
       </div>
@@ -93,13 +92,13 @@ export function PaperCard({paper, staticMode = false}: PaperCardProps) {
           <span className="truncate text-xs font-medium text-[var(--text-secondary)]">
             {paper.authors.join(', ')}
           </span>
-          <span className="inline-flex shrink-0 items-center gap-1.5 text-xs font-semibold text-[var(--text-primary)] whitespace-nowrap">
-            <span>{t.research.readPaper}</span>
+          <span className="inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap text-xs font-semibold text-[var(--text-primary)]">
+            <span>{siteCopy.qrbLab.readPaper}</span>
             <ArrowRight
               className={
                 staticMode
-                  ? 'h-3.5 w-3.5 rtl:rotate-180'
-                  : 'h-3.5 w-3.5 transition-transform duration-200 group-hover:translate-x-0.5 rtl:rotate-180 rtl:group-hover:-translate-x-0.5'
+                  ? 'h-3.5 w-3.5'
+                  : 'h-3.5 w-3.5 transition-transform duration-200 group-hover:translate-x-0.5'
               }
               strokeWidth={1.75}
             />

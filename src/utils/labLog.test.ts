@@ -28,7 +28,6 @@ const fixtureLogs: LabLogEntry[] = [
     timestamp: '2026-11-23T18:30:00Z',
     caption: {
       en: 'DMA ADC trigger timing locked under 1.2 us jitter.',
-      ar: 'تثبيت توقيت DMA لمحول الإشارة أقل من 1.2 ميكروثانية.',
     },
     sourceUrl: 'http://example.org/spec',
     tags: ['Firmware'],
@@ -47,26 +46,22 @@ test('sortLabLogsDesc and getLatestLabLog order entries newest-first', () => {
   assert.equal(getLatestLabLog(fixtureLogs)?.id, 'log-2');
 });
 
-test('getLabLogCaption resolves localized copy with English fallback', () => {
+test('getLabLogCaption resolves English copy reliably', () => {
   assert.equal(
-    getLabLogCaption(fixtureLogs[0]!, 'fr'),
-    'Premier balayage sur banc.',
+    getLabLogCaption(fixtureLogs[0]!),
+    'First actuator bench sweep.',
   );
   assert.equal(
-    getLabLogCaption(fixtureLogs[1]!, 'de'),
+    getLabLogCaption(fixtureLogs[1]!),
     'DMA ADC trigger timing locked under 1.2 us jitter.',
-  );
-  assert.equal(
-    getLabLogCaption(fixtureLogs[1]!, 'ar'),
-    'تثبيت توقيت DMA لمحول الإشارة أقل من 1.2 ميكروثانية.',
   );
 });
 
 test('formatLabLogTimestamp formats UTC ISO timestamps cleanly and preserves invalid input', () => {
-  const formatted = formatLabLogTimestamp('2026-11-23T18:30:00Z', 'en');
+  const formatted = formatLabLogTimestamp('2026-11-23T18:30:00Z');
   assert.ok(formatted.includes('2026'));
   assert.ok(formatted.includes('18:30'));
-  assert.equal(formatLabLogTimestamp('not-a-date', 'en'), 'not-a-date');
+  assert.equal(formatLabLogTimestamp('not-a-date'), 'not-a-date');
 });
 
 test('isSafeExternalUrl allows http/https and rejects javascript/data/empty urls', () => {

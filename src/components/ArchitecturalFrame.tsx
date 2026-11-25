@@ -17,30 +17,30 @@ export function ArchitecturalFrame({
   compact = false,
   className = '',
 }: ArchitecturalFrameProps) {
-  const paddingClass = compact ? 'p-4 sm:p-5 lg:p-6' : 'p-6 sm:p-8 lg:p-10';
+  const paddingClass = compact ? 'py-14 sm:py-20' : 'py-20 sm:py-28';
   return (
     <section
       id={id}
       aria-label={ariaLabel}
-      className={`glass-surface relative scroll-mt-24 overflow-hidden rounded-[2rem] ${paddingClass} ${className}`}
+      className={`relative scroll-mt-24 border-t border-white/[0.08] bg-transparent ${paddingClass} ${className}`}
     >
       {livingBorder ? (
         <>
           <span
             aria-hidden="true"
-            className="home-border-tick pointer-events-none absolute top-0 start-0 h-[1px] w-28"
+            className="home-border-tick pointer-events-none absolute top-0 start-0 h-[1px] w-36"
           />
           <span
             aria-hidden="true"
             style={{'--tick-delay': '6s'} as React.CSSProperties}
-            className="home-border-tick pointer-events-none absolute bottom-0 start-0 h-[1px] w-28"
+            className="home-border-tick pointer-events-none absolute bottom-0 start-0 h-[1px] w-36"
           />
         </>
       ) : null}
 
       <span
         aria-hidden="true"
-        className={`font-mono-tabular pointer-events-none absolute start-4 top-3 select-none text-xs leading-none text-[var(--crosshair-color)] ${
+        className={`font-mono-tabular pointer-events-none absolute start-6 top-4 select-none text-xs leading-none text-[var(--crosshair-color)] ${
           livingBorder ? 'home-periphery-marker' : ''
         }`}
       >
@@ -53,7 +53,7 @@ export function ArchitecturalFrame({
             ? ({'--float-delay': '2.5s'} as React.CSSProperties)
             : undefined
         }
-        className={`font-mono-tabular pointer-events-none absolute end-4 top-3 select-none text-xs leading-none text-[var(--crosshair-color)] ${
+        className={`font-mono-tabular pointer-events-none absolute end-6 top-4 select-none text-xs leading-none text-[var(--crosshair-color)] ${
           livingBorder ? 'home-periphery-marker' : ''
         }`}
       >
@@ -66,7 +66,7 @@ export function ArchitecturalFrame({
             ? ({'--float-delay': '5s'} as React.CSSProperties)
             : undefined
         }
-        className={`font-mono-tabular pointer-events-none absolute start-4 bottom-3 select-none text-xs leading-none text-[var(--crosshair-color)] ${
+        className={`font-mono-tabular pointer-events-none absolute start-6 bottom-4 select-none text-xs leading-none text-[var(--crosshair-color)] ${
           livingBorder ? 'home-periphery-marker' : ''
         }`}
       >
@@ -79,13 +79,15 @@ export function ArchitecturalFrame({
             ? ({'--float-delay': '7.5s'} as React.CSSProperties)
             : undefined
         }
-        className={`font-mono-tabular pointer-events-none absolute end-4 bottom-3 select-none text-xs leading-none text-[var(--crosshair-color)] ${
+        className={`font-mono-tabular pointer-events-none absolute end-6 bottom-4 select-none text-xs leading-none text-[var(--crosshair-color)] ${
           livingBorder ? 'home-periphery-marker' : ''
         }`}
       >
         +
       </span>
-      {children}
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        {children}
+      </div>
     </section>
   );
 }

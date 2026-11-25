@@ -1,10 +1,14 @@
 import {useEffect, useRef, useState, type MouseEvent} from 'react';
-import {useLanguage} from '../context/LanguageContext';
-import {useTheme} from '../context/ThemeContext';
+import {
+  SCROLL_REVEAL_ROOT_MARGIN,
+  SCROLL_REVEAL_THRESHOLD,
+  shouldRevealFromGeometry,
+} from '../utils/scrollReveal';
 
 interface UseScrollRevealOptions {
   threshold?: number;
   rootMargin?: string;
+  marginBottomPx?: number;
   disabled?: boolean;
 }
 
@@ -16,77 +20,111 @@ export function prefersReducedMotion(): boolean {
 }
 
 export function useScrollReveal<T extends HTMLElement = HTMLDivElement>({
-  threshold = 0.01,
-  rootMargin = '0px 0px 120px 0px',
+  threshold = SCROLL_REVEAL_THRESHOLD,
+  rootMargin = SCROLL_REVEAL_ROOT_MARGIN,
+  marginBottomPx = 60,
   disabled = false,
 }: UseScrollRevealOptions = {}) {
   const ref = useRef<T | null>(null);
-  const {lang} = useLanguage();
-  const {effectiveTheme} = useTheme();
-  const initialLangRef = useRef(lang);
-  const initialThemeRef = useRef(effectiveTheme);
 
   const [isVisible, setIsVisible] = useState<boolean>(
-    () => disabled || prefersReducedMotion(),
+    () =>
+      disabled ||
+      prefersReducedMotion() ||
+      typeof IntersectionObserver === 'undefined',
   );
 
-  // Immediately keep content visible whenever language or theme switches
-  useEffect(() => {
-    if (
-      lang !== initialLangRef.current ||
-      effectiveTheme !== initialThemeRef.current
-    ) {
-      setIsVisible(true);
-    }
-  }, [lang, effectiveTheme]);
-
-  // 350ms failsafe timeout so no section or card ever remains stuck at opacity: 0
   useEffect(() => {
     if (disabled || isVisible) {
       return;
     }
 
-    if (prefersReducedMotion() || typeof IntersectionObserver === 'undefined') {
+    if (
+      prefersReducedMotion() ||
+      typeof IntersectionObserver === 'undefined'
+    ) {
       setIsVisible(true);
       return;
     }
-
-    const failsafeTimer = window.setTimeout(() => {
-      setIsVisible(true);
-    }, 350);
 
     const node = ref.current;
     if (!node) {
-      return () => window.clearTimeout(failsafeTimer);
-    }
-
-    const rect = node.getBoundingClientRect();
-    if (rect.top <= window.innerHeight + 120) {
       setIsVisible(true);
-      window.clearTimeout(failsafeTimer);
       return;
     }
 
-    const observer = new IntersectionObserver(
+    let revealed = false;
+    let observer: IntersectionObserver | null = null;
+    let settleTimer: number | null = null;
+
+    const triggerReveal = () => {
+      if (revealed) {
+        return;
+      }
+      revealed = true;
+      setIsVisible(true);
+      observer?.disconnect();
+      window.removeEventListener('scroll', checkGeometry);
+      window.removeEventListener('resize', checkGeometry);
+      if (settleTimer !== null) {
+        window.clearTimeout(settleTimer);
+        settleTimer = null;
+      }
+    };
+
+    const checkGeometry = () => {
+      if (revealed) {
+        return;
+      }
+      const rect = node.getBoundingClientRect();
+      if (shouldRevealFromGeometry(rect, window.innerHeight, marginBottomPx)) {
+        triggerReveal();
+      }
+    };
+
+    // Immediate viewport & post-route-transition geometry checks
+    checkGeometry();
+    if (revealed) {
+      return;
+    }
+
+    settleTimer = window.setTimeout(checkGeometry, 240);
+
+    observer = new IntersectionObserver(
       (entries) => {
         for (const entry of entries) {
-          if (entry.isIntersecting) {
-            setIsVisible(true);
-            observer.disconnect();
-            window.clearTimeout(failsafeTimer);
+          if (
+            entry.isIntersecting ||
+            shouldRevealFromGeometry(
+              entry.boundingClientRect,
+              window.innerHeight,
+              marginBottomPx,
+            )
+          ) {
+            triggerReveal();
             break;
           }
         }
       },
-      {threshold, rootMargin},
+      {
+        threshold: [0, threshold],
+        rootMargin,
+      },
     );
 
     observer.observe(node);
+    window.addEventListener('scroll', checkGeometry, {passive: true});
+    window.addEventListener('resize', checkGeometry, {passive: true});
+
     return () => {
-      observer.disconnect();
-      window.clearTimeout(failsafeTimer);
+      observer?.disconnect();
+      window.removeEventListener('scroll', checkGeometry);
+      window.removeEventListener('resize', checkGeometry);
+      if (settleTimer !== null) {
+        window.clearTimeout(settleTimer);
+      }
     };
-  }, [disabled, isVisible, rootMargin, threshold]);
+  }, [disabled, isVisible, marginBottomPx, rootMargin, threshold]);
 
   return {ref, isVisible};
 }

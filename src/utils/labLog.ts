@@ -1,14 +1,5 @@
 import type {LabLogEntry} from '../data/labLog';
-import type {SupportedLanguage} from '../data/papers';
 import {getLocalizedText} from './papers';
-
-const TIMESTAMP_LOCALES: Record<SupportedLanguage, string> = {
-  en: 'en-US',
-  ar: 'ar-SA',
-  fr: 'fr-FR',
-  de: 'de-DE',
-  es: 'es-ES',
-};
 
 export function sortLabLogsDesc(entries: readonly LabLogEntry[]): LabLogEntry[] {
   return [...entries].sort((a, b) => {
@@ -28,22 +19,16 @@ export function getLatestLabLog(entries: readonly LabLogEntry[]): LabLogEntry | 
   return sortLabLogsDesc(entries)[0] ?? null;
 }
 
-export function getLabLogCaption(
-  entry: LabLogEntry,
-  lang: SupportedLanguage,
-): string {
-  return getLocalizedText(entry.caption, lang);
+export function getLabLogCaption(entry: LabLogEntry): string {
+  return getLocalizedText(entry.caption);
 }
 
-export function formatLabLogTimestamp(
-  isoTimestamp: string,
-  lang: SupportedLanguage,
-): string {
+export function formatLabLogTimestamp(isoTimestamp: string): string {
   const parsed = new Date(isoTimestamp);
   if (Number.isNaN(parsed.getTime())) {
     return isoTimestamp;
   }
-  return new Intl.DateTimeFormat(TIMESTAMP_LOCALES[lang], {
+  return new Intl.DateTimeFormat('en-US', {
     year: 'numeric',
     month: 'short',
     day: 'numeric',

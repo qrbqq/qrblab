@@ -1,6 +1,6 @@
 import {useState} from 'react';
 import {ArrowUpRight, ImageOff, Maximize2} from 'lucide-react';
-import {useLanguage} from '../context/LanguageContext';
+import {siteCopy} from '../data/i18n';
 import type {LabLogEntry} from '../data/labLog';
 import {
   formatLabLogTimestamp,
@@ -20,11 +20,10 @@ export function LabLogCard({
   onInspectImage,
   compact = false,
 }: LabLogCardProps) {
-  const {lang, t} = useLanguage();
   const [imageFailed, setImageFailed] = useState(false);
 
-  const caption = getLabLogCaption(entry, lang);
-  const formattedTime = formatLabLogTimestamp(entry.timestamp, lang);
+  const caption = getLabLogCaption(entry);
+  const formattedTime = formatLabLogTimestamp(entry.timestamp);
   const imageUrl = entry.image
     ? resolveAssetUrl(entry.image, import.meta.env.BASE_URL)
     : '';
@@ -51,17 +50,14 @@ export function LabLogCard({
             rel="noopener noreferrer"
             className="inline-flex min-h-[32px] shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full border border-[var(--border-hairline)] bg-[var(--bg-surface-elevated)] px-3 py-1 text-xs font-medium text-[var(--text-primary)] transition-colors hover:border-[var(--border-strong)] hover:bg-[var(--bg-surface)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--focus-ring)]"
           >
-            <span>{t.labLog.sourceLink}</span>
-            <ArrowUpRight
-              className="h-3.5 w-3.5 rtl:-scale-x-100"
-              strokeWidth={1.75}
-            />
+            <span>{siteCopy.labLog.sourceLink}</span>
+            <ArrowUpRight className="h-3.5 w-3.5" strokeWidth={1.75} />
           </a>
         ) : null}
       </div>
 
       <p
-        className={`mt-3.5 leading-relaxed text-[var(--text-primary)] ${
+        className={`font-body-prose mt-3.5 text-[var(--text-primary)] ${
           compact ? 'text-sm' : 'text-sm sm:text-[15px]'
         }`}
       >
@@ -85,7 +81,7 @@ export function LabLogCard({
             <button
               type="button"
               onClick={() => onInspectImage?.(imageUrl, caption)}
-              aria-label={t.labLog.zoomImage}
+              aria-label={siteCopy.labLog.zoomImage}
               className="group relative block w-full overflow-hidden text-start focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--focus-ring)]"
             >
               <img
