@@ -1,7 +1,8 @@
 import {useEffect, useState} from 'react';
+import {Link} from 'react-router-dom';
 import {ArrowUpRight, ImageOff, Maximize2} from 'lucide-react';
 import type {LabLogEntry} from '../data/labLog';
-import {siteCopy} from '../data/siteConfig';
+import {siteConfig, siteCopy} from '../data/siteConfig';
 import {
   formatLabLogTimestamp,
   formatRelativeTime,
@@ -40,39 +41,51 @@ export function LabLogCard({
     ? resolveAssetUrl(entry.image, import.meta.env.BASE_URL)
     : '';
   const safeSourceUrl = sanitizeExternalUrl(entry.sourceUrl);
+  const aspectClass = entry.imageAspect === 'square' ? 'aspect-square' : 'aspect-video';
 
   return (
     <article
-      className={compact ? 'py-7 sm:py-9' : 'py-8 sm:py-10'}
+      className={`group/card relative flex flex-col ${
+        compact ? 'py-6 sm:py-7' : 'py-7 sm:py-9'
+      }`}
     >
-      {/* Author Identity Header: @qrbqq + Verified Badge + · {relativeTime} */}
+      {/* Author Identity Header: @qrbqq + Crimson Verified Seal + Timestamp */}
       <div className="flex items-start justify-between gap-3">
-        <div className="flex min-w-0 items-center gap-3">
-          <FounderAvatar
-            sizeClass={compact ? 'h-8 w-8' : 'h-9 w-9'}
-            paddingClass="p-1.5"
-            alt="@qrbqq"
-          />
+        <Link
+          to="/log"
+          aria-label={`View ${siteConfig.displayName} profile`}
+          className="group/author inline-flex min-w-0 items-center gap-2.5 rounded-lg text-start transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--focus-ring)]"
+        >
+          <div className="transition-transform duration-200 group-hover/author:scale-[1.04]">
+            <FounderAvatar
+              sizeClass={compact ? 'h-8 w-8' : 'h-9 w-9'}
+              paddingClass="p-1.5"
+              alt={siteConfig.handle}
+            />
+          </div>
 
           <div className="min-w-0 flex flex-col">
             <div className="flex flex-wrap items-center gap-1.5">
-              <span className="font-mono-tabular text-sm font-semibold text-[#F5F5F5]">
-                @qrbqq
+              <span
+                className="font-mono-tabular text-xs font-semibold text-[#F5F5F5] transition-colors group-hover/author:text-white sm:text-sm"
+                style={{textTransform: 'none'}}
+              >
+                {siteConfig.handle}
               </span>
-              <VerifiedBadge size={17} />
+              <VerifiedBadge size={16} />
               <span aria-hidden="true" className="text-xs text-white/30">
                 ·
               </span>
               <time
                 dateTime={entry.timestamp}
                 title={exactFormattedTime}
-                className="font-mono-tabular text-xs text-[#8A8A8A] tabular-nums transition-colors hover:text-[#F5F5F5]"
+                className="font-mono-tabular text-xs text-[#8A8A8A] tabular-nums transition-colors group-hover/author:text-[#F5F5F5]"
               >
                 {relativeTime}
               </time>
             </div>
           </div>
-        </div>
+        </Link>
 
         {safeSourceUrl ? (
           <a
@@ -89,8 +102,8 @@ export function LabLogCard({
 
       {/* Dispatch Body */}
       <p
-        className={`font-body-prose mt-3.5 max-w-3xl text-[var(--text-primary)] ${
-          compact ? 'text-sm' : 'text-sm sm:text-[15px]'
+        className={`font-body-prose mt-3 max-w-3xl text-[var(--text-primary)] ${
+          compact ? 'text-xs sm:text-sm' : 'text-sm sm:text-[15px]'
         }`}
       >
         {caption}
@@ -98,9 +111,9 @@ export function LabLogCard({
 
       {/* Optional Tags */}
       {entry.tags && entry.tags.length > 0 ? (
-        <div className="mt-3 flex flex-wrap items-center gap-x-2 gap-y-1 font-mono-tabular text-[11px] text-[var(--text-secondary)]">
+        <div className="mt-2.5 flex flex-wrap items-center gap-x-2 gap-y-1 font-mono-tabular text-[11px] text-[var(--text-secondary)]">
           {entry.tags.map((tag, index) => (
-            <span key={tag} className="inline-flex items-center gap-2">
+            <span key={tag} className="inline-flex items-center gap-1.5">
               {index > 0 ? <span aria-hidden="true">·</span> : null}
               <span>#{tag}</span>
             </span>
@@ -108,34 +121,33 @@ export function LabLogCard({
         </div>
       ) : null}
 
-      {/* Optional Media Attachment (Never renders empty image box when absent) */}
+      {/* Optional Media Attachment (16:9 or 1:1, borderless unboxed unit with 1px neutral hairline frame) */}
       {imageUrl ? (
-        <div className="mt-4 overflow-hidden rounded-xl border border-white/[0.08]">
+        <div className="mt-4 w-full overflow-hidden rounded-lg border border-white/[0.08] bg-[#0A0A0A]">
           {!imageFailed ? (
             <button
               type="button"
               onClick={() => onInspectImage?.(imageUrl, caption)}
               aria-label={siteCopy.labLog.zoomImage}
-              className="group relative block w-full overflow-hidden text-start focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--focus-ring)]"
+              className={`group relative block w-full ${aspectClass} overflow-hidden text-start focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--focus-ring)]`}
             >
               <img
                 src={imageUrl}
                 alt={caption}
+                loading="lazy"
                 referrerPolicy="no-referrer"
                 onError={() => setImageFailed(true)}
-                className={`w-full object-cover transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.01] ${
-                  compact ? 'max-h-64' : 'max-h-[460px]'
-                }`}
+                className="h-full w-full object-cover transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.02]"
               />
               <span
                 aria-hidden="true"
-                className="glass-surface absolute end-3 bottom-3 inline-flex h-8 w-8 items-center justify-center rounded-xl text-[var(--text-primary)] opacity-0 transition-opacity duration-200 group-hover:opacity-100 group-focus-visible:opacity-100"
+                className="glass-surface absolute end-2.5 bottom-2.5 inline-flex h-7 w-7 items-center justify-center rounded-lg text-[var(--text-primary)] opacity-0 transition-opacity duration-200 group-hover:opacity-100 group-focus-visible:opacity-100"
               >
                 <Maximize2 className="h-3.5 w-3.5" strokeWidth={1.75} />
               </span>
             </button>
           ) : (
-            <div className="flex h-36 w-full items-center justify-center gap-2 text-xs text-[var(--text-secondary)]">
+            <div className={`flex ${aspectClass} w-full items-center justify-center gap-2 text-xs text-[var(--text-secondary)]`}>
               <ImageOff className="h-4 w-4" strokeWidth={1.6} />
               <span className="truncate px-2">{entry.image}</span>
             </div>

@@ -78,11 +78,11 @@ export function PaperCard({paper, staticMode = false}: PaperCardProps) {
         </div>
       </div>
 
-      {/* 2. Single Minimal Action Line Beneath Each Poster */}
-      <div className="mt-3 flex items-center gap-1.5 text-xs font-medium text-[var(--text-secondary)] transition-colors duration-200 group-hover:text-[var(--text-primary)]">
+      {/* 2. Single Minimal Action Line Beneath Each Poster (with whitespace-nowrap to prevent arrow wrap) */}
+      <div className="mt-3 flex items-center gap-1.5 whitespace-nowrap text-xs font-medium text-[var(--text-secondary)] transition-colors duration-200 group-hover:text-[var(--text-primary)]">
         <span>Open PDF</span>
         <ArrowRight
-          className="h-3.5 w-3.5 transition-transform duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:translate-x-1"
+          className="h-3.5 w-3.5 shrink-0 transition-transform duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:translate-x-1"
           strokeWidth={1.75}
         />
       </div>

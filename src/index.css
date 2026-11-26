@@ -794,3 +794,30 @@ input[type="search"]::-webkit-search-cancel-button {
 .billboard-marquee-track:active {
   animation-play-state: running !important;
 }
+
+/* =========================================================================
+   PROFILE COVER MARQUEE (NEVER PAUSES)
+   ========================================================================= */
+.profile-cover-marquee-container {
+  overflow: hidden;
+  mask-image: linear-gradient(to right, transparent, black 6%, black 94%, transparent);
+  -webkit-mask-image: linear-gradient(to right, transparent, black 6%, black 94%, transparent);
+}
+
+.profile-cover-marquee-track {
+  display: flex;
+  width: max-content;
+  will-change: transform;
+  animation: architectural-marquee 32s linear infinite;
+  animation-play-state: running !important;
+}
+
+.profile-cover-marquee-container:hover .profile-cover-marquee-track,
+.profile-cover-marquee-container:active .profile-cover-marquee-track,
+.profile-cover-marquee-container:focus-within .profile-cover-marquee-track,
+.profile-cover-marquee-track:hover,
+.profile-cover-marquee-track:active,
+.profile-cover-marquee-track:focus-within {
+  animation-play-state: running !important;
+}
+

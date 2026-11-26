@@ -1,12 +1,11 @@
 import {useMemo, useState} from 'react';
 import {EmptyStateCard} from '../components/EmptyStateCard';
 import {FounderAvatar} from '../components/FounderAvatar';
-import {KineticHeadline} from '../components/KineticHeadline';
 import {LabLogCard} from '../components/LabLogCard';
 import {ScreenshotLightbox} from '../components/ScreenshotLightbox';
 import {ScrollReveal} from '../components/ScrollReveal';
 import {VerifiedBadge} from '../components/VerifiedBadge';
-import {siteCopy} from '../data/siteConfig';
+import {siteConfig, siteCopy} from '../data/siteConfig';
 import {labLogs} from '../data/labLog';
 import {sortLabLogsDesc} from '../utils/labLog';
 
@@ -19,81 +18,75 @@ export function LabLogPage() {
   const sortedLogs = useMemo(() => sortLabLogsDesc(labLogs), []);
 
   return (
-    <div className="w-full pb-16">
+    <div className="w-full pb-20">
       {/* =========================================================================
-          1. ARCHITECTURAL DARK-VOID BANNER (h-32 md:h-40, technical grid + radial glow)
+          1. KINETIC PROFILE COVER MARQUEE BANNER (Never pauses on hover)
           ========================================================================= */}
-      <div
-        aria-hidden="true"
-        className="relative h-32 w-full overflow-hidden border-b border-white/[0.08] bg-[#050505] md:h-40"
-        style={{
-          backgroundImage: [
-            'radial-gradient(60% 100% at 50% 0%, rgba(255, 255, 255, 0.05) 0%, transparent 72%)',
-            'linear-gradient(180deg, #0D0D0D 0%, #050505 100%)',
-          ].join(', '),
-        }}
-      >
-        {/* Ultra-faint technical coordinate hairlines fading seamlessly into #050505 */}
+      <div className="profile-cover-marquee-container relative h-28 w-full overflow-hidden border-t border-b border-white/[0.08] bg-[#050505] md:h-36 flex items-center">
         <div
-          className="pointer-events-none absolute inset-0 opacity-65"
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 opacity-40"
           style={{
             backgroundImage:
-              'linear-gradient(rgba(255, 255, 255, 0.032) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, 0.032) 1px, transparent 1px)',
-            backgroundSize: '32px 32px',
-            maskImage: 'linear-gradient(180deg, rgba(0,0,0,0.9) 0%, transparent 100%)',
-            WebkitMaskImage:
-              'linear-gradient(180deg, rgba(0,0,0,0.9) 0%, transparent 100%)',
+              'linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px)',
+            backgroundSize: '28px 28px',
           }}
         />
-        {/* Subtle bottom horizon hairline glow */}
-        <div
-          className="pointer-events-none absolute inset-x-0 bottom-0 h-px"
-          style={{
-            background:
-              'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.16) 50%, transparent 100%)',
-          }}
-        />
+        <div className="profile-cover-marquee-track whitespace-nowrap flex items-center">
+          {Array.from({length: 8}).map((_, i) => (
+            <div key={i} className="flex items-center gap-6 px-4">
+              <span
+                className="font-display-bebas text-2xl md:text-3xl font-bold tracking-[0.06em] text-[#E5E5E5]"
+                style={{textTransform: 'none'}}
+              >
+                {siteConfig.profileBannerText}
+              </span>
+              <span className="text-white/30 text-xl font-light">·</span>
+            </div>
+          ))}
+        </div>
       </div>
 
       {/* =========================================================================
-          2. ELEVATED FOUNDER PROFILE HEADER (Crisp white Q emblem, 23px Crimson Seal)
+          2. NARROWER FOCUSED CONTAINER + PROMINENT ENLARGED IDENTITY HEADER
           ========================================================================= */}
-      <div className="mx-auto w-full max-w-3xl px-4 sm:px-6">
+      <div className="mx-auto w-full max-w-3xl px-4 md:px-6">
         <header className="relative pb-8">
-          {/* Clean Circular Q Brand Emblem Avatar (Zero overlapping mini-circle) */}
-          <div className="relative -mt-12 inline-flex md:-mt-14">
+          {/* Prominent Enlarged Profile Emblem Circle (w-28 h-28 md:w-32 md:h-32) */}
+          <div className="relative -mt-14 inline-flex md:-mt-16">
             <FounderAvatar
-              sizeClass="h-24 w-24 md:h-28 md:w-28"
-              paddingClass="p-4 md:p-5"
+              sizeClass="h-28 w-28 md:h-32 md:w-32"
+              paddingClass="p-5 md:p-6"
               className="border border-white/[0.16] ring-4 ring-[#050505] shadow-2xl"
-              alt="qrbqq brand emblem"
+              alt={siteConfig.displayName}
             />
           </div>
 
-          {/* Identity Hierarchy Directly Below */}
+          {/* Display Name + Enlarged Crimson Verified Seal */}
           <div className="mt-4">
             <div className="flex items-center gap-2.5">
-              <KineticHeadline
-                as="h1"
-                text="qrbqq"
-                className="text-3xl text-[#F5F5F5] sm:text-4xl"
-              />
-              <VerifiedBadge size={23} />
+              <h1
+                className="font-display-heading text-3xl font-bold text-[#F5F5F5] md:text-4xl"
+                style={{textTransform: 'none'}}
+              >
+                {siteConfig.displayName}
+              </h1>
+              <VerifiedBadge size={24} />
             </div>
-            <p className="font-mono-tabular mt-1 text-sm text-[#8A8A8A]">
-              @qrbqq
+            <p
+              className="font-mono-tabular mt-1 text-sm text-[#8A8A8A]"
+              style={{textTransform: 'none'}}
+            >
+              {siteConfig.handle}
             </p>
           </div>
 
-          {/* Clean Concise Bio (Zero unnecessary counter clutter) */}
-          <ScrollReveal staggerIndex={1}>
-            <p className="font-body-prose mt-3.5 max-w-2xl text-sm leading-relaxed text-[var(--text-secondary)]">
-              Independent personal research &amp; technical dispatches in Artificial
-              Intelligence, Mechatronics, Robotics &amp; Autonomous Systems.
-            </p>
-          </ScrollReveal>
+          {/* Concise Bio */}
+          <p className="font-body-prose mt-3 max-w-2xl text-sm leading-relaxed text-[var(--text-secondary)] sm:text-base">
+            Independent personal research &amp; technical dispatches in Artificial
+            Intelligence, Mechatronics, Robotics &amp; Autonomous Systems.
+          </p>
 
-          {/* Discrete registration marks */}
           <span
             aria-hidden="true"
             className="font-mono-tabular pointer-events-none absolute end-0 bottom-3 hidden select-none text-[11px] text-white/20 sm:block"
@@ -103,14 +96,13 @@ export function LabLogPage() {
         </header>
       </div>
 
-      {/* Subtle 1px Full-Width Architectural Divider */}
       <div className="h-px w-full bg-white/[0.08]" />
 
       {/* =========================================================================
-          3. UNBOXED CHRONOLOGICAL DISPATCH FEED (1px Hairline Dividers Only)
+          3. BORDERLESS UNBOXED PROFILE FEED (All dispatches)
           ========================================================================= */}
-      <div className="mx-auto w-full max-w-3xl px-4 sm:px-6">
-        <section aria-label={siteCopy.labLog.title} className="mt-8">
+      <div className="mx-auto w-full max-w-3xl px-4 md:px-6">
+        <section aria-label={siteCopy.labLog.title} className="mt-6">
           {sortedLogs.length === 0 ? (
             <ScrollReveal staggerIndex={2}>
               <EmptyStateCard
@@ -124,18 +116,14 @@ export function LabLogPage() {
           ) : (
             <div className="divide-y divide-white/[0.08]">
               {sortedLogs.map((entry, index) => (
-                <ScrollReveal
-                  key={entry.id}
-                  staggerIndex={Math.min(index, 2)}
-                  className="relative"
-                >
+                <div key={entry.id} className="relative">
                   <LabLogCard
                     entry={entry}
                     onInspectImage={(url, caption) =>
                       setLightboxImage({url, caption})
                     }
                   />
-                </ScrollReveal>
+                </div>
               ))}
             </div>
           )}
