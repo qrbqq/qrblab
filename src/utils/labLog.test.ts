@@ -7,6 +7,8 @@ import {
   formatRelativeTime,
   getLabLogCaption,
   getLatestLabLog,
+  getLatestLabLogs,
+  HOME_LAB_LOG_PREVIEW_LIMIT,
   isSafeExternalUrl,
   sanitizeExternalUrl,
   sortLabLogsDesc,
@@ -46,6 +48,25 @@ test('sortLabLogsDesc and getLatestLabLog order entries newest-first', () => {
   assert.equal(sorted[0]?.id, 'log-2');
   assert.equal(sorted[1]?.id, 'log-1');
   assert.equal(getLatestLabLog(fixtureLogs)?.id, 'log-2');
+});
+
+test('getLatestLabLogs caps preview at max 3 newest posts by default', () => {
+  assert.equal(HOME_LAB_LOG_PREVIEW_LIMIT, 3);
+  assert.deepEqual(getLatestLabLogs([]), []);
+  assert.equal(getLatestLabLogs(fixtureLogs).length, 2);
+
+  const sixLogs: LabLogEntry[] = Array.from({length: 6}, (_, idx) => ({
+    id: `log-${idx + 1}`,
+    timestamp: `2026-11-0${idx + 1}T10:00:00Z`,
+    caption: {en: `Entry ${idx + 1}`},
+  }));
+
+  const capped = getLatestLabLogs(sixLogs);
+  assert.equal(capped.length, 3);
+  assert.deepEqual(
+    capped.map((item) => item.id),
+    ['log-6', 'log-5', 'log-4'],
+  );
 });
 
 test('getLabLogCaption resolves English copy reliably', () => {

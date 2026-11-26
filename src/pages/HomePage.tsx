@@ -10,15 +10,27 @@ import {HomeSectionTracker} from '../components/HomeSectionTracker';
 import {LatestLabLogSection} from '../components/LatestLabLogSection';
 import {LatestPublicationsSection} from '../components/LatestPublicationsSection';
 import {ArchitecturalMarquee} from '../components/ArchitecturalMarquee';
+import {BillboardMarquee} from '../components/BillboardMarquee';
+import {EditorialMethodologySection} from '../components/EditorialMethodologySection';
+import {KineticHeadline} from '../components/KineticHeadline';
 import {StatementCard} from '../components/StatementCard';
 import {siteConfig, siteCopy} from '../data/siteConfig';
 import {prefersReducedMotion} from '../hooks/useScrollReveal';
 import {hasIntroPlayedInMemory} from '../utils/particleIntro';
 import {getLocalizedList, getLocalizedText} from '../utils/papers';
 
+function hasAutostartParam(): boolean {
+  if (typeof window === 'undefined') return false;
+  return (
+    window.location.search.includes('autostart=1') ||
+    window.location.hash.includes('autostart=1')
+  );
+}
+
 export function HomePage() {
   const [introState, setIntroState] = useState<IntroVisualState>(() => {
-    const skipIntro = hasIntroPlayedInMemory() || prefersReducedMotion();
+    const skipIntro =
+      hasIntroPlayedInMemory() || prefersReducedMotion() || hasAutostartParam();
     return skipIntro
       ? {active: false, stage: 'complete', heroReveal: 1}
       : {active: true, stage: 'deep-space', heroReveal: 0};
@@ -41,7 +53,7 @@ export function HomePage() {
   const closingParagraphs = allParagraphs.slice(purposeIndex + 1);
 
   return (
-    <div className="relative w-full">
+    <div className="relative w-full overflow-x-clip">
       {/* Isolated Sticky Right-Edge Progress Tracker (Scroll updates stay isolated from hero video) */}
       {!introState.active ? <HomeSectionTracker /> : null}
 
@@ -86,14 +98,17 @@ export function HomePage() {
             introState.heroReveal < 0.25 ? 'pointer-events-none' : ''
           }`}
         >
-          <div className="max-w-md lg:max-w-lg">
+          <div className="max-w-lg lg:max-w-2xl">
             <p className="font-mono-tabular text-[11px] font-medium tracking-[0.12em] text-white/75">
               {siteCopy.home.heroEyebrow}
             </p>
 
-            <h1 className="font-display-hero mt-2 text-2xl font-bold text-[#F4F5F7] sm:text-4xl lg:text-[2.65rem]">
-              {siteCopy.home.heroHeadline}
-            </h1>
+            <KineticHeadline
+              as="h1"
+              text={siteCopy.home.heroHeadline}
+              triggerReady={!introState.active || introState.heroReveal >= 0.25}
+              className="mt-2.5 text-4xl text-[#F5F5F5] sm:text-5xl lg:text-[3.75rem]"
+            />
 
             <p className="font-mono-tabular mt-2.5 text-[11px] font-medium tracking-[0.08em] text-[#9BA1AE]">
               {siteCopy.home.eyebrow}
@@ -138,11 +153,17 @@ export function HomePage() {
           collapseLabel={siteCopy.home.collapseStatement}
         />
 
-        {/* 2. Lab Log Preview */}
+        {/* 2. Full-Bleed Continuous Billboard Marquee */}
+        <BillboardMarquee />
+
+        {/* 3. Unboxed Founder Dispatch Feed (Auto-synced with src/data/labLog.ts) */}
         <LatestLabLogSection id="lab-log" />
 
-        {/* 3. Latest Publications Showcase */}
+        {/* 4. Latest Publications Showcase */}
         <LatestPublicationsSection id="publications" />
+
+        {/* 5. Comprehensive Editorial & Technical Methodology Block */}
+        <EditorialMethodologySection id="methodology" />
       </div>
     </div>
   );

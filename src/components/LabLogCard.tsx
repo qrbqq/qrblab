@@ -43,17 +43,14 @@ export function LabLogCard({
 
   return (
     <article
-      className={`glass-card rounded-3xl ${
-        compact ? 'p-4 sm:p-5' : 'p-5 sm:p-6'
-      }`}
+      className={compact ? 'py-7 sm:py-9' : 'py-8 sm:py-10'}
     >
       {/* Author Identity Header: @qrbqq + Verified Badge + · {relativeTime} */}
       <div className="flex items-start justify-between gap-3">
         <div className="flex min-w-0 items-center gap-3">
           <FounderAvatar
             sizeClass={compact ? 'h-8 w-8' : 'h-9 w-9'}
-            paddingClass={compact ? 'p-1.5' : 'p-1.5'}
-            className="border border-white/[0.16]"
+            paddingClass="p-1.5"
             alt="@qrbqq"
           />
 
@@ -82,7 +79,7 @@ export function LabLogCard({
             href={safeSourceUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex min-h-[32px] shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full border border-[var(--border-hairline)] bg-[var(--bg-surface-elevated)] px-3 py-1 text-xs font-medium text-[var(--text-primary)] transition-colors hover:border-[var(--border-strong)] hover:bg-[var(--bg-surface)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--focus-ring)]"
+            className="inline-flex min-h-[32px] shrink-0 items-center gap-1 whitespace-nowrap border-b border-white/20 pb-0.5 text-xs font-medium text-[var(--text-secondary)] transition-colors hover:border-white hover:text-[var(--text-primary)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--focus-ring)]"
           >
             <span>{siteCopy.labLog.sourceLink}</span>
             <ArrowUpRight className="h-3.5 w-3.5" strokeWidth={1.75} />
@@ -92,7 +89,7 @@ export function LabLogCard({
 
       {/* Dispatch Body */}
       <p
-        className={`font-body-prose mt-3.5 text-[var(--text-primary)] ${
+        className={`font-body-prose mt-3.5 max-w-3xl text-[var(--text-primary)] ${
           compact ? 'text-sm' : 'text-sm sm:text-[15px]'
         }`}
       >
@@ -113,7 +110,7 @@ export function LabLogCard({
 
       {/* Optional Media Attachment (Never renders empty image box when absent) */}
       {imageUrl ? (
-        <div className="mt-4 overflow-hidden rounded-2xl border border-[var(--border-hairline)] bg-[var(--bg-surface-elevated)]">
+        <div className="mt-4 overflow-hidden rounded-xl border border-white/[0.08]">
           {!imageFailed ? (
             <button
               type="button"
@@ -138,7 +135,7 @@ export function LabLogCard({
               </span>
             </button>
           ) : (
-            <div className="flex h-40 w-full items-center justify-center gap-2 text-xs text-[var(--text-secondary)]">
+            <div className="flex h-36 w-full items-center justify-center gap-2 text-xs text-[var(--text-secondary)]">
               <ImageOff className="h-4 w-4" strokeWidth={1.6} />
               <span className="truncate px-2">{entry.image}</span>
             </div>

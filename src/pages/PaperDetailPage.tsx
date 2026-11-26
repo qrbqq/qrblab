@@ -11,6 +11,7 @@ import {
   Quote,
 } from 'lucide-react';
 import {EmptyStateCard} from '../components/EmptyStateCard';
+import {KineticHeadline} from '../components/KineticHeadline';
 import {PosterPlaceholder} from '../components/PosterPlaceholder';
 import {ScreenshotLightbox} from '../components/ScreenshotLightbox';
 import {ScrollReveal} from '../components/ScrollReveal';
@@ -207,10 +208,12 @@ export function PaperDetailPage() {
               ) : null}
             </div>
 
-            {/* Crisp Oxanium Title */}
-            <h1 className="font-display-hero mt-3 text-2xl font-bold leading-tight text-[#F5F5F5] sm:text-3xl lg:text-4xl">
-              {title}
-            </h1>
+            {/* Bebas Neue Kinetic Display Title */}
+            <KineticHeadline
+              as="h1"
+              text={title}
+              className="mt-3 text-3xl text-[#F5F5F5] sm:text-4xl lg:text-5xl"
+            />
 
             {/* Authors Byline */}
             <div className="mt-3 text-xs font-medium text-[var(--text-secondary)]">
@@ -401,9 +404,9 @@ export function PaperDetailPage() {
               ))}
             </div>
           ) : (
-            <div className="rounded-xl border border-[var(--border-hairline)] bg-[var(--bg-surface-elevated)] p-6 text-center text-xs text-[var(--text-secondary)]">
+            <p className="font-body-prose pt-1 text-xs text-[var(--text-secondary)]">
               {siteCopy.paperDetail.screenshotsEmpty}
-            </div>
+            </p>
           )}
         </section>
 

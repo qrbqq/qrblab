@@ -10,6 +10,7 @@ import {
 } from 'react';
 import {ChevronDown, ChevronUp} from 'lucide-react';
 import {prefersReducedMotion} from '../hooks/useScrollReveal';
+import {KineticHeadline} from './KineticHeadline';
 import {
   computeWordLensResponse,
   computeWordPointerDistance,
@@ -230,6 +231,57 @@ function measureHeadingLines(headingEl: HTMLElement): VisualLineBox[] {
     return [];
   }
 
+  const wordNodes = headingEl.querySelectorAll<HTMLElement>('[data-kinetic-word="true"]');
+  if (wordNodes.length > 0) {
+    const lines: Array<{
+      words: string[];
+      minLeft: number;
+      topSum: number;
+      bottomSum: number;
+      count: number;
+    }> = [];
+
+    wordNodes.forEach((wordEl) => {
+      const rect = wordEl.getBoundingClientRect();
+      const wordText = (wordEl.textContent || '').trim();
+      if (!wordText || rect.width <= 0 || rect.height <= 0) {
+        return;
+      }
+
+      const relLeft = rect.left - headingRect.left;
+      const relTop = rect.top - headingRect.top;
+      const relBottom = rect.bottom - headingRect.top;
+      const lastLine = lines[lines.length - 1];
+
+      if (
+        lastLine &&
+        Math.abs(relTop - lastLine.topSum / lastLine.count) < rect.height * 0.55
+      ) {
+        lastLine.words.push(wordText);
+        lastLine.minLeft = Math.min(lastLine.minLeft, relLeft);
+        lastLine.topSum += relTop;
+        lastLine.bottomSum += relBottom;
+        lastLine.count += 1;
+      } else {
+        lines.push({
+          words: [wordText],
+          minLeft: relLeft,
+          topSum: relTop,
+          bottomSum: relBottom,
+          count: 1,
+        });
+      }
+    });
+
+    if (lines.length > 0) {
+      return lines.map((line) => ({
+        text: line.words.join(' '),
+        left: line.minLeft,
+        midY: (line.topSum + line.bottomSum) / (2 * line.count),
+      }));
+    }
+  }
+
   const textNode = headingEl.firstChild;
   if (!textNode || textNode.nodeType !== Node.TEXT_NODE) {
     return [
@@ -321,8 +373,10 @@ function buildCardParticleCloud(
 
   const computed = window.getComputedStyle(headingEl);
   const fontSize = parseFloat(computed.fontSize) || 18;
-  const fontWeight = computed.fontWeight || '600';
+  const fontWeight = computed.fontWeight || '400';
+  const fontFamily = computed.fontFamily || '"Bebas Neue", sans-serif';
   const letterSpacing = computed.letterSpacing;
+  const isUppercase = computed.textTransform === 'uppercase';
 
   const lines = measureHeadingLines(headingEl);
   const sampleScale = 2;
@@ -342,7 +396,7 @@ function buildCardParticleCloud(
     ctx.fillStyle = '#ffffff';
     ctx.textAlign = 'left';
     ctx.textBaseline = 'middle';
-    ctx.font = `${fontWeight} ${fontSize * sampleScale}px "Oxanium", sans-serif`;
+    ctx.font = `${fontWeight} ${fontSize * sampleScale}px ${fontFamily}`;
 
     if ('letterSpacing' in ctx && letterSpacing && letterSpacing !== 'normal') {
       const numericSpacing = parseFloat(letterSpacing);
@@ -355,13 +409,17 @@ function buildCardParticleCloud(
     if (lines.length > 0) {
       for (const line of lines) {
         ctx.fillText(
-          line.text,
+          isUppercase ? line.text.toUpperCase() : line.text,
           line.left * sampleScale,
           line.midY * sampleScale,
         );
       }
     } else {
-      ctx.fillText(title, 0, (headingBoxH * sampleScale) / 2);
+      ctx.fillText(
+        isUppercase ? title.toUpperCase() : title,
+        0,
+        (headingBoxH * sampleScale) / 2,
+      );
     }
 
     const img = ctx.getImageData(0, 0, offscreen.width, offscreen.height).data;
@@ -1232,12 +1290,13 @@ export const StatementCard = memo(function StatementCard({
       data-statement-phase={phase}
       className="relative mx-auto w-full scroll-mt-24 border-t border-b border-white/[0.08] py-16 sm:py-20"
     >
-      <div
-        ref={cardRef}
-        onPointerMove={handleCardPointerMove}
-        onPointerLeave={handleCardPointerLeave}
-        className="relative overflow-hidden text-start"
-      >
+      <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div
+          ref={cardRef}
+          onPointerMove={handleCardPointerMove}
+          onPointerLeave={handleCardPointerLeave}
+          className="relative overflow-hidden text-start"
+        >
         <span
           aria-hidden="true"
           style={{'--tick-delay': '3s'} as CSSProperties}
@@ -1286,15 +1345,20 @@ export const StatementCard = memo(function StatementCard({
           }}
         />
 
-        <div className="relative z-[1] flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <h2
+        <div className="relative z-[1] flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <KineticHeadline
+            as="h2"
             id="statement-heading"
-            ref={headingRef}
+            headingRef={headingRef}
+            text={title}
+            triggerReady={
+              phase === 'cover-dissolve' ||
+              phase === 'text-reveal' ||
+              phase === 'revealed'
+            }
             style={{opacity: headingOpacity}}
-            className="font-display-heading relative text-base font-semibold text-[var(--text-primary)] sm:text-lg"
-          >
-            {title}
-          </h2>
+            className="relative text-2xl text-[var(--text-primary)] sm:text-3xl lg:text-[2.5rem]"
+          />
 
           <button
             type="button"
@@ -1353,6 +1417,7 @@ export const StatementCard = memo(function StatementCard({
               </div>
             </div>
           ) : null}
+        </div>
         </div>
       </div>
     </section>

@@ -1,6 +1,7 @@
 import {useEffect, useMemo, useState} from 'react';
 import {Folder} from 'lucide-react';
 import {EmptyStateCard} from '../components/EmptyStateCard';
+import {KineticHeadline} from '../components/KineticHeadline';
 import {PaperCard} from '../components/PaperCard';
 import {ScrollReveal} from '../components/ScrollReveal';
 import {siteCopy} from '../data/siteConfig';
@@ -58,11 +59,11 @@ export function QrbLabPage() {
               className="h-px flex-1 bg-[var(--border-hairline)]"
             />
           </ScrollReveal>
-          <ScrollReveal staggerIndex={1}>
-            <h1 className="font-display-hero normal-case mt-2 text-3xl font-bold text-[var(--text-primary)] sm:text-4xl">
-              {siteCopy.qrbLab.title}
-            </h1>
-          </ScrollReveal>
+          <KineticHeadline
+            as="h1"
+            text={siteCopy.qrbLab.title}
+            className="mt-2.5 text-4xl text-[var(--text-primary)] sm:text-5xl"
+          />
           <ScrollReveal staggerIndex={2}>
             <p className="font-body-prose normal-case mt-2 max-w-2xl text-sm text-[var(--text-secondary)] sm:text-base">
               {siteCopy.qrbLab.subtitle}

@@ -1,6 +1,7 @@
 import {useMemo, useState} from 'react';
 import {EmptyStateCard} from '../components/EmptyStateCard';
 import {FounderAvatar} from '../components/FounderAvatar';
+import {KineticHeadline} from '../components/KineticHeadline';
 import {LabLogCard} from '../components/LabLogCard';
 import {ScreenshotLightbox} from '../components/ScreenshotLightbox';
 import {ScrollReveal} from '../components/ScrollReveal';
@@ -70,17 +71,19 @@ export function LabLogPage() {
           </div>
 
           {/* Identity Hierarchy Directly Below */}
-          <ScrollReveal staggerIndex={0} className="mt-4">
+          <div className="mt-4">
             <div className="flex items-center gap-2.5">
-              <h1 className="font-display-hero text-2xl font-bold tracking-tight text-[#F5F5F5] sm:text-3xl">
-                qrbqq
-              </h1>
+              <KineticHeadline
+                as="h1"
+                text="qrbqq"
+                className="text-3xl text-[#F5F5F5] sm:text-4xl"
+              />
               <VerifiedBadge size={23} />
             </div>
             <p className="font-mono-tabular mt-1 text-sm text-[#8A8A8A]">
               @qrbqq
             </p>
-          </ScrollReveal>
+          </div>
 
           {/* Clean Concise Bio (Zero unnecessary counter clutter) */}
           <ScrollReveal staggerIndex={1}>
@@ -104,7 +107,7 @@ export function LabLogPage() {
       <div className="h-px w-full bg-white/[0.08]" />
 
       {/* =========================================================================
-          3. CHRONOLOGICAL DISPATCH FEED (Sorted Newest-First)
+          3. UNBOXED CHRONOLOGICAL DISPATCH FEED (1px Hairline Dividers Only)
           ========================================================================= */}
       <div className="mx-auto w-full max-w-3xl px-4 sm:px-6">
         <section aria-label={siteCopy.labLog.title} className="mt-8">
@@ -119,7 +122,7 @@ export function LabLogPage() {
               />
             </ScrollReveal>
           ) : (
-            <div className="space-y-4 sm:space-y-5">
+            <div className="divide-y divide-white/[0.08]">
               {sortedLogs.map((entry, index) => (
                 <ScrollReveal
                   key={entry.id}

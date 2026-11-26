@@ -6,8 +6,19 @@ interface ArchitecturalFrameProps {
   children: ReactNode;
   livingBorder?: boolean;
   compact?: boolean;
+  spacing?: 'default' | 'compact' | 'preview' | 'editorial';
   className?: string;
 }
+
+const SPACING_CLASSES: Record<
+  NonNullable<ArchitecturalFrameProps['spacing']>,
+  string
+> = {
+  compact: 'py-14 sm:py-20',
+  default: 'py-20 sm:py-28',
+  preview: 'py-20 md:py-24',
+  editorial: 'py-24 md:py-32',
+};
 
 export function ArchitecturalFrame({
   id,
@@ -15,9 +26,11 @@ export function ArchitecturalFrame({
   children,
   livingBorder = false,
   compact = false,
+  spacing,
   className = '',
 }: ArchitecturalFrameProps) {
-  const paddingClass = compact ? 'py-14 sm:py-20' : 'py-20 sm:py-28';
+  const resolvedSpacing = spacing ?? (compact ? 'compact' : 'default');
+  const paddingClass = SPACING_CLASSES[resolvedSpacing];
   return (
     <section
       id={id}

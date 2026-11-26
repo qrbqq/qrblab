@@ -1,5 +1,6 @@
 import {ArrowUpRight} from 'lucide-react';
 import {CoreResearchMatrix} from '../components/CoreResearchMatrix';
+import {KineticHeadline} from '../components/KineticHeadline';
 import {ScrollReveal} from '../components/ScrollReveal';
 import {siteConfig, siteCopy} from '../data/siteConfig';
 import {
@@ -27,11 +28,11 @@ export function AboutPage() {
             className="h-px flex-1 bg-[var(--border-hairline)]"
           />
         </ScrollReveal>
-        <ScrollReveal staggerIndex={1}>
-          <h1 className="font-display-hero mt-2 text-3xl font-bold text-[var(--text-primary)] sm:text-4xl">
-            {siteCopy.about.title}
-          </h1>
-        </ScrollReveal>
+        <KineticHeadline
+          as="h1"
+          text={siteCopy.about.title}
+          className="mt-2.5 text-4xl text-[var(--text-primary)] sm:text-5xl"
+        />
         <ScrollReveal staggerIndex={2}>
           <p className="font-body-prose mt-2 max-w-2xl text-sm text-[var(--text-secondary)] sm:text-base">
             {siteCopy.about.subtitle}
@@ -40,14 +41,12 @@ export function AboutPage() {
       </header>
 
       <section aria-labelledby="about-statement-heading" className="border-t border-white/[0.08] py-16 sm:py-20">
-        <ScrollReveal staggerIndex={0}>
-          <h2
-            id="about-statement-heading"
-            className="font-display-heading text-xl font-semibold text-[var(--text-primary)] sm:text-2xl"
-          >
-            {statementTitle}
-          </h2>
-        </ScrollReveal>
+        <KineticHeadline
+          as="h2"
+          id="about-statement-heading"
+          text={statementTitle}
+          className="text-3xl text-[var(--text-primary)] sm:text-4xl"
+        />
         <div className="font-body-prose mt-6 max-w-3xl space-y-4 text-sm text-[var(--text-secondary)] sm:text-base">
           {paragraphs.map((paragraph, index) => (
             <ScrollReveal
@@ -77,18 +76,18 @@ export function AboutPage() {
       {activeChannels.length > 0 ? (
         <section className="border-t border-white/[0.08] py-16 sm:py-20" aria-labelledby="about-channels-heading">
           <div className="mb-8">
-            <ScrollReveal staggerIndex={0} className="flex items-center gap-3">
-              <h2
+            <div className="flex items-center gap-4">
+              <KineticHeadline
+                as="h2"
                 id="about-channels-heading"
-                className="font-display-heading shrink-0 text-2xl font-semibold text-[var(--text-primary)]"
-              >
-                {siteCopy.about.channelsHeading}
-              </h2>
+                text={siteCopy.about.channelsHeading}
+                className="shrink-0 text-3xl text-[var(--text-primary)] sm:text-4xl"
+              />
               <span
                 aria-hidden="true"
                 className="h-px flex-1 bg-[var(--border-hairline)]"
               />
-            </ScrollReveal>
+            </div>
             <ScrollReveal staggerIndex={1}>
               <p className="font-body-prose mt-1.5 text-sm text-[var(--text-secondary)]">
                 {siteCopy.about.channelsSubheading}
@@ -96,7 +95,7 @@ export function AboutPage() {
             </ScrollReveal>
           </div>
 
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
             {activeChannels.map((channel, index) => {
               const label =
                 channel.key === 'email'
@@ -115,7 +114,7 @@ export function AboutPage() {
                     href={channel.href}
                     target={isEmail ? undefined : '_blank'}
                     rel={isEmail ? undefined : 'noopener noreferrer'}
-                    className="rounded-sm border border-white/[0.08] bg-[var(--bg-surface)] group flex h-full min-h-[76px] items-center justify-between gap-4 p-5 transition-colors hover:border-white/20 hover:bg-[var(--bg-surface-hover)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--focus-ring)]"
+                    className="group flex h-full min-h-[72px] items-center justify-between gap-4 border-t border-white/[0.08] py-5 transition-colors hover:border-white/30 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--focus-ring)]"
                   >
                     <div className="min-w-0">
                       <div className="flex items-center gap-2">
@@ -135,7 +134,7 @@ export function AboutPage() {
                       </p>
                     </div>
                     <ArrowUpRight
-                      className="h-4 w-4 shrink-0 text-[var(--text-secondary)] transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+                      className="h-4 w-4 shrink-0 text-[var(--text-secondary)] transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-[var(--text-primary)]"
                       strokeWidth={1.75}
                     />
                   </a>

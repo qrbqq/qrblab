@@ -5,7 +5,8 @@ export type HomeSectionId =
   | 'overview'
   | 'statement'
   | 'lab-log'
-  | 'publications';
+  | 'publications'
+  | 'methodology';
 
 const SECTION_ORDER: Array<{
   id: HomeSectionId;
@@ -16,6 +17,7 @@ const SECTION_ORDER: Array<{
   {id: 'statement', code: '01', labelKey: 'statement'},
   {id: 'lab-log', code: '02', labelKey: 'labLog'},
   {id: 'publications', code: '03', labelKey: 'publications'},
+  {id: 'methodology', code: '04', labelKey: 'methodology'},
 ];
 
 export const HomeSectionTracker = memo(function HomeSectionTracker() {
@@ -29,7 +31,7 @@ export const HomeSectionTracker = memo(function HomeSectionTracker() {
         document.documentElement.scrollHeight - 40;
 
       if (docBottom) {
-        setActiveSection('publications');
+        setActiveSection('methodology');
         return;
       }
 

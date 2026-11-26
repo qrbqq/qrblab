@@ -28,7 +28,15 @@ export function Navbar({activePathname}: NavbarProps) {
 
   const [introHidden, setIntroHidden] = useState(() => {
     if (typeof window === 'undefined') return false;
-    return currentPath === '/' && !hasIntroPlayedInMemory() && !prefersReducedMotion();
+    const isAutostart =
+      window.location.search.includes('autostart=1') ||
+      window.location.hash.includes('autostart=1');
+    return (
+      currentPath === '/' &&
+      !hasIntroPlayedInMemory() &&
+      !prefersReducedMotion() &&
+      !isAutostart
+    );
   });
 
   const logoSrc = resolveAssetUrl('images/logo.png', import.meta.env.BASE_URL);
@@ -38,11 +46,15 @@ export function Navbar({activePathname}: NavbarProps) {
   }, [location.pathname]);
 
   useEffect(() => {
+    const isAutostart =
+      typeof window !== 'undefined' &&
+      (window.location.search.includes('autostart=1') ||
+        window.location.hash.includes('autostart=1'));
     if (currentPath !== '/') {
       setIntroHidden(false);
       return;
     }
-    if (hasIntroPlayedInMemory() || prefersReducedMotion()) {
+    if (hasIntroPlayedInMemory() || prefersReducedMotion() || isAutostart) {
       setIntroHidden(false);
       return;
     }

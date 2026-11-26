@@ -13,6 +13,15 @@ export function sortLabLogsDesc(entries: readonly LabLogEntry[]): LabLogEntry[] 
   });
 }
 
+export const HOME_LAB_LOG_PREVIEW_LIMIT = 3;
+
+export function getLatestLabLogs(
+  entries: readonly LabLogEntry[],
+  limit = HOME_LAB_LOG_PREVIEW_LIMIT,
+): LabLogEntry[] {
+  return sortLabLogsDesc(entries).slice(0, Math.max(0, limit));
+}
+
 export function getLatestLabLog(entries: readonly LabLogEntry[]): LabLogEntry | null {
   if (entries.length === 0) {
     return null;

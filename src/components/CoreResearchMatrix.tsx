@@ -1,6 +1,6 @@
 import {siteCopy} from '../data/siteConfig';
-import {handleSpotlightMouseMove} from '../hooks/useScrollReveal';
 import {ArchitecturalFrame} from './ArchitecturalFrame';
+import {KineticHeadline} from './KineticHeadline';
 import {ScrollReveal} from './ScrollReveal';
 
 interface CoreResearchMatrixProps {
@@ -25,7 +25,7 @@ export function CoreResearchMatrix({
       livingBorder={animated}
     >
       <div>
-        <div className="mb-6 flex flex-col gap-2 sm:mb-8">
+        <div className="mb-8 flex flex-col gap-2 sm:mb-10">
           <ScrollReveal staggerIndex={0} className="flex items-center gap-3">
             <p className="font-mono-tabular shrink-0 text-[11px] font-medium tracking-[0.12em] text-[var(--text-eyebrow)]">
               {eyebrow}
@@ -37,11 +37,11 @@ export function CoreResearchMatrix({
           </ScrollReveal>
 
           {heading ? (
-            <ScrollReveal staggerIndex={1}>
-              <h2 className="font-display-heading text-2xl font-semibold text-[var(--text-primary)]">
-                {heading}
-              </h2>
-            </ScrollReveal>
+            <KineticHeadline
+              as="h2"
+              text={heading}
+              className="text-3xl text-[var(--text-primary)] sm:text-4xl"
+            />
           ) : null}
 
           {subheading ? (
@@ -53,35 +53,22 @@ export function CoreResearchMatrix({
           ) : null}
         </div>
 
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 lg:gap-5">
+        <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4 lg:gap-8">
           {siteCopy.about.focusAreas.map((area, index) => (
             <ScrollReveal
               key={area.id}
               staggerIndex={index % 4}
               className="h-full"
             >
-              <div
-                onMouseMove={animated ? handleSpotlightMouseMove : undefined}
-                className={`rounded-sm border border-white/[0.08] bg-[var(--bg-surface)] group flex h-full flex-col justify-between p-5 sm:p-6 ${
-                  animated ? 'home-spotlight-card' : 'glass-card-interactive'
-                }`}
-              >
-                <div className="relative z-10">
+              <div className="group flex h-full flex-col justify-between border-t border-white/[0.08] pt-5">
+                <div>
                   <div className="flex items-center gap-2.5">
-                    <span
-                      className={`font-mono-tabular text-xs font-semibold tracking-wider text-[var(--text-secondary)] ${
-                        animated ? 'home-card-code' : ''
-                      }`}
-                    >
+                    <span className="font-mono-tabular text-xs font-semibold tracking-wider text-[var(--text-eyebrow)] transition-colors group-hover:text-[var(--text-primary)]">
                       {area.code}
                     </span>
-                    <span
-                      aria-hidden="true"
-                      className="h-px flex-1 bg-[var(--border-hairline)]"
-                    />
                   </div>
 
-                  <h3 className="font-display-card mt-4 text-base font-bold text-[var(--text-primary)]">
+                  <h3 className="font-display-card mt-3 text-base font-bold text-[var(--text-primary)]">
                     {area.title}
                   </h3>
 
