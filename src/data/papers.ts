@@ -27,101 +27,48 @@ export interface ResearchPaper {
   explanation: LocalizedText;
   abstract?: LocalizedText;
   authors: string[];
-  publishedDate: string; // ISO date string: YYYY-MM-DD
+  publishedDate: string;
   version: string;
   category: LocalizedText;
   tags: string[];
-  pdfPath: string; // Relative to public/, e.g. "papers/my-paper.pdf"
-  thumbnail?: string; // Relative to public/, e.g. "images/my-paper-thumb.png"
-  previewImages?: string[]; // Relative to public/, e.g. ["images/page-1.png", "images/page-2.png"]
+  pdfPath: string;
+  thumbnail?: string;
+  previewImages?: string[];
   doi?: string;
   highlights?: LocalizedList;
 }
 
-/**
- * Publishing Template for qrblab (takes under 2 minutes on GitHub):
- * 1. Upload your PDF to `public/papers/` and images to `public/images/`.
- * 2. Copy the template object below into the `papers` array (`fr`, `de`, `es` are optional and fall back cleanly to `en`).
- * 3. Commit and push to `main` — GitHub Actions builds and deploys automatically.
- *
- * {
- *   id: "qrblab-2026-001",
- *   slug: "field-oriented-control-bldc-actuator",
- *   title: {
- *     en: "High-Bandwidth Field-Oriented Control for Compact BLDC Actuators",
- *     ar: "التحكم الموجه بالمجال عالي النطاق الترددي لمشغلات المحركات عديمة الفرش المدمجة",
- *   },
- *   shortDescription: {
- *     en: "Concise 1-2 sentence overview displayed on research cards and search results.",
- *     ar: "ملخص موجز من جملة إلى جملتين يظهر على بطاقات الأبحاث ونتائج البحث.",
- *   },
- *   explanation: {
- *     en: "Deep technical explanation covering methodology, math, testbench architecture, and empirical observations.",
- *     ar: "شرح تقني معمق يغطي المنهجية والمعادلات وبنية منصة الاختبار والملاحظات التجريبية.",
- *   },
- *   thumbnail: "images/field-oriented-control-thumb.png",
- *   previewImages: [
- *     "images/field-oriented-control-p1.png",
- *     "images/field-oriented-control-p2.png",
- *   ],
- *   pdfPath: "papers/field-oriented-control-bldc-actuator.pdf",
- *   authors: ["Author Name"],
- *   publishedDate: "2026-05-14",
- *   version: "v1.0",
- *   category: {
- *     en: "Mechatronics",
- *     ar: "الميكاترونيكس",
- *   },
- *   tags: ["BLDC", "FOC", "Robotics"],
- *   doi: "10.0000/qrblab.2026.001",
- *   highlights: {
- *     en: [
- *       "Key engineering contribution or experimental result.",
- *       "Second verifiable technical takeaway.",
- *     ],
- *     ar: [
- *       "المساهمة الهندسية الرئيسية أو النتيجة التجريبية.",
- *       "الاستنتاج التقني الثاني القابل للتحقق.",
- *     ],
- *   },
- * }
- */
 export const papers: ResearchPaper[] = [
   {
-    id: "qrb-2017-001",
+    id: "qrb-20261126-111721",
     slug: "attention-is-all-you-need",
     title: {
       en: "Attention Is All You Need",
-      ar: "الانتباه هو كل ما تحتاجه (معمارية المحولات)",
+      ar: "Attention Is All You Need",
+    },
+    shortDescription: {
+      en: "The foundational paper introducing the Transformer architecture, a sequence transduction model built solely on self-attention mechanisms without recurrence or convolutions. It achieves higher parallelization, faster training, and state-of-the-art machine translation performance.",
+      ar: "The foundational paper introducing the Transformer architecture, a sequence transduction model built solely on self-attention mechanisms without recurrence or convolutions. It achieves higher parallelization, faster training, and state-of-the-art machine translation performance.",
     },
     abstract: {
-      en: "The foundational research paper proposing the Transformer architecture, replacing recurrent and convolutional layers entirely with self-attention mechanisms.",
-      ar: "الورقة البحثية التأسيسية التي اقترحت معمارية المحولات التوليدية، مستبدلة الشبكات العصبية المتكررة بالكامل بآليات الانتباه الذاتي.",
+      en: "The foundational paper introducing the Transformer architecture, a sequence transduction model built solely on self-attention mechanisms without recurrence or convolutions. It achieves higher parallelization, faster training, and state-of-the-art machine translation performance.",
+      ar: "The foundational paper introducing the Transformer architecture, a sequence transduction model built solely on self-attention mechanisms without recurrence or convolutions. It achieves higher parallelization, faster training, and state-of-the-art machine translation performance.",
     },
     explanation: {
-      en: "A comprehensive breakdown of multi-head self-attention, positional encoding, and feed-forward networks that revolutionized modern deep learning and large language models.",
-      ar: "شرح تفصيلي لآليات الانتباه المتعدد الرؤوس، والترميز الموضعي، والشبكات الأمامية التي أحدثت ثورة في التعلم العميق ونماذج اللغة الكبيرة الحديثة.",
+      en: "This paper introduces the Transformer, an encoder-decoder neural architecture that completely replaces recurrent (RNN/LSTM) and convolutional layers with attention mechanisms to model global sequence dependencies directly in constant sequential operations.\n\nKey Architectural Components:\n1. Scaled Dot-Product & Multi-Head Attention: Queries, keys, and values are linearly projected into parallel attention heads (h = 8, d_k = d_v = 64 for d_model = 512), enabling the model to jointly attend to information across different representation subspaces and positions.\n2. Encoder & Decoder Stacks: Six identical encoder layers (multi-head self-attention + position-wise feed-forward network) paired with six decoder layers that add masked self-attention to preserve auto-regressive generation and cross-attention over encoder outputs. Residual connections and layer normalization wrap every sub-layer.\n3. Position-Wise Feed-Forward Networks & Positional Encoding: Each layer applies two linear transformations with ReLU activation (d_ff = 2048), while sinusoidal positional encodings inject sequence order without recurrence.\n\nEmpirical Results (WMT 2014 & Generalization):\n- Achieved 28.4 BLEU on WMT 2014 English-to-German and 41.8 BLEU on English-to-French (single model trained in 3.5 days on 8 P100 GPUs), outperforming prior recurrent and convolutional ensembles at a fraction of the training cost.\n- Generalized effectively beyond translation to English constituency parsing (91.3 F1 WSJ-only, 92.7 F1 semi-supervised).",
+      ar: "This paper introduces the Transformer, an encoder-decoder neural architecture that completely replaces recurrent (RNN/LSTM) and convolutional layers with attention mechanisms to model global sequence dependencies directly in constant sequential operations.\n\nKey Architectural Components:\n1. Scaled Dot-Product & Multi-Head Attention: Queries, keys, and values are linearly projected into parallel attention heads (h = 8, d_k = d_v = 64 for d_model = 512), enabling the model to jointly attend to information across different representation subspaces and positions.\n2. Encoder & Decoder Stacks: Six identical encoder layers (multi-head self-attention + position-wise feed-forward network) paired with six decoder layers that add masked self-attention to preserve auto-regressive generation and cross-attention over encoder outputs. Residual connections and layer normalization wrap every sub-layer.\n3. Position-Wise Feed-Forward Networks & Positional Encoding: Each layer applies two linear transformations with ReLU activation (d_ff = 2048), while sinusoidal positional encodings inject sequence order without recurrence.\n\nEmpirical Results (WMT 2014 & Generalization):\n- Achieved 28.4 BLEU on WMT 2014 English-to-German and 41.8 BLEU on English-to-French (single model trained in 3.5 days on 8 P100 GPUs), outperforming prior recurrent and convolutional ensembles at a fraction of the training cost.\n- Generalized effectively beyond translation to English constituency parsing (91.3 F1 WSJ-only, 92.7 F1 semi-supervised).",
     },
-    authors: [
-      "Ashish Vaswani",
-      "Noam Shazeer",
-      "Niki Parmar",
-      "Jakob Uszkoreit",
-      "Llion Jones",
-      "Aidan N. Gomez",
-      "Łukasz Kaiser",
-      "Illia Polosukhin",
-    ],
+    authors: ["Ashish Vaswani", "Noam Shazeer", "Niki Parmar", "Jakob Uszkoreit", "Llion Jones", "Aidan N. Gomez", "Łukasz Kaiser", "Illia Polosukhin"],
     publishedDate: "2017-06-12",
     version: "v1.0",
     category: {
       en: "Artificial Intelligence",
-      ar: "الذكاء الاصطناعي",
+      ar: "Artificial Intelligence",
     },
-    tags: ["Transformer", "Self-Attention", "Deep Learning", "NLP"],
-    pdfPath: "papers/attention-is-all-you-need.pdf.pdf",
-    thumbnail: "",
-    previewImages: [],
+    tags: ["Transformer", "Self-Attention", "Multi-Head Attention", "Deep Learning", "NLP"],
+    pdfPath: "papers/attention-is-all-you-need.pdf",
+    thumbnail: "images/attention-is-all-you-need-poster.jpg",
+    previewImages: ["images/attention-is-all-you-need-p1.png", "images/attention-is-all-you-need-p2.png", "images/attention-is-all-you-need-p3.png"],
     doi: "10.48550/arXiv.1706.03762",
-  },
+  }
 ];
