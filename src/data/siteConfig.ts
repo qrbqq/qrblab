@@ -199,6 +199,8 @@ export interface SiteCopy {
  * the UI omits unconfigured channels and falls back cleanly when profileAvatar is empty.
  */
 export const siteConfig: SiteConfig = {
+  handle: "@AbdoAhmed",
+  displayName: "AbdoAhmed",
   brandName: 'qrblab',
   profileAvatar: '',
   tagline: {
