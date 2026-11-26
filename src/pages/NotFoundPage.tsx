@@ -1,7 +1,7 @@
 import {Link} from 'react-router-dom';
 import {ArrowLeft} from 'lucide-react';
 import {ScrollReveal} from '../components/ScrollReveal';
-import {siteCopy} from '../data/i18n';
+import {siteCopy} from '../data/siteConfig';
 
 export function NotFoundPage() {
   return (

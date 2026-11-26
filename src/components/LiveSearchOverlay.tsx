@@ -7,7 +7,7 @@ import {
 } from 'react';
 import {useNavigate} from 'react-router-dom';
 import {ArrowRight, FileText, Folder, Search, X} from 'lucide-react';
-import {siteCopy} from '../data/i18n';
+import {siteCopy} from '../data/siteConfig';
 import {papers} from '../data/papers';
 import {formatPaperDate, resolveAssetUrl} from '../utils/papers';
 import {searchPapers} from '../utils/search';

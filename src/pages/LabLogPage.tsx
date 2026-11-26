@@ -5,7 +5,7 @@ import {LabLogCard} from '../components/LabLogCard';
 import {ScreenshotLightbox} from '../components/ScreenshotLightbox';
 import {ScrollReveal} from '../components/ScrollReveal';
 import {VerifiedBadge} from '../components/VerifiedBadge';
-import {siteCopy} from '../data/i18n';
+import {siteCopy} from '../data/siteConfig';
 import {labLogs} from '../data/labLog';
 import {sortLabLogsDesc} from '../utils/labLog';
 

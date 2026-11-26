@@ -13,10 +13,4 @@ export interface LabLogEntry {
   tags?: string[];
 }
 
-export const labLogs: LabLogEntry[] = [
-  {
-    id: "log-20261126-120111",
-    timestamp: "2026-11-26T12:01:11Z",
-    caption: "البداية",
-  }
-];
+export const labLogs: LabLogEntry[] = [];

@@ -1,6 +1,6 @@
 import {useState} from 'react';
 import {Star} from 'lucide-react';
-import {siteCopy} from '../data/i18n';
+import {siteCopy} from '../data/siteConfig';
 
 interface StarRatingProps {
   value: number | null;

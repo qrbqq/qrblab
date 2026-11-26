@@ -1,9 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {siteCopy} from '../data/i18n';
 import type {ResearchPaper} from '../data/papers';
 import {papers} from '../data/papers';
-import {siteConfig} from '../data/siteConfig';
+import {siteConfig, siteCopy} from '../data/siteConfig';
 import {
   extractCategories,
   extractFolders,
@@ -106,6 +105,7 @@ function createMemoryStorage(): StorageLike & {dump: () => Map<string, string>} 
 test('production papers array starts empty and siteConfig preserves qrblab 7-paragraph English statement', () => {
   assert.equal(papers.length, 0);
   assert.equal(siteConfig.brandName, 'qrblab');
+  assert.equal(siteConfig.profileAvatar, '');
   const paragraphs = getLocalizedList(siteConfig.projectStatement.paragraphs);
   assert.equal(paragraphs.length, 7);
   assert.ok(getLocalizedText(siteConfig.projectStatement.title).length > 0);
@@ -183,9 +183,10 @@ test('findPaperBySlug locates exact slug or returns undefined', () => {
   assert.equal(findPaperBySlug(sampleFixtures, 'missing'), undefined);
 });
 
-test('resolveAssetUrl handles relative, root-relative, and subpath GitHub Pages bases', () => {
+test('resolveAssetUrl handles relative, root-relative, subpath GitHub Pages bases, and blocks unsafe injection schemes', () => {
   assert.equal(resolveAssetUrl('papers/doc.pdf', './'), './papers/doc.pdf');
   assert.equal(resolveAssetUrl('/papers/doc.pdf', './'), './papers/doc.pdf');
+  assert.equal(resolveAssetUrl('./papers/doc.pdf', './'), './papers/doc.pdf');
   assert.equal(
     resolveAssetUrl('papers/doc.pdf', '/qrblab/'),
     '/qrblab/papers/doc.pdf',
@@ -194,6 +195,12 @@ test('resolveAssetUrl handles relative, root-relative, and subpath GitHub Pages 
     resolveAssetUrl('https://example.org/doc.pdf', './'),
     'https://example.org/doc.pdf',
   );
+  assert.equal(resolveAssetUrl('javascript:alert(1)', './'), '');
+  assert.equal(resolveAssetUrl('java\nscript:alert(1)', './'), '');
+  assert.equal(resolveAssetUrl('data:text/html,<script>alert(1)</script>', './'), '');
+  assert.equal(resolveAssetUrl('vbscript:msgbox(1)', './'), '');
+  assert.equal(resolveAssetUrl('//evil.example.com/payload.pdf', './'), '');
+  assert.equal(resolveAssetUrl('../../etc/passwd', './'), '');
 });
 
 test('citation formatters emit plain text and BibTeX with qrblab attribution', () => {
@@ -208,16 +215,16 @@ test('citation formatters emit plain text and BibTeX with qrblab attribution', (
   assert.ok(!bibtex.includes('doi ='));
 });
 
-test('getActiveChannels filters out empty strings and builds mailto href', () => {
+test('getActiveChannels filters out empty strings, blocks unsafe social URLs, and builds mailto href', () => {
   const channels = getActiveChannels({
     ...siteConfig,
     contactEmail: 'hello@qrblab.org',
     socialLinks: {
       github: 'https://github.com/qrblab',
-      discord: '',
+      discord: 'javascript:alert(1)',
       instagram: 'https://instagram.com/qrblab',
       x: 'https://x.com/qrblab',
-      website: '',
+      website: 'data:text/html,xss',
     },
   });
 

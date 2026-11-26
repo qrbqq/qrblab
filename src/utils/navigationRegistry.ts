@@ -1,6 +1,6 @@
 import {papers, type ResearchPaper} from '../data/papers';
 import {labLogs, type LabLogEntry} from '../data/labLog';
-import {siteCopy} from '../data/i18n';
+import {siteCopy} from '../data/siteConfig';
 
 export interface DynamicContentSection {
   id: string;

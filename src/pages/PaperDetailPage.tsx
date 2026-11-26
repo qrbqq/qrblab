@@ -16,9 +16,8 @@ import {ScreenshotLightbox} from '../components/ScreenshotLightbox';
 import {ScrollReveal} from '../components/ScrollReveal';
 import {StarRating} from '../components/StarRating';
 import {Toast, type ToastMessage} from '../components/Toast';
-import {siteCopy} from '../data/i18n';
 import {papers} from '../data/papers';
-import {siteConfig} from '../data/siteConfig';
+import {siteConfig, siteCopy} from '../data/siteConfig';
 import {
   findPaperBySlug,
   formatBibtexCitation,
@@ -228,43 +227,45 @@ export function PaperDetailPage() {
 
             {/* Action Zone: Prominent Tactile Monochrome Download Button & Secondary Controls (Zero Blue/Green!) */}
             <div className="mt-6 flex flex-col gap-4 border-t border-white/[0.08] pt-6">
-              <div className="flex flex-wrap items-center gap-3">
-                {/* Prominent High-Contrast Monochrome Download PDF Button (Crisp #F5F5F5, dark #050505 text, NO GREEN!) */}
-                <a
-                  href={pdfUrl}
-                  download
-                  className="inline-flex min-h-[46px] items-center justify-center gap-2.5 rounded-xl bg-[#F5F5F5] px-6 py-2.5 text-sm font-semibold text-[#050505] shadow-sm transition-all duration-200 hover:bg-white active:scale-[0.985] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
-                >
-                  <Download className="h-4 w-4" strokeWidth={2} />
-                  <span>{siteCopy.paperDetail.downloadPdf}</span>
-                </a>
+              {pdfUrl ? (
+                <div className="flex flex-wrap items-center gap-3">
+                  {/* Prominent High-Contrast Monochrome Download PDF Button (Crisp #F5F5F5, dark #050505 text, NO GREEN!) */}
+                  <a
+                    href={pdfUrl}
+                    download
+                    className="inline-flex min-h-[46px] items-center justify-center gap-2.5 rounded-xl bg-[#F5F5F5] px-6 py-2.5 text-sm font-semibold text-[#050505] shadow-sm transition-all duration-200 hover:bg-white active:scale-[0.985] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+                  >
+                    <Download className="h-4 w-4" strokeWidth={2} />
+                    <span>{siteCopy.paperDetail.downloadPdf}</span>
+                  </a>
 
-                {/* View Inside Page (Neutral Frosted Glass, NO BLUE!) */}
-                <button
-                  type="button"
-                  onClick={() => setShowInlinePdf((prev) => !prev)}
-                  aria-expanded={showInlinePdf}
-                  className="inline-flex min-h-[46px] items-center justify-center gap-2 rounded-xl border border-white/[0.16] bg-white/[0.06] px-4 py-2.5 text-sm font-medium text-[#F5F5F5] backdrop-blur-sm shadow-xs transition-all duration-200 hover:bg-white/[0.12] hover:border-white/[0.28] active:scale-[0.985] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
-                >
-                  <BookOpen className="h-4 w-4 text-white/80" strokeWidth={1.75} />
-                  <span>
-                    {showInlinePdf
-                      ? siteCopy.paperDetail.hideInsidePage
-                      : siteCopy.paperDetail.viewInsidePage}
-                  </span>
-                </button>
+                  {/* View Inside Page (Neutral Frosted Glass, NO BLUE!) */}
+                  <button
+                    type="button"
+                    onClick={() => setShowInlinePdf((prev) => !prev)}
+                    aria-expanded={showInlinePdf}
+                    className="inline-flex min-h-[46px] items-center justify-center gap-2 rounded-xl border border-white/[0.16] bg-white/[0.06] px-4 py-2.5 text-sm font-medium text-[#F5F5F5] backdrop-blur-sm shadow-xs transition-all duration-200 hover:bg-white/[0.12] hover:border-white/[0.28] active:scale-[0.985] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+                  >
+                    <BookOpen className="h-4 w-4 text-white/80" strokeWidth={1.75} />
+                    <span>
+                      {showInlinePdf
+                        ? siteCopy.paperDetail.hideInsidePage
+                        : siteCopy.paperDetail.viewInsidePage}
+                    </span>
+                  </button>
 
-                {/* Open In New Tab (Neutral Frosted Glass, NO BLUE!) */}
-                <a
-                  href={pdfUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex min-h-[46px] items-center justify-center gap-2 rounded-xl border border-white/[0.16] bg-white/[0.06] px-4 py-2.5 text-sm font-medium text-[#F5F5F5] backdrop-blur-sm shadow-xs transition-all duration-200 hover:bg-white/[0.12] hover:border-white/[0.28] active:scale-[0.985] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
-                >
-                  <ExternalLink className="h-4 w-4 text-white/80" strokeWidth={1.75} />
-                  <span>{siteCopy.paperDetail.openInNewTab}</span>
-                </a>
-              </div>
+                  {/* Open In New Tab (Neutral Frosted Glass, NO BLUE!) */}
+                  <a
+                    href={pdfUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex min-h-[46px] items-center justify-center gap-2 rounded-xl border border-white/[0.16] bg-white/[0.06] px-4 py-2.5 text-sm font-medium text-[#F5F5F5] backdrop-blur-sm shadow-xs transition-all duration-200 hover:bg-white/[0.12] hover:border-white/[0.28] active:scale-[0.985] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+                  >
+                    <ExternalLink className="h-4 w-4 text-white/80" strokeWidth={1.75} />
+                    <span>{siteCopy.paperDetail.openInNewTab}</span>
+                  </a>
+                </div>
+              ) : null}
 
               {/* Utility Citation Controls & Compact Reader Rating */}
               <div className="flex flex-wrap items-center justify-between gap-3 border-t border-white/[0.06] pt-4">
@@ -326,7 +327,7 @@ export function PaperDetailPage() {
         </section>
 
         {/* Collapsible Embedded Inline PDF Reader */}
-        {showInlinePdf ? (
+        {showInlinePdf && pdfUrl ? (
           <section className="mt-8 overflow-hidden rounded-xl border border-white/[0.12] bg-[#0E0E0E] p-4 sm:p-6">
             <h2 className="font-display-heading mb-4 text-base font-semibold text-[var(--text-primary)]">
               {siteCopy.paperDetail.pdfPreviewHeading}

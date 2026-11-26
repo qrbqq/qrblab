@@ -1,12 +1,12 @@
 import {useEffect, useState} from 'react';
 import {ArrowUpRight, ImageOff, Maximize2} from 'lucide-react';
-import {siteCopy} from '../data/i18n';
 import type {LabLogEntry} from '../data/labLog';
+import {siteCopy} from '../data/siteConfig';
 import {
   formatLabLogTimestamp,
   formatRelativeTime,
   getLabLogCaption,
-  isSafeExternalUrl,
+  sanitizeExternalUrl,
 } from '../utils/labLog';
 import {resolveAssetUrl} from '../utils/papers';
 import {FounderAvatar} from './FounderAvatar';
@@ -39,7 +39,7 @@ export function LabLogCard({
   const imageUrl = entry.image
     ? resolveAssetUrl(entry.image, import.meta.env.BASE_URL)
     : '';
-  const hasSafeSource = isSafeExternalUrl(entry.sourceUrl);
+  const safeSourceUrl = sanitizeExternalUrl(entry.sourceUrl);
 
   return (
     <article
@@ -47,25 +47,22 @@ export function LabLogCard({
         compact ? 'p-4 sm:p-5' : 'p-5 sm:p-6'
       }`}
     >
-      {/* Author Identity Header */}
+      {/* Author Identity Header: @qrbqq + Verified Badge + · {relativeTime} */}
       <div className="flex items-start justify-between gap-3">
         <div className="flex min-w-0 items-center gap-3">
           <FounderAvatar
             sizeClass={compact ? 'h-8 w-8' : 'h-9 w-9'}
             paddingClass={compact ? 'p-1.5' : 'p-1.5'}
             className="border border-white/[0.16]"
-            alt="qrbqq"
+            alt="@qrbqq"
           />
 
           <div className="min-w-0 flex flex-col">
             <div className="flex flex-wrap items-center gap-1.5">
-              <span className="font-display-card text-sm font-bold text-[#F5F5F5]">
-                qrbqq
-              </span>
-              <VerifiedBadge size={18} />
-              <span className="font-mono-tabular text-xs text-[#8A8A8A]">
+              <span className="font-mono-tabular text-sm font-semibold text-[#F5F5F5]">
                 @qrbqq
               </span>
+              <VerifiedBadge size={17} />
               <span aria-hidden="true" className="text-xs text-white/30">
                 ·
               </span>
@@ -80,9 +77,9 @@ export function LabLogCard({
           </div>
         </div>
 
-        {hasSafeSource && entry.sourceUrl ? (
+        {safeSourceUrl ? (
           <a
-            href={entry.sourceUrl}
+            href={safeSourceUrl}
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex min-h-[32px] shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full border border-[var(--border-hairline)] bg-[var(--bg-surface-elevated)] px-3 py-1 text-xs font-medium text-[var(--text-primary)] transition-colors hover:border-[var(--border-strong)] hover:bg-[var(--bg-surface)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--focus-ring)]"

@@ -1,8 +1,7 @@
 import {ArrowUpRight} from 'lucide-react';
 import {CoreResearchMatrix} from '../components/CoreResearchMatrix';
 import {ScrollReveal} from '../components/ScrollReveal';
-import {siteCopy} from '../data/i18n';
-import {siteConfig} from '../data/siteConfig';
+import {siteConfig, siteCopy} from '../data/siteConfig';
 import {
   getActiveChannels,
   getLocalizedList,

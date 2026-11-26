@@ -5,7 +5,7 @@ import {
 } from 'react';
 import {Link, useLocation} from 'react-router-dom';
 import {Search, User} from 'lucide-react';
-import {siteCopy} from '../data/i18n';
+import {siteCopy} from '../data/siteConfig';
 import {resolveAssetUrl} from '../utils/papers';
 import {LiveSearchOverlay} from './LiveSearchOverlay';
 import {SmartNavMenu} from './SmartNavMenu';

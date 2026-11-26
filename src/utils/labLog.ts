@@ -1,5 +1,6 @@
 import type {LabLogEntry} from '../data/labLog';
 import {getLocalizedText} from './papers';
+export {isSafeExternalUrl, sanitizeExternalUrl} from './url';
 
 export function sortLabLogsDesc(entries: readonly LabLogEntry[]): LabLogEntry[] {
   return [...entries].sort((a, b) => {
@@ -97,20 +98,4 @@ export function formatRelativeTime(
 
   const years = Math.floor(diffDays / 365);
   return `${years}y ago`;
-}
-
-export function isSafeExternalUrl(rawUrl: string | undefined): boolean {
-  if (!rawUrl) {
-    return false;
-  }
-  const trimmed = rawUrl.trim();
-  if (!trimmed) {
-    return false;
-  }
-  try {
-    const parsed = new URL(trimmed);
-    return parsed.protocol === 'https:' || parsed.protocol === 'http:';
-  } catch {
-    return false;
-  }
 }

@@ -1,4 +1,4 @@
-import {siteCopy} from '../data/i18n';
+import {siteCopy} from '../data/siteConfig';
 import {handleSpotlightMouseMove} from '../hooks/useScrollReveal';
 import {ArchitecturalFrame} from './ArchitecturalFrame';
 import {ScrollReveal} from './ScrollReveal';

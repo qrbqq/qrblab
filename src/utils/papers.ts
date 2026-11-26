@@ -4,6 +4,11 @@ import type {
   ResearchPaper,
 } from '../data/papers';
 import type {SiteConfig} from '../data/siteConfig';
+import {
+  isSafeExternalUrl,
+  isValidEmailAddress,
+  sanitizeSafeUrl,
+} from './url';
 
 export interface ActiveChannel {
   key: 'email' | 'github' | 'discord' | 'instagram' | 'x' | 'website';
@@ -172,16 +177,7 @@ export function findPaperBySlug(
 }
 
 export function resolveAssetUrl(relativePath: string, baseUrl = './'): string {
-  const trimmedPath = relativePath.trim();
-  if (!trimmedPath) {
-    return '';
-  }
-  if (/^(https?:|data:|blob:)/i.test(trimmedPath)) {
-    return trimmedPath;
-  }
-  const cleanBase = baseUrl.endsWith('/') ? baseUrl : `${baseUrl}/`;
-  const cleanPath = trimmedPath.replace(/^\/+/, '');
-  return `${cleanBase}${cleanPath}`;
+  return sanitizeSafeUrl(relativePath, baseUrl);
 }
 
 export function formatPaperDate(isoDate: string): string {
@@ -235,7 +231,7 @@ export function formatBibtexCitation(
 export function getActiveChannels(config: SiteConfig): ActiveChannel[] {
   const channels: ActiveChannel[] = [];
   const email = config.contactEmail.trim();
-  if (email) {
+  if (email && isValidEmailAddress(email)) {
     channels.push({
       key: 'email',
       href: `mailto:${email}`,
@@ -253,7 +249,7 @@ export function getActiveChannels(config: SiteConfig): ActiveChannel[] {
 
   for (const key of socialOrder) {
     const url = config.socialLinks[key].trim();
-    if (url) {
+    if (url && isSafeExternalUrl(url)) {
       channels.push({
         key,
         href: url,

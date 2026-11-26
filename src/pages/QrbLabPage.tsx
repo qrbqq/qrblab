@@ -3,7 +3,7 @@ import {Folder} from 'lucide-react';
 import {EmptyStateCard} from '../components/EmptyStateCard';
 import {PaperCard} from '../components/PaperCard';
 import {ScrollReveal} from '../components/ScrollReveal';
-import {siteCopy} from '../data/i18n';
+import {siteCopy} from '../data/siteConfig';
 import {papers} from '../data/papers';
 import {extractFolders, filterPapers} from '../utils/papers';
 

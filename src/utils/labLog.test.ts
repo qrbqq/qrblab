@@ -8,6 +8,7 @@ import {
   getLabLogCaption,
   getLatestLabLog,
   isSafeExternalUrl,
+  sanitizeExternalUrl,
   sortLabLogsDesc,
 } from './labLog';
 
@@ -92,11 +93,16 @@ test('formatRelativeTime computes accurate buckets from Just now through years a
   assert.equal(formatRelativeTime('not-a-date', now), 'not-a-date');
 });
 
-test('isSafeExternalUrl allows http/https and rejects javascript/data/empty urls', () => {
+test('isSafeExternalUrl and sanitizeExternalUrl allow http/https and reject javascript/data/empty urls', () => {
   assert.equal(isSafeExternalUrl('https://github.com/qrblab'), true);
   assert.equal(isSafeExternalUrl('http://example.org/spec'), true);
   assert.equal(isSafeExternalUrl('javascript:alert(1)'), false);
   assert.equal(isSafeExternalUrl('data:text/html,hi'), false);
   assert.equal(isSafeExternalUrl(''), false);
   assert.equal(isSafeExternalUrl(undefined), false);
+
+  assert.equal(sanitizeExternalUrl('  https://github.com/qrblab  '), 'https://github.com/qrblab');
+  assert.equal(sanitizeExternalUrl('javascript:alert(1)'), '');
+  assert.equal(sanitizeExternalUrl('data:text/html,<script>1</script>'), '');
+  assert.equal(sanitizeExternalUrl('//evil.com/path'), '');
 });

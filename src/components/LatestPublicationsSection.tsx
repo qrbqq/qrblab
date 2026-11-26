@@ -1,4 +1,4 @@
-import {siteCopy} from '../data/i18n';
+import {siteCopy} from '../data/siteConfig';
 import {papers} from '../data/papers';
 import {handleSpotlightMouseMove} from '../hooks/useScrollReveal';
 import {getLatestPapers} from '../utils/papers';

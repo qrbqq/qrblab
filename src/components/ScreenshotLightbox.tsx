@@ -1,6 +1,6 @@
 import {useEffect} from 'react';
 import {ChevronLeft, ChevronRight, X} from 'lucide-react';
-import {siteCopy} from '../data/i18n';
+import {siteCopy} from '../data/siteConfig';
 
 interface ScreenshotLightboxProps {
   images: string[];

@@ -1,5 +1,5 @@
 import {memo, useEffect, useState} from 'react';
-import {siteCopy} from '../data/i18n';
+import {siteCopy} from '../data/siteConfig';
 
 export type HomeSectionId =
   | 'overview'

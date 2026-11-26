@@ -1,7 +1,7 @@
 import {useEffect, useRef} from 'react';
 import {Link} from 'react-router-dom';
 import {RotateCcw, Sparkles} from 'lucide-react';
-import {siteCopy} from '../data/i18n';
+import {siteCopy} from '../data/siteConfig';
 import {clearAllLocalData} from '../utils/ratings';
 import {getAutoSortedSections} from '../utils/navigationRegistry';
 

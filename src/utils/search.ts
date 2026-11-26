@@ -139,6 +139,8 @@ export function searchPapers(
         slugNormalized,
         ...collectLocalizedValues(paper.category).map(normalizeSearchText),
         ...paper.tags.map(normalizeSearchText),
+        normalizeSearchText(getPaperSummary(paper)),
+        ...collectLocalizedValues(paper.explanation).map(normalizeSearchText),
       ].filter(Boolean);
 
       if (candidateSubstrings.some((text) => text.includes(normalizedQuery))) {

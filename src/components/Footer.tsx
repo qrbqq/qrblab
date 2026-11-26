@@ -1,7 +1,6 @@
 import {useState} from 'react';
 import {Link} from 'react-router-dom';
-import {siteCopy} from '../data/i18n';
-import {siteConfig} from '../data/siteConfig';
+import {siteConfig, siteCopy} from '../data/siteConfig';
 import {getActiveChannels, getLocalizedText, resolveAssetUrl} from '../utils/papers';
 import {ScrollReveal} from './ScrollReveal';
 
