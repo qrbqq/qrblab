@@ -9,7 +9,7 @@ import {useNavigate} from 'react-router-dom';
 import {ArrowRight, FileText, Folder, Search, X} from 'lucide-react';
 import {siteCopy} from '../data/i18n';
 import {papers} from '../data/papers';
-import {formatPaperDate} from '../utils/papers';
+import {formatPaperDate, resolveAssetUrl} from '../utils/papers';
 import {searchPapers} from '../utils/search';
 
 interface LiveSearchOverlayProps {
@@ -21,6 +21,7 @@ export function LiveSearchOverlay({open, onClose}: LiveSearchOverlayProps) {
   const [query, setQuery] = useState('');
   const [activeIndex, setActiveIndex] = useState(0);
   const [isClosing, setIsClosing] = useState(false);
+  const [brokenThumbs, setBrokenThumbs] = useState<Record<string, boolean>>({});
   const inputRef = useRef<HTMLInputElement | null>(null);
   const panelRef = useRef<HTMLDivElement | null>(null);
   const itemRefs = useRef<Array<HTMLButtonElement | null>>([]);
@@ -103,10 +104,13 @@ export function LiveSearchOverlay({open, onClose}: LiveSearchOverlayProps) {
   }
 
   const handleOpenResult = (slug: string) => {
-    setQuery('');
-    setIsClosing(false);
-    onClose();
-    navigate(`/qrb-lab/${slug}`);
+    setIsClosing(true);
+    setTimeout(() => {
+      setIsClosing(false);
+      setQuery('');
+      onClose();
+      navigate(`/qrb-lab/${slug}`);
+    }, 180);
   };
 
   const handleInputKeyDown = (
@@ -146,14 +150,17 @@ export function LiveSearchOverlay({open, onClose}: LiveSearchOverlayProps) {
     >
       <div
         ref={panelRef}
-        className={`w-full max-w-xl rounded-full bg-[#0e0e0e]/92 backdrop-blur-2xl border border-white/[0.16] shadow-2xl overflow-hidden transition-all duration-200 ${
+        className={`w-full max-w-xl transition-all duration-200 ${
           isClosing ? 'live-search-exit' : 'live-search-enter'
         }`}
-        style={{
-          boxShadow: '0 32px 75px rgba(0, 0, 0, 0.85), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
-        }}
       >
-        <div className="flex items-center gap-3 px-5 py-3">
+        {/* 1. Standalone Fixed-Height Input Capsule (Never clips, never stretches) */}
+        <div
+          className="flex h-13 w-full items-center gap-3 rounded-full bg-[#101010]/92 px-5 backdrop-blur-2xl border border-white/[0.16] shadow-2xl"
+          style={{
+            boxShadow: '0 20px 50px rgba(0, 0, 0, 0.8), inset 0 1px 0 rgba(255, 255, 255, 0.12)',
+          }}
+        >
           <Search
             className="h-4 w-4 shrink-0 text-[var(--text-secondary)]"
             strokeWidth={1.85}
@@ -179,7 +186,7 @@ export function LiveSearchOverlay({open, onClose}: LiveSearchOverlayProps) {
                 ? `live-search-option-${activeIndex}`
                 : undefined
             }
-            className="min-h-[36px] w-full bg-transparent text-sm text-[var(--text-primary)] placeholder:text-[var(--text-secondary)] focus:outline-none sm:text-[15px]"
+            className="h-full w-full bg-transparent text-sm text-[var(--text-primary)] placeholder:text-[var(--text-secondary)] focus:outline-none sm:text-[15px]"
           />
           {query ? (
             <button
@@ -196,26 +203,29 @@ export function LiveSearchOverlay({open, onClose}: LiveSearchOverlayProps) {
           ) : null}
         </div>
 
+        {/* 2. Separated Stacked Glass Notification Cards (Outside the input capsule) */}
         {hasQuery ? (
-          <div className="border-t border-white/[0.08] max-h-[min(60vh,380px)] overflow-y-auto">
+          <div className="mt-3 space-y-2.5 max-h-[min(60vh,380px)] overflow-y-auto overflow-x-hidden">
             {results.length === 0 ? (
-              <div className="px-5 py-7 text-center">
-                <p className="text-sm font-semibold text-[var(--text-primary)]">
-                  {siteCopy.liveSearch.noResults}
-                </p>
-                <p className="mt-1 text-xs text-[var(--text-secondary)]">
-                  {siteCopy.liveSearch.noResultsHint}
-                </p>
+              <div
+                className="search-result-enter flex items-center justify-between rounded-2xl bg-[#121212]/85 px-4 py-3.5 backdrop-blur-xl border-0 text-sm text-[var(--text-secondary)] shadow-xl"
+                style={{boxShadow: '0 12px 30px rgba(0,0,0,0.6)'}}
+              >
+                <span>{siteCopy.liveSearch.noResults}</span>
               </div>
             ) : (
               <div
                 id="live-search-results-list"
                 role="listbox"
                 aria-label={siteCopy.liveSearch.label}
-                className="divide-y divide-white/[0.06] p-2"
+                className="space-y-2.5"
               >
                 {results.map((result, index) => {
                   const isSelected = index === activeIndex;
+                  const thumbUrl = result.paper.thumbnail
+                    ? resolveAssetUrl(result.paper.thumbnail, import.meta.env.BASE_URL)
+                    : null;
+
                   return (
                     <button
                       key={result.paper.id}
@@ -228,18 +238,35 @@ export function LiveSearchOverlay({open, onClose}: LiveSearchOverlayProps) {
                       aria-selected={isSelected}
                       onMouseEnter={() => setActiveIndex(index)}
                       onClick={() => handleOpenResult(result.paper.slug)}
-                      className={`flex w-full items-center justify-between gap-3 rounded-2xl px-3.5 py-3 text-start transition-colors duration-150 focus-visible:outline-2 focus-visible:outline-[var(--focus-ring)] ${
+                      className={`search-result-enter flex w-full items-center justify-between gap-3 rounded-2xl px-4 py-3 text-start backdrop-blur-xl border-0 transition-all duration-150 active:scale-[0.985] focus-visible:outline-2 focus-visible:outline-[var(--focus-ring)] ${
                         isSelected
-                          ? 'bg-white/[0.08] text-[var(--text-primary)]'
-                          : 'bg-transparent text-[var(--text-primary)] hover:bg-white/[0.04]'
+                          ? 'bg-white/[0.12] text-[var(--text-primary)] shadow-2xl scale-[1.005]'
+                          : 'bg-[#121212]/78 text-[var(--text-primary)] hover:bg-white/[0.08]'
                       }`}
+                      style={{
+                        '--stagger': `${Math.min(index * 40, 200)}ms`,
+                        boxShadow: '0 12px 32px rgba(0, 0, 0, 0.65), inset 0 1px 0 rgba(255, 255, 255, 0.08)',
+                      } as React.CSSProperties}
                     >
-                      <div className="flex min-w-0 items-start gap-3">
-                        <FileText
-                          className="mt-0.5 h-4 w-4 shrink-0 text-[var(--text-secondary)]"
-                          strokeWidth={1.75}
-                          aria-hidden="true"
-                        />
+                      <div className="flex min-w-0 items-center gap-3.5">
+                        {thumbUrl && !brokenThumbs[result.paper.id] ? (
+                          <img
+                            src={thumbUrl}
+                            alt=""
+                            onError={() =>
+                              setBrokenThumbs((prev) => ({
+                                ...prev,
+                                [result.paper.id]: true,
+                              }))
+                            }
+                            className="h-9 w-9 shrink-0 rounded-lg object-cover border border-white/[0.12]"
+                          />
+                        ) : (
+                          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white/[0.06] border border-white/[0.12] text-[var(--text-secondary)]">
+                            <FileText className="h-4 w-4" strokeWidth={1.75} />
+                          </div>
+                        )}
+
                         <div className="min-w-0">
                           <p
                             dir="auto"
@@ -247,7 +274,7 @@ export function LiveSearchOverlay({open, onClose}: LiveSearchOverlayProps) {
                           >
                             {result.matchedTitle}
                           </p>
-                          <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[11px] text-[var(--text-secondary)]">
+                          <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[11px] text-[var(--text-secondary)]">
                             {result.folder ? (
                               <span className="inline-flex items-center gap-1 font-medium text-[var(--text-primary)]/80">
                                 <Folder className="h-3 w-3" strokeWidth={1.75} aria-hidden="true" />
@@ -267,11 +294,8 @@ export function LiveSearchOverlay({open, onClose}: LiveSearchOverlayProps) {
                         </div>
                       </div>
 
-                      <span className="inline-flex shrink-0 items-center gap-1 text-xs font-medium text-[var(--text-secondary)]">
-                        <span className="hidden sm:inline">
-                          {siteCopy.liveSearch.openItemLabel}
-                        </span>
-                        <ArrowRight className="h-3.5 w-3.5" strokeWidth={1.75} />
+                      <span className="inline-flex shrink-0 items-center text-[var(--text-secondary)]">
+                        <ArrowRight className="h-4 w-4" strokeWidth={1.75} />
                       </span>
                     </button>
                   );

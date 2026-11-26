@@ -483,7 +483,7 @@ const LensParagraph = memo(function LensParagraph({
     <p className={className}>
       {tokens.map((token, idx) =>
         token.isWhitespace ? (
-          <span key={idx}>{token.text}</span>
+          token.text
         ) : (
           <span key={idx} className="statement-lens-word">
             {token.text}

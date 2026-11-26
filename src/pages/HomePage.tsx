@@ -9,6 +9,7 @@ import {HeroVideoBackdrop} from '../components/HeroVideoBackdrop';
 import {HomeSectionTracker} from '../components/HomeSectionTracker';
 import {LatestLabLogSection} from '../components/LatestLabLogSection';
 import {LatestPublicationsSection} from '../components/LatestPublicationsSection';
+import {ArchitecturalMarquee} from '../components/ArchitecturalMarquee';
 import {StatementCard} from '../components/StatementCard';
 import {siteCopy} from '../data/i18n';
 import {siteConfig} from '../data/siteConfig';
@@ -26,6 +27,9 @@ export function HomePage() {
 
   const handleIntroStateChange = useCallback((next: IntroVisualState) => {
     setIntroState(next);
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('qrblab-intro-state', {detail: next}));
+    }
   }, []);
 
   const statement = siteConfig.projectStatement;
@@ -118,6 +122,9 @@ export function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* Architectural Discipline Marquee Strip */}
+      <ArchitecturalMarquee />
 
       {/* Content Directly Below the Visual Showcase */}
       <div className="w-full">

@@ -11,6 +11,7 @@ import {
   Quote,
 } from 'lucide-react';
 import {EmptyStateCard} from '../components/EmptyStateCard';
+import {PosterPlaceholder} from '../components/PosterPlaceholder';
 import {ScreenshotLightbox} from '../components/ScreenshotLightbox';
 import {ScrollReveal} from '../components/ScrollReveal';
 import {StarRating} from '../components/StarRating';
@@ -40,12 +41,14 @@ export function PaperDetailPage() {
   const [rating, setRating] = useState<number | null>(null);
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
   const [showInlinePdf, setShowInlinePdf] = useState(false);
+  const [imgError, setImgError] = useState(false);
   const timerRef = useRef<number | null>(null);
 
   const paper = findPaperBySlug(papers, slug);
 
   useEffect(() => {
     setShowInlinePdf(false);
+    setImgError(false);
     if (!paper) {
       setRating(null);
       return;
@@ -104,6 +107,11 @@ export function PaperDetailPage() {
   const highlights = getLocalizedList(paper.highlights);
   const summary = getPaperSummary(paper);
   const deepExplanation = getLocalizedText(paper.explanation).trim();
+  const thumbUrl = paper.thumbnail
+    ? resolveAssetUrl(paper.thumbnail, import.meta.env.BASE_URL)
+    : '';
+  const hasValidThumb = Boolean(thumbUrl) && !imgError;
+
   const previewImages = (paper.previewImages ?? [])
     .map((img) => resolveAssetUrl(img, import.meta.env.BASE_URL))
     .filter(Boolean);
@@ -122,289 +130,209 @@ export function PaperDetailPage() {
     showToast(siteCopy.paperDetail.ratingCleared, 'success');
   };
 
+
   return (
-    <div className="mx-auto max-w-5xl px-4 py-10 sm:px-6 sm:py-14 lg:px-8">
-      <ScrollReveal staggerIndex={0} className="mb-8 inline-block">
+    <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6 sm:py-12 lg:px-8">
+      {/* Prelude Stage 0: Back Button */}
+      <div className="paper-stage-0 mb-6 inline-block">
         <Link
           to="/qrb-lab"
-          className="normal-case inline-flex min-h-[44px] items-center gap-2 text-sm font-medium text-[var(--text-secondary)] transition-colors hover:text-[var(--text-primary)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--focus-ring)]"
+          className="normal-case inline-flex min-h-[44px] items-center gap-2 text-sm font-medium text-[var(--text-secondary)] transition-all hover:text-[var(--text-primary)] active:scale-[0.985] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--focus-ring)]"
         >
           <ArrowLeft className="h-4 w-4" strokeWidth={1.75} />
           <span>{siteCopy.paperDetail.backToArchive}</span>
         </Link>
-      </ScrollReveal>
+      </div>
 
-      <article className="border-t border-white/[0.08] py-16 sm:py-20">
-        <ScrollReveal staggerIndex={0}>
-          <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1 text-xs font-medium text-[var(--text-secondary)] sm:text-sm">
-            <span className="font-semibold text-[var(--text-primary)]">{category}</span>
-            <span aria-hidden="true">·</span>
-            <time dateTime={paper.publishedDate} className="font-mono-tabular tabular-nums">
-              {formattedDate}
-            </time>
-            <span aria-hidden="true">·</span>
-            <span className="font-mono-tabular">{paper.version}</span>
-            {paper.doi ? (
-              <>
-                <span aria-hidden="true">·</span>
-                <span className="font-mono-tabular">
-                  {siteCopy.paperDetail.doiLabel}: {paper.doi}
+      <div className="hairline-draw-accent h-[1px] w-full bg-white/[0.08]" />
+
+      <article className="py-10 sm:py-14">
+        {/* =========================================================================
+            1. TOP HERO SECTION (2-Column Editorial Split on Desktop, Clean Stack on Mobile)
+            ========================================================================= */}
+        <section className="grid grid-cols-1 items-start gap-8 md:grid-cols-12 lg:gap-12">
+          {/* Left Side: Identical Glass Poster (3:4 Portrait Aspect Ratio, Glass Frame) */}
+          <div className="paper-stage-1 w-full max-w-xs mx-auto md:max-w-none md:col-span-5 lg:col-span-4">
+            <div
+              className="relative aspect-[3/4] w-full overflow-hidden rounded-xl border border-white/[0.12] bg-[#0B0B0B] shadow-2xl"
+              style={{
+                boxShadow: '0 16px 36px rgba(0, 0, 0, 0.75), inset 0 1px 0 rgba(255, 255, 255, 0.12)',
+              }}
+            >
+              {hasValidThumb ? (
+                <img
+                  src={thumbUrl}
+                  alt={title}
+                  loading="eager"
+                  onError={() => setImgError(true)}
+                  className="h-full w-full object-cover"
+                />
+              ) : (
+                <PosterPlaceholder
+                  title={title}
+                  category={category}
+                  version={paper.version}
+                />
+              )}
+
+              {/* Minimal Top Specularity & Technical Badges */}
+              <div className="pointer-events-none absolute inset-x-0 top-0 flex items-center justify-between p-3 text-[10px] font-mono-tabular tracking-wider text-white/60">
+                <span className="rounded bg-black/60 px-2 py-0.5 backdrop-blur-md border border-white/[0.08]">
+                  {paper.version}
                 </span>
-              </>
-            ) : null}
-          </div>
-        </ScrollReveal>
-
-        <ScrollReveal staggerIndex={1}>
-          <h1 className="font-display-hero mt-4 text-3xl font-bold text-[var(--text-primary)] sm:text-4xl">
-            {title}
-          </h1>
-        </ScrollReveal>
-
-        <ScrollReveal staggerIndex={2}>
-          <dl className="mt-6 grid grid-cols-1 gap-4 border-y border-[var(--border-hairline)] py-5 sm:grid-cols-3">
-            <div>
-              <dt className="text-xs font-medium text-[var(--text-secondary)]">
-                {siteCopy.paperDetail.authorsLabel}
-              </dt>
-              <dd className="mt-1 text-sm font-medium text-[var(--text-primary)]">
-                {paper.authors.join(', ')}
-              </dd>
+                <span className="rounded bg-black/60 px-2 py-0.5 backdrop-blur-md border border-white/[0.08]">
+                  {category}
+                </span>
+              </div>
             </div>
-            <div>
-              <dt className="text-xs font-medium text-[var(--text-secondary)]">
-                {siteCopy.paperDetail.publishedLabel}
-              </dt>
-              <dd className="font-mono-tabular mt-1 text-sm font-medium text-[var(--text-primary)] tabular-nums">
+          </div>
+
+          {/* Right Side: Metadata Eyebrow, Title, Description, Tactile Monochrome Download Button, Secondary Controls */}
+          <div className="paper-stage-2 flex flex-col justify-start md:col-span-7 lg:col-span-8">
+            {/* Subtle Inline Metadata Eyebrow */}
+            <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1 text-xs font-medium text-[var(--text-secondary)] sm:text-sm">
+              <span className="font-semibold text-[var(--text-primary)]">{category}</span>
+              <span aria-hidden="true">·</span>
+              <time dateTime={paper.publishedDate} className="font-mono-tabular tabular-nums">
                 {formattedDate}
-              </dd>
-            </div>
-            <div>
-              <dt className="text-xs font-medium text-[var(--text-secondary)]">
-                {siteCopy.paperDetail.versionLabel}
-              </dt>
-              <dd className="mt-1 font-mono-tabular text-sm font-medium text-[var(--text-primary)]">
-                {paper.version}
-              </dd>
-            </div>
-          </dl>
-        </ScrollReveal>
-
-        {/* 1. Interactive localStorage Star Rating */}
-        <ScrollReveal
-          as="section"
-          staggerIndex={0}
-          className="mt-8 rounded-2xl border border-[var(--border-hairline)] bg-[var(--bg-surface-elevated)] p-5 sm:p-6"
-        >
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <h2 className="font-display-card text-sm font-semibold text-[var(--text-primary)]">
-                {siteCopy.paperDetail.rateHeading}
-              </h2>
-              <p className="mt-0.5 text-xs text-[var(--text-secondary)]">
-                {siteCopy.paperDetail.rateSubheading}
-              </p>
-            </div>
-
-            <StarRating
-              value={rating}
-              onChange={handleRate}
-              onClear={handleClearRating}
-            />
-          </div>
-        </ScrollReveal>
-
-        {/* 2. Deep Explanation & Summary */}
-        <section className="mt-10">
-          <ScrollReveal staggerIndex={0}>
-            <h2 className="font-display-heading text-lg font-semibold text-[var(--text-primary)]">
-              {deepExplanation
-                ? siteCopy.paperDetail.explanationHeading
-                : siteCopy.paperDetail.abstractHeading}
-            </h2>
-          </ScrollReveal>
-          {summary && deepExplanation ? (
-            <ScrollReveal as="p" staggerIndex={1} className="font-body-prose mt-3 max-w-3xl text-sm text-[var(--text-secondary)]">
-              {summary}
-            </ScrollReveal>
-          ) : null}
-          <ScrollReveal
-            as="p"
-            staggerIndex={summary && deepExplanation ? 2 : 1}
-            className="font-body-prose mt-4 max-w-3xl whitespace-pre-line text-base text-[var(--text-primary)]/90"
-          >
-            {deepExplanation || summary}
-          </ScrollReveal>
-        </section>
-
-        {highlights.length > 0 ? (
-          <section className="mt-8 border-t border-[var(--border-hairline)] pt-8">
-            <ScrollReveal staggerIndex={0}>
-              <h2 className="font-display-heading text-lg font-semibold text-[var(--text-primary)]">
-                {siteCopy.paperDetail.highlightsHeading}
-              </h2>
-            </ScrollReveal>
-            <ul className="mt-4 space-y-3">
-              {highlights.map((item, idx) => (
-                <ScrollReveal
-                  key={idx}
-                  as="li"
-                  staggerIndex={idx % 5}
-                  className="flex items-start gap-3 text-sm leading-relaxed text-[var(--text-primary)]/90"
-                >
-                  <span className="font-mono-tabular mt-0.5 shrink-0 text-xs font-medium tracking-wider text-[var(--text-eyebrow)]">
-                    {String(idx + 1).padStart(2, '0')}
+              </time>
+              <span aria-hidden="true">·</span>
+              <span className="font-mono-tabular">{paper.version}</span>
+              {paper.doi ? (
+                <>
+                  <span aria-hidden="true">·</span>
+                  <span className="font-mono-tabular">
+                    {siteCopy.paperDetail.doiLabel}: {paper.doi}
                   </span>
-                  <span className="font-body-prose">{item}</span>
-                </ScrollReveal>
-              ))}
-            </ul>
-          </section>
-        ) : null}
-
-        {paper.tags.length > 0 ? (
-          <ScrollReveal staggerIndex={0}>
-            <div className="mt-8 flex flex-wrap items-center gap-x-2 gap-y-1 border-t border-[var(--border-hairline)] pt-6 text-xs text-[var(--text-secondary)]">
-              <span className="font-medium text-[var(--text-primary)]">
-                {siteCopy.paperDetail.tagsLabel}:
-              </span>
-              <span className="font-mono-tabular">{paper.tags.join(' · ')}</span>
+                </>
+              ) : null}
             </div>
-          </ScrollReveal>
-        ) : null}
 
-        {/* 3. Horizontal PDF Preview Screenshots + Lightbox */}
-        <section className="mt-10 border-t border-[var(--border-hairline)] pt-8">
-          <ScrollReveal staggerIndex={0} className="mb-4">
-            <h2 className="font-display-heading text-lg font-semibold text-[var(--text-primary)]">
-              {siteCopy.paperDetail.screenshotsHeading}
-            </h2>
-            <p className="mt-0.5 text-xs text-[var(--text-secondary)]">
-              {siteCopy.paperDetail.screenshotsSubheading}
-            </p>
-          </ScrollReveal>
+            {/* Crisp Oxanium Title */}
+            <h1 className="font-display-hero mt-3 text-2xl font-bold leading-tight text-[#F5F5F5] sm:text-3xl lg:text-4xl">
+              {title}
+            </h1>
 
-          {previewImages.length > 0 ? (
-            <div className="flex snap-x snap-mandatory gap-4 overflow-x-auto pb-3">
-              {previewImages.map((src, index) => (
-                <button
-                  key={`${src}-${index}`}
-                  type="button"
-                  onClick={() => setLightboxIndex(index)}
-                  aria-label={`${siteCopy.paperDetail.openLightbox} (${index + 1})`}
-                  className="group relative w-72 shrink-0 snap-start overflow-hidden rounded-2xl border border-[var(--border-hairline)] bg-[var(--bg-surface-elevated)] text-start shadow-xs transition-transform hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--focus-ring)] sm:w-80"
+            {/* Authors Byline */}
+            <div className="mt-3 text-xs font-medium text-[var(--text-secondary)]">
+              <span className="text-[var(--text-eyebrow)]">{siteCopy.paperDetail.authorsLabel}:</span>{' '}
+              <span className="text-[var(--text-primary)]/90">{paper.authors.join(', ')}</span>
+            </div>
+
+            {/* Short Description directly beneath title */}
+            {summary ? (
+              <p className="font-body-prose mt-4 text-sm leading-relaxed text-[var(--text-secondary)] sm:text-base">
+                {summary}
+              </p>
+            ) : null}
+
+            {/* Action Zone: Prominent Tactile Monochrome Download Button & Secondary Controls (Zero Blue/Green!) */}
+            <div className="mt-6 flex flex-col gap-4 border-t border-white/[0.08] pt-6">
+              <div className="flex flex-wrap items-center gap-3">
+                {/* Prominent High-Contrast Monochrome Download PDF Button (Crisp #F5F5F5, dark #050505 text, NO GREEN!) */}
+                <a
+                  href={pdfUrl}
+                  download
+                  className="inline-flex min-h-[46px] items-center justify-center gap-2.5 rounded-xl bg-[#F5F5F5] px-6 py-2.5 text-sm font-semibold text-[#050505] shadow-sm transition-all duration-200 hover:bg-white active:scale-[0.985] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
                 >
-                  <img
-                    src={src}
-                    alt={`${title} — ${index + 1}`}
-                    referrerPolicy="no-referrer"
-                    className="aspect-[4/3] w-full object-cover"
-                  />
-                  <span className="glass-surface absolute end-3 bottom-3 inline-flex h-9 w-9 items-center justify-center rounded-xl text-[var(--text-primary)] opacity-90 transition-opacity group-hover:opacity-100">
-                    <Maximize2 className="h-4 w-4" strokeWidth={1.75} />
+                  <Download className="h-4 w-4" strokeWidth={2} />
+                  <span>{siteCopy.paperDetail.downloadPdf}</span>
+                </a>
+
+                {/* View Inside Page (Neutral Frosted Glass, NO BLUE!) */}
+                <button
+                  type="button"
+                  onClick={() => setShowInlinePdf((prev) => !prev)}
+                  aria-expanded={showInlinePdf}
+                  className="inline-flex min-h-[46px] items-center justify-center gap-2 rounded-xl border border-white/[0.16] bg-white/[0.06] px-4 py-2.5 text-sm font-medium text-[#F5F5F5] backdrop-blur-sm shadow-xs transition-all duration-200 hover:bg-white/[0.12] hover:border-white/[0.28] active:scale-[0.985] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+                >
+                  <BookOpen className="h-4 w-4 text-white/80" strokeWidth={1.75} />
+                  <span>
+                    {showInlinePdf
+                      ? siteCopy.paperDetail.hideInsidePage
+                      : siteCopy.paperDetail.viewInsidePage}
                   </span>
                 </button>
-              ))}
+
+                {/* Open In New Tab (Neutral Frosted Glass, NO BLUE!) */}
+                <a
+                  href={pdfUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex min-h-[46px] items-center justify-center gap-2 rounded-xl border border-white/[0.16] bg-white/[0.06] px-4 py-2.5 text-sm font-medium text-[#F5F5F5] backdrop-blur-sm shadow-xs transition-all duration-200 hover:bg-white/[0.12] hover:border-white/[0.28] active:scale-[0.985] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+                >
+                  <ExternalLink className="h-4 w-4 text-white/80" strokeWidth={1.75} />
+                  <span>{siteCopy.paperDetail.openInNewTab}</span>
+                </a>
+              </div>
+
+              {/* Utility Citation Controls & Compact Reader Rating */}
+              <div className="flex flex-wrap items-center justify-between gap-3 border-t border-white/[0.06] pt-4">
+                <div className="flex flex-wrap items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() =>
+                      copyToClipboard(
+                        formatPlainCitation(paper, siteConfig.brandName),
+                        siteCopy.paperDetail.citationCopied,
+                      )
+                    }
+                    className="inline-flex min-h-[36px] items-center gap-1.5 rounded-lg border border-white/[0.12] bg-white/[0.04] px-3 py-1.5 text-xs font-medium text-[var(--text-primary)] shadow-xs transition-all duration-150 hover:bg-white/[0.08] hover:border-white/[0.2] active:scale-[0.985] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--focus-ring)]"
+                  >
+                    <Quote className="h-3.5 w-3.5 text-[var(--text-secondary)]" strokeWidth={1.75} />
+                    <span>{siteCopy.paperDetail.copyCitation}</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() =>
+                      copyToClipboard(
+                        formatBibtexCitation(paper, siteConfig.brandName),
+                        siteCopy.paperDetail.bibtexCopied,
+                      )
+                    }
+                    className="inline-flex min-h-[36px] items-center gap-1.5 rounded-lg border border-white/[0.12] bg-white/[0.04] px-3 py-1.5 text-xs font-medium text-[var(--text-primary)] shadow-xs transition-all duration-150 hover:bg-white/[0.08] hover:border-white/[0.2] active:scale-[0.985] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--focus-ring)]"
+                  >
+                    <Copy className="h-3.5 w-3.5 text-[var(--text-secondary)]" strokeWidth={1.75} />
+                    <span>{siteCopy.paperDetail.copyBibtex}</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() =>
+                      copyToClipboard(window.location.href, siteCopy.paperDetail.linkCopied)
+                    }
+                    className="inline-flex min-h-[36px] items-center gap-1.5 rounded-lg border border-white/[0.12] bg-white/[0.04] px-3 py-1.5 text-xs font-medium text-[var(--text-primary)] shadow-xs transition-all duration-150 hover:bg-white/[0.08] hover:border-white/[0.2] active:scale-[0.985] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--focus-ring)]"
+                  >
+                    <Link2 className="h-3.5 w-3.5 text-[var(--text-secondary)]" strokeWidth={1.75} />
+                    <span>{siteCopy.paperDetail.copyLink}</span>
+                  </button>
+                </div>
+
+                {/* Compact Reader Rating Stars (No bloated boxes) */}
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-[var(--text-secondary)] font-medium">
+                    {siteCopy.paperDetail.rateHeading}:
+                  </span>
+                  <StarRating
+                    value={rating}
+                    onChange={handleRate}
+                    onClear={handleClearRating}
+                  />
+                </div>
+              </div>
             </div>
-          ) : (
-            <div className="rounded-2xl border border-[var(--border-hairline)] bg-[var(--bg-surface-elevated)] p-6 text-center text-xs text-[var(--text-secondary)]">
-              {siteCopy.paperDetail.screenshotsEmpty}
-            </div>
-          )}
+          </div>
         </section>
 
-        {/* 4. Action Zone Directly Beneath Screenshots */}
-        <section className="mt-8 border-t border-[var(--border-hairline)] pt-8">
-          {/* Primary Prominent GREEN Download PDF Button */}
-          <ScrollReveal staggerIndex={0}>
-            <a
-              href={pdfUrl}
-              download
-              className="inline-flex min-h-[52px] items-center justify-center gap-2.5 whitespace-nowrap rounded-2xl bg-[#16A34A] px-7 py-3.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-[#15803D] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#16A34A]"
-            >
-              <Download className="h-4 w-4" strokeWidth={2} />
-              <span>{siteCopy.paperDetail.downloadPdf}</span>
-            </a>
-          </ScrollReveal>
-
-          {/* Directly Under Green Button: Two BLUE File-Opening Choice Buttons */}
-          <ScrollReveal staggerIndex={1} className="mt-3.5 flex flex-wrap items-center gap-3">
-            <button
-              type="button"
-              onClick={() => setShowInlinePdf((prev) => !prev)}
-              aria-expanded={showInlinePdf}
-              className="inline-flex min-h-[46px] items-center justify-center gap-2 whitespace-nowrap rounded-2xl bg-[#0071E3] px-5 py-2.5 text-sm font-semibold text-white shadow-xs transition-colors hover:bg-[#0062C4] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0071E3]"
-            >
-              <BookOpen className="h-4 w-4" strokeWidth={1.85} />
-              <span>
-                {showInlinePdf
-                  ? siteCopy.paperDetail.hideInsidePage
-                  : siteCopy.paperDetail.viewInsidePage}
-              </span>
-            </button>
-
-            <a
-              href={pdfUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex min-h-[46px] items-center justify-center gap-2 whitespace-nowrap rounded-2xl bg-[#0071E3] px-5 py-2.5 text-sm font-semibold text-white shadow-xs transition-colors hover:bg-[#0062C4] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0071E3]"
-            >
-              <ExternalLink className="h-4 w-4" strokeWidth={1.85} />
-              <span>{siteCopy.paperDetail.openInNewTab}</span>
-            </a>
-          </ScrollReveal>
-
-          {/* Utility Row Nearby */}
-          <ScrollReveal staggerIndex={2} className="mt-4 flex flex-wrap items-center gap-2.5">
-            <button
-              type="button"
-              onClick={() =>
-                copyToClipboard(
-                  formatPlainCitation(paper, siteConfig.brandName),
-                  siteCopy.paperDetail.citationCopied,
-                )
-              }
-              className="inline-flex min-h-[44px] items-center gap-2 whitespace-nowrap rounded-2xl border border-[var(--border-strong)] bg-[var(--btn-secondary-bg)] px-4 py-2.5 text-sm font-medium text-[var(--text-primary)] shadow-xs transition-colors hover:bg-[var(--btn-secondary-hover)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--focus-ring)]"
-            >
-              <Quote className="h-4 w-4 text-[var(--text-secondary)]" strokeWidth={1.75} />
-              <span>{siteCopy.paperDetail.copyCitation}</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() =>
-                copyToClipboard(
-                  formatBibtexCitation(paper, siteConfig.brandName),
-                  siteCopy.paperDetail.bibtexCopied,
-                )
-              }
-              className="inline-flex min-h-[44px] items-center gap-2 whitespace-nowrap rounded-2xl border border-[var(--border-strong)] bg-[var(--btn-secondary-bg)] px-4 py-2.5 text-sm font-medium text-[var(--text-primary)] shadow-xs transition-colors hover:bg-[var(--btn-secondary-hover)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--focus-ring)]"
-            >
-              <Copy className="h-4 w-4 text-[var(--text-secondary)]" strokeWidth={1.75} />
-              <span>{siteCopy.paperDetail.copyBibtex}</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() =>
-                copyToClipboard(window.location.href, siteCopy.paperDetail.linkCopied)
-              }
-              className="inline-flex min-h-[44px] items-center gap-2 whitespace-nowrap rounded-2xl border border-[var(--border-strong)] bg-[var(--btn-secondary-bg)] px-4 py-2.5 text-sm font-medium text-[var(--text-primary)] shadow-xs transition-colors hover:bg-[var(--btn-secondary-hover)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--focus-ring)]"
-            >
-              <Link2 className="h-4 w-4 text-[var(--text-secondary)]" strokeWidth={1.75} />
-              <span>{siteCopy.paperDetail.copyLink}</span>
-            </button>
-          </ScrollReveal>
-        </section>
-
-        {/* Optional Embedded Inline PDF Reader */}
+        {/* Collapsible Embedded Inline PDF Reader */}
         {showInlinePdf ? (
-          <section className="mt-8 border-t border-[var(--border-hairline)] pt-8">
-            <h2 className="font-display-heading mb-4 text-lg font-semibold text-[var(--text-primary)]">
+          <section className="mt-8 overflow-hidden rounded-xl border border-white/[0.12] bg-[#0E0E0E] p-4 sm:p-6">
+            <h2 className="font-display-heading mb-4 text-base font-semibold text-[var(--text-primary)]">
               {siteCopy.paperDetail.pdfPreviewHeading}
             </h2>
 
-            <div className="overflow-hidden rounded-2xl border border-[var(--border-hairline)] bg-[var(--bg-surface-elevated)]">
+            <div className="overflow-hidden rounded-lg border border-white/[0.08] bg-black">
               <object
                 data={pdfUrl}
                 type="application/pdf"
@@ -424,7 +352,7 @@ export function PaperDetailPage() {
                     href={pdfUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="mt-4 inline-flex min-h-[44px] items-center gap-2 rounded-full bg-[#0071E3] px-5 py-2.5 text-sm font-medium text-white hover:bg-[#0062C4]"
+                    className="mt-4 inline-flex min-h-[44px] items-center gap-2 rounded-xl bg-white/[0.1] px-5 py-2.5 text-sm font-medium text-white hover:bg-white/[0.16]"
                   >
                     <ExternalLink className="h-4 w-4" strokeWidth={1.75} />
                     <span>{siteCopy.paperDetail.openInNewTab}</span>
@@ -434,6 +362,96 @@ export function PaperDetailPage() {
             </div>
           </section>
         ) : null}
+
+        {/* =========================================================================
+            2. MIDDLE SECTION — PDF Screenshots / Page Previews
+            ========================================================================= */}
+        <section className="paper-stage-3 mt-12 border-t border-[var(--border-hairline)] pt-10">
+          <div className="mb-5">
+            <h2 className="font-display-heading text-lg font-semibold text-[var(--text-primary)]">
+              {siteCopy.paperDetail.screenshotsHeading}
+            </h2>
+            <p className="mt-1 text-xs text-[var(--text-secondary)]">
+              {siteCopy.paperDetail.screenshotsSubheading}
+            </p>
+          </div>
+
+          {previewImages.length > 0 ? (
+            <div className="flex snap-x snap-mandatory gap-4 overflow-x-auto pb-3 sm:grid sm:grid-cols-2 md:grid-cols-3 sm:overflow-visible">
+              {previewImages.map((src, index) => (
+                <button
+                  key={`${src}-${index}`}
+                  type="button"
+                  onClick={() => setLightboxIndex(index)}
+                  aria-label={`${siteCopy.paperDetail.openLightbox} (${index + 1})`}
+                  className="group relative w-64 shrink-0 snap-start overflow-hidden rounded-xl border border-white/[0.12] bg-[#0E0E0E] text-start shadow-sm transition-all duration-200 hover:-translate-y-1 hover:border-white/[0.24] hover:shadow-lg active:scale-[0.985] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--focus-ring)] sm:w-auto"
+                >
+                  <img
+                    src={src}
+                    alt={`${title} — ${index + 1}`}
+                    loading="lazy"
+                    referrerPolicy="no-referrer"
+                    className="aspect-[3/4] w-full object-cover transition-transform duration-300 group-hover:scale-[1.02]"
+                  />
+                  <span className="glass-surface absolute end-2.5 bottom-2.5 inline-flex h-8 w-8 items-center justify-center rounded-lg text-white opacity-80 backdrop-blur-md transition-opacity group-hover:opacity-100">
+                    <Maximize2 className="h-3.5 w-3.5" strokeWidth={1.75} />
+                  </span>
+                </button>
+              ))}
+            </div>
+          ) : (
+            <div className="rounded-xl border border-[var(--border-hairline)] bg-[var(--bg-surface-elevated)] p-6 text-center text-xs text-[var(--text-secondary)]">
+              {siteCopy.paperDetail.screenshotsEmpty}
+            </div>
+          )}
+        </section>
+
+        {/* =========================================================================
+            3. LOWER SECTION — Detailed Technical Explanation
+            ========================================================================= */}
+        <section className="paper-stage-4 mt-12 border-t border-[var(--border-hairline)] pt-10">
+          <div>
+            <h2 className="font-display-heading text-lg font-semibold text-[var(--text-primary)]">
+              {deepExplanation
+                ? siteCopy.paperDetail.explanationHeading
+                : siteCopy.paperDetail.abstractHeading}
+            </h2>
+
+            <p className="font-body-prose mt-4 max-w-3xl whitespace-pre-line text-sm leading-relaxed text-[var(--text-primary)]/90 sm:text-base">
+              {deepExplanation || summary}
+            </p>
+          </div>
+
+          {highlights.length > 0 ? (
+            <div className="mt-8 border-t border-[var(--border-hairline)] pt-8">
+              <h3 className="font-display-heading text-base font-semibold text-[var(--text-primary)]">
+                {siteCopy.paperDetail.highlightsHeading}
+              </h3>
+              <ul className="mt-4 space-y-3">
+                {highlights.map((item, idx) => (
+                  <li
+                    key={idx}
+                    className="flex items-start gap-3 text-sm leading-relaxed text-[var(--text-primary)]/90"
+                  >
+                    <span className="font-mono-tabular mt-0.5 shrink-0 text-xs font-medium tracking-wider text-[var(--text-eyebrow)]">
+                      {String(idx + 1).padStart(2, '0')}
+                    </span>
+                    <span className="font-body-prose">{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
+
+          {paper.tags.length > 0 ? (
+            <div className="mt-8 flex flex-wrap items-center gap-x-2 gap-y-1 border-t border-[var(--border-hairline)] pt-6 text-xs text-[var(--text-secondary)]">
+              <span className="font-medium text-[var(--text-primary)]">
+                {siteCopy.paperDetail.tagsLabel}:
+              </span>
+              <span className="font-mono-tabular">{paper.tags.join(' · ')}</span>
+            </div>
+          ) : null}
+        </section>
       </article>
 
       <ScreenshotLightbox

@@ -176,7 +176,7 @@ export function resolveAssetUrl(relativePath: string, baseUrl = './'): string {
   if (!trimmedPath) {
     return '';
   }
-  if (/^https?:\/\//i.test(trimmedPath)) {
+  if (/^(https?:|data:|blob:)/i.test(trimmedPath)) {
     return trimmedPath;
   }
   const cleanBase = baseUrl.endsWith('/') ? baseUrl : `${baseUrl}/`;

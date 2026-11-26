@@ -10,6 +10,8 @@ import {resolveAssetUrl} from '../utils/papers';
 import {LiveSearchOverlay} from './LiveSearchOverlay';
 import {SettingsModal} from './SettingsModal';
 import {Toast, type ToastMessage} from './Toast';
+import {hasIntroPlayedInMemory} from '../utils/particleIntro';
+import {prefersReducedMotion} from '../hooks/useScrollReveal';
 
 interface NavbarProps {
   activePathname?: string;
@@ -43,11 +45,33 @@ export function Navbar({activePathname}: NavbarProps) {
   const location = useLocation();
   const currentPath = activePathname ?? location.pathname;
 
+  const [introHidden, setIntroHidden] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    return currentPath === '/' && !hasIntroPlayedInMemory() && !prefersReducedMotion();
+  });
+
   const logoSrc = resolveAssetUrl('images/logo.png', import.meta.env.BASE_URL);
 
   useEffect(() => {
     setMobileMenuOpen(false);
   }, [location.pathname]);
+
+  useEffect(() => {
+    if (currentPath !== '/') {
+      setIntroHidden(false);
+      return;
+    }
+    const handleIntroState = (e: Event) => {
+      const detail = (e as CustomEvent<{active: boolean}>).detail;
+      if (detail && typeof detail.active === 'boolean') {
+        setIntroHidden(detail.active);
+      }
+    };
+    window.addEventListener('qrblab-intro-state', handleIntroState as EventListener);
+    return () => {
+      window.removeEventListener('qrblab-intro-state', handleIntroState as EventListener);
+    };
+  }, [currentPath]);
 
   useEffect(() => {
     if (!mobileMenuOpen) {
@@ -92,7 +116,7 @@ export function Navbar({activePathname}: NavbarProps) {
     {to: '/about', label: siteCopy.nav.about, end: false},
   ];
 
-  const activeNavKey = resolveActiveNavKey(location.pathname);
+  const activeNavKey = resolveActiveNavKey(currentPath);
 
   const toggleSearch = () => {
     setMobileMenuOpen(false);
@@ -101,10 +125,15 @@ export function Navbar({activePathname}: NavbarProps) {
 
   return (
     <>
-      {/* Protected Brand Lockup (Fixed Top-Left, Untouched) */}
+      {/* Protected Brand Lockup (Absolute Top-Left, Anchored to Top of Page, Scrolls Naturally) */}
       <Link
         to="/"
-        className="fixed top-4 left-4 z-40 inline-flex items-center gap-2.5 whitespace-nowrap py-1 sm:top-5 sm:left-6 transition-transform duration-150 active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--focus-ring)]"
+        style={{
+          opacity: introHidden ? 0 : 1,
+          pointerEvents: introHidden ? 'none' : 'auto',
+          visibility: introHidden ? 'hidden' : 'visible',
+        }}
+        className="absolute top-4 left-4 z-40 inline-flex items-center gap-2.5 whitespace-nowrap py-1 sm:top-5 sm:left-6 transition-opacity duration-300 active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--focus-ring)]"
       >
         {!logoError ? (
           <img
@@ -120,8 +149,15 @@ export function Navbar({activePathname}: NavbarProps) {
         </span>
       </Link>
 
-      {/* Unboxed Individual Floating Glass Navigation Pills */}
-      <div className="fixed top-4 right-4 z-40 flex items-center gap-2 sm:top-5 sm:right-6 font-nav-sans">
+      {/* Unboxed Individual Floating Glass Navigation Pills (Fixed top-right so they stay floating on scroll) */}
+      <div
+        style={{
+          opacity: introHidden ? 0 : 1,
+          pointerEvents: introHidden ? 'none' : 'auto',
+          visibility: introHidden ? 'hidden' : 'visible',
+        }}
+        className="fixed top-4 right-4 z-40 flex items-center gap-2 sm:top-5 sm:right-6 font-nav-sans transition-opacity duration-300"
+      >
         {/* Search button pill */}
         <button
           type="button"

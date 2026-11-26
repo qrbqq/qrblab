@@ -74,21 +74,21 @@ function pickMatchedDisplayTitle(
 
 /**
  * Ranks local static papers against a live query.
- * Priority:
- *   0 — Exact title / filename / slug match
- *   1 — Prefix match (title, filename, or slug starts with query)
- *   2 — Word-boundary prefix match inside title / filename / folder / tags
- *   3 — Substring match anywhere in title, filename, slug, folder, category, tags, summary, explanation, or authors
+ * Strict rules:
+ *   - 1-character queries match STRICTLY where title or PDF filename starts with that character.
+ *   - Multi-character queries prioritize prefix matches on title/filename, word-boundary prefix in title, and category/tag substring matches.
  */
 export function searchPapers(
   items: readonly ResearchPaper[],
   query: string,
 ): SearchResult[] {
-  const normalizedQuery = normalizeSearchText(query);
+  const rawQuery = query.trim();
+  const normalizedQuery = normalizeSearchText(rawQuery);
   if (!normalizedQuery) {
     return [];
   }
 
+  const isSingleChar = rawQuery.length === 1;
   const results: SearchResult[] = [];
 
   for (const paper of items) {
@@ -99,58 +99,50 @@ export function searchPapers(
       .map(normalizeSearchText)
       .filter(Boolean);
     const slugNormalized = normalizeSearchText(paper.slug);
-    const primaryCandidates = [...titleValues, ...filenameCandidates, slugNormalized].filter(Boolean);
 
     let bestTier: number | null = null;
 
-    for (const candidate of [...titleValues, ...filenameCandidates]) {
-      if (candidate === normalizedQuery) {
-        bestTier = 0;
-        break;
+    const startsWithQuery = [...titleValues, ...filenameCandidates].some((c) => c.startsWith(normalizedQuery));
+    if (startsWithQuery) {
+      bestTier = 0;
+    }
+
+    if (isSingleChar) {
+      // 1-Character queries must strictly match title or filename starting with that character!
+      if (bestTier !== null) {
+        results.push({
+          paper,
+          score: 0,
+          filename,
+          folder,
+          matchedTitle: pickMatchedDisplayTitle(paper, query, normalizedQuery),
+        });
       }
-      if (candidate.startsWith(normalizedQuery)) {
-        bestTier = bestTier === null ? 1 : Math.min(bestTier, 1);
+      continue;
+    }
+
+    // Multi-character queries (>= 2 chars)
+    if (bestTier === null) {
+      const hasWordPrefix = titleValues.some((title) => {
+        const tokens = title.split(/[\s\-_/.]+/).filter(Boolean);
+        return tokens.some((token) => token.startsWith(normalizedQuery));
+      });
+      if (hasWordPrefix) {
+        bestTier = 1;
       }
     }
 
-    if (bestTier === null && slugNormalized) {
-      if (slugNormalized === normalizedQuery || slugNormalized.startsWith(normalizedQuery)) {
+    if (bestTier === null) {
+      const candidateSubstrings = [
+        ...titleValues,
+        ...filenameCandidates,
+        slugNormalized,
+        ...collectLocalizedValues(paper.category).map(normalizeSearchText),
+        ...paper.tags.map(normalizeSearchText),
+      ].filter(Boolean);
+
+      if (candidateSubstrings.some((text) => text.includes(normalizedQuery))) {
         bestTier = 2;
-      }
-    }
-
-    if (bestTier === null) {
-      const wordCandidates = [
-        ...primaryCandidates,
-        ...collectLocalizedValues(paper.folder).map(normalizeSearchText),
-        ...collectLocalizedValues(paper.category).map(normalizeSearchText),
-        ...paper.tags.map(normalizeSearchText),
-      ].filter(Boolean);
-
-      for (const candidate of wordCandidates) {
-        const tokens = candidate.split(/[\s\-_/.]+/).filter(Boolean);
-        if (tokens.some((token) => token.startsWith(normalizedQuery))) {
-          bestTier = 3;
-          break;
-        }
-      }
-    }
-
-    if (bestTier === null) {
-      const allSearchable = [
-        ...primaryCandidates,
-        ...collectLocalizedValues(paper.folder).map(normalizeSearchText),
-        ...collectLocalizedValues(paper.category).map(normalizeSearchText),
-        ...collectLocalizedValues(paper.shortDescription).map(normalizeSearchText),
-        ...collectLocalizedValues(paper.abstract).map(normalizeSearchText),
-        ...collectLocalizedValues(paper.explanation).map(normalizeSearchText),
-        normalizeSearchText(getPaperSummary(paper)),
-        ...paper.tags.map(normalizeSearchText),
-        ...paper.authors.map(normalizeSearchText),
-      ].filter(Boolean);
-
-      if (allSearchable.some((text) => text.includes(normalizedQuery))) {
-        bestTier = 4;
       }
     }
 
