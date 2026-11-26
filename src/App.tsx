@@ -169,6 +169,8 @@ function AppShell() {
   };
 
   const displayIsHome = displayLocation.pathname === '/';
+  const displayIsFullBleedTop =
+    displayIsHome || displayLocation.pathname === '/log';
   const transitionClass =
     phase === 'exiting'
       ? 'page-transition-exit '
@@ -186,7 +188,7 @@ function AppShell() {
         className={`${transitionClass}flex flex-1 flex-col`}
       >
         <main
-          className={`flex flex-1 flex-col ${displayIsHome ? '' : 'pt-20 sm:pt-24'}`}
+          className={`flex flex-1 flex-col ${displayIsFullBleedTop ? '' : 'pt-20 sm:pt-24'}`}
         >
           <Routes location={displayLocation}>
             <Route path="/" element={<HomePage />} />

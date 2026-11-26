@@ -4,6 +4,7 @@ import type {LabLogEntry} from '../data/labLog';
 import {labLogs} from '../data/labLog';
 import {
   formatLabLogTimestamp,
+  formatRelativeTime,
   getLabLogCaption,
   getLatestLabLog,
   isSafeExternalUrl,
@@ -62,6 +63,33 @@ test('formatLabLogTimestamp formats UTC ISO timestamps cleanly and preserves inv
   assert.ok(formatted.includes('2026'));
   assert.ok(formatted.includes('18:30'));
   assert.equal(formatLabLogTimestamp('not-a-date'), 'not-a-date');
+});
+
+test('formatRelativeTime computes accurate buckets from Just now through years ago', () => {
+  const now = Date.parse('2026-11-26T12:00:00Z');
+  const SEC = 1000;
+  const MIN = 60 * SEC;
+  const HOUR = 60 * MIN;
+  const DAY = 24 * HOUR;
+
+  assert.equal(formatRelativeTime(new Date(now - 15 * SEC).toISOString(), now), 'Just now');
+  assert.equal(formatRelativeTime(new Date(now - 5 * MIN).toISOString(), now), '5m ago');
+  assert.equal(formatRelativeTime(new Date(now - 59 * MIN).toISOString(), now), '59m ago');
+  assert.equal(formatRelativeTime(new Date(now - 3 * HOUR).toISOString(), now), '3h ago');
+  assert.equal(formatRelativeTime(new Date(now - 23 * HOUR).toISOString(), now), '23h ago');
+  assert.equal(formatRelativeTime(new Date(now - 1 * DAY).toISOString(), now), '1d ago');
+  assert.equal(formatRelativeTime(new Date(now - 6 * DAY).toISOString(), now), '6d ago');
+  assert.equal(formatRelativeTime(new Date(now - 7 * DAY).toISOString(), now), '1w ago');
+  assert.equal(formatRelativeTime(new Date(now - 21 * DAY).toISOString(), now), '3w ago');
+  assert.equal(formatRelativeTime(new Date(now - 28 * DAY).toISOString(), now), '1mo ago');
+  assert.equal(formatRelativeTime(new Date(now - 65 * DAY).toISOString(), now), '2mo ago');
+  assert.equal(formatRelativeTime(new Date(now - 340 * DAY).toISOString(), now), '11mo ago');
+  assert.equal(formatRelativeTime(new Date(now - 365 * DAY).toISOString(), now), '1y ago');
+  assert.equal(formatRelativeTime(new Date(now - 800 * DAY).toISOString(), now), '2y ago');
+  // Supports YYYY-MM-DD date-only strings cleanly
+  assert.equal(formatRelativeTime('2026-11-24', now), '2d ago');
+  // Preserves invalid strings cleanly
+  assert.equal(formatRelativeTime('not-a-date', now), 'not-a-date');
 });
 
 test('isSafeExternalUrl allows http/https and rejects javascript/data/empty urls', () => {

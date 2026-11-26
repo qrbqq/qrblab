@@ -1,13 +1,16 @@
-import {useState} from 'react';
+import {useEffect, useState} from 'react';
 import {ArrowUpRight, ImageOff, Maximize2} from 'lucide-react';
 import {siteCopy} from '../data/i18n';
 import type {LabLogEntry} from '../data/labLog';
 import {
   formatLabLogTimestamp,
+  formatRelativeTime,
   getLabLogCaption,
   isSafeExternalUrl,
 } from '../utils/labLog';
 import {resolveAssetUrl} from '../utils/papers';
+import {FounderAvatar} from './FounderAvatar';
+import {VerifiedBadge} from './VerifiedBadge';
 
 interface LabLogCardProps {
   entry: LabLogEntry;
@@ -21,9 +24,18 @@ export function LabLogCard({
   compact = false,
 }: LabLogCardProps) {
   const [imageFailed, setImageFailed] = useState(false);
+  const [nowMs, setNowMs] = useState(() => Date.now());
+
+  useEffect(() => {
+    const intervalId = window.setInterval(() => {
+      setNowMs(Date.now());
+    }, 60_000);
+    return () => window.clearInterval(intervalId);
+  }, []);
 
   const caption = getLabLogCaption(entry);
-  const formattedTime = formatLabLogTimestamp(entry.timestamp);
+  const exactFormattedTime = formatLabLogTimestamp(entry.timestamp);
+  const relativeTime = formatRelativeTime(entry.timestamp, nowMs);
   const imageUrl = entry.image
     ? resolveAssetUrl(entry.image, import.meta.env.BASE_URL)
     : '';
@@ -35,13 +47,38 @@ export function LabLogCard({
         compact ? 'p-4 sm:p-5' : 'p-5 sm:p-6'
       }`}
     >
-      <div className="flex flex-wrap items-center justify-between gap-2.5">
-        <time
-          dateTime={entry.timestamp}
-          className="font-mono-tabular inline-flex items-center rounded-md border border-[var(--border-hairline)] bg-[var(--bg-surface-elevated)] px-2.5 py-1 text-[11px] font-medium tracking-wide text-[var(--text-secondary)] tabular-nums"
-        >
-          {formattedTime}
-        </time>
+      {/* Author Identity Header */}
+      <div className="flex items-start justify-between gap-3">
+        <div className="flex min-w-0 items-center gap-3">
+          <FounderAvatar
+            sizeClass={compact ? 'h-8 w-8' : 'h-9 w-9'}
+            paddingClass={compact ? 'p-1.5' : 'p-1.5'}
+            className="border border-white/[0.16]"
+            alt="qrbqq"
+          />
+
+          <div className="min-w-0 flex flex-col">
+            <div className="flex flex-wrap items-center gap-1.5">
+              <span className="font-display-card text-sm font-bold text-[#F5F5F5]">
+                qrbqq
+              </span>
+              <VerifiedBadge size={18} />
+              <span className="font-mono-tabular text-xs text-[#8A8A8A]">
+                @qrbqq
+              </span>
+              <span aria-hidden="true" className="text-xs text-white/30">
+                ·
+              </span>
+              <time
+                dateTime={entry.timestamp}
+                title={exactFormattedTime}
+                className="font-mono-tabular text-xs text-[#8A8A8A] tabular-nums transition-colors hover:text-[#F5F5F5]"
+              >
+                {relativeTime}
+              </time>
+            </div>
+          </div>
+        </div>
 
         {hasSafeSource && entry.sourceUrl ? (
           <a
@@ -56,6 +93,7 @@ export function LabLogCard({
         ) : null}
       </div>
 
+      {/* Dispatch Body */}
       <p
         className={`font-body-prose mt-3.5 text-[var(--text-primary)] ${
           compact ? 'text-sm' : 'text-sm sm:text-[15px]'
@@ -64,6 +102,7 @@ export function LabLogCard({
         {caption}
       </p>
 
+      {/* Optional Tags */}
       {entry.tags && entry.tags.length > 0 ? (
         <div className="mt-3 flex flex-wrap items-center gap-x-2 gap-y-1 font-mono-tabular text-[11px] text-[var(--text-secondary)]">
           {entry.tags.map((tag, index) => (
@@ -75,6 +114,7 @@ export function LabLogCard({
         </div>
       ) : null}
 
+      {/* Optional Media Attachment (Never renders empty image box when absent) */}
       {imageUrl ? (
         <div className="mt-4 overflow-hidden rounded-2xl border border-[var(--border-hairline)] bg-[var(--bg-surface-elevated)]">
           {!imageFailed ? (
