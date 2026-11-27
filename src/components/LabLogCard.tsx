@@ -143,25 +143,16 @@ export function LabLogCard({
         <div className="flex items-start justify-between gap-3">
           <Link
             to={profileIdentity.routePath}
-            aria-label={`View ${profileIdentity.displayName} profile`}
+            aria-label={`View ${profileIdentity.handle} profile`}
             className="group/author inline-flex min-w-0 flex-wrap items-center gap-x-1.5 gap-y-0.5 rounded-lg text-start transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--focus-ring)]"
           >
             <span
               className="font-display-heading text-xs font-semibold text-[#F5F5F5] transition-colors group-hover/author:text-white sm:text-sm"
               style={{textTransform: 'none'}}
             >
-              {profileIdentity.displayName}
+              {profileIdentity.handle}
             </span>
             <VerifiedBadge size={18} label={badgeLabel} />
-            {profileIdentity.handle &&
-            profileIdentity.handle !== profileIdentity.displayName ? (
-              <span
-                className="font-mono-tabular text-xs text-[#8A8A8A] transition-colors group-hover/author:text-[#C5C5C5]"
-                style={{textTransform: 'none'}}
-              >
-                {profileIdentity.handle}
-              </span>
-            ) : null}
             <span aria-hidden="true" className="text-xs text-white/30">
               ·
             </span>
