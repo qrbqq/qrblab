@@ -15,6 +15,11 @@ export interface LabLogEntry {
 
 export const labLogs: LabLogEntry[] = [
   {
+    id: 'log-20261127-201555',
+    date: '2026-11-27T18:15:55Z',
+    text: "From chatbots to agentic AI, and from the cloud to local AI—we are seeing the rise of open-weight models that run locally and can be customized through fine-tuning, alongside hybrid architectures and AI agents capable of executing real-world tasks. We may soon see smaller companies managed by lean teams, perhaps even operating entirely from home. I believe this is one of the defining features of the future of business.",
+  },
+  {
     id: "log-20261126-160350",
     timestamp: "2026-11-26T16:03:50Z",
     caption: "النقلة الحقيقية ليست في عدد المعاملات، بل في test-time compute: نماذج مدرَّبة بالتعلم المعزز تولّد chain-of-thought، وتراجع مساراتها بـverifier، وتصحح أخطاءها قبل الجواب. الآلية ما زالت next-token prediction، لكن الاستدلال نفسه صار قابلاً للتوسع بالحوسبة.",

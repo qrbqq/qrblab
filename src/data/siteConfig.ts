@@ -203,7 +203,7 @@ export const siteConfig: SiteConfig = {
   handle: "@AbdoAhmed",
   displayName: "AbdoAhmed",
   brandName: 'qrblab',
-  profileAvatar: "images/profile-avatar.jpg",
+  profileAvatar: "images/profile-avatar.png",
   tagline: {
     en: '',
   },
