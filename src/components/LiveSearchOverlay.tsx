@@ -10,6 +10,7 @@ import {ArrowRight, FileText, Folder, Search, X} from 'lucide-react';
 import {siteCopy} from '../data/siteConfig';
 import {papers} from '../data/papers';
 import {formatPaperDate, resolveAssetUrl} from '../utils/papers';
+import {recordQInteraction} from '../utils/qScore';
 import {searchPapers} from '../utils/search';
 
 interface LiveSearchOverlayProps {
@@ -37,6 +38,7 @@ export function LiveSearchOverlay({open, onClose}: LiveSearchOverlayProps) {
     if (open) {
       setIsClosing(false);
       setActiveIndex(0);
+      recordQInteraction('tool-trigger');
       const frame = window.requestAnimationFrame(() => {
         inputRef.current?.focus();
       });
@@ -104,6 +106,7 @@ export function LiveSearchOverlay({open, onClose}: LiveSearchOverlayProps) {
   }
 
   const handleOpenResult = (slug: string) => {
+    recordQInteraction('search-query');
     setIsClosing(true);
     setTimeout(() => {
       setIsClosing(false);

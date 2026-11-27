@@ -5,7 +5,6 @@ import {labLogs} from '../data/labLog';
 import {siteConfig} from '../data/siteConfig';
 import {
   computeThreadConnections,
-  filterLabLogsByProfile,
   formatLabLogTimestamp,
   formatRelativeTime,
   getLabLogCaption,
@@ -113,22 +112,6 @@ test('resolveLabLogVideo trims and returns MP4 attachment path cleanly', () => {
   assert.equal(resolveLabLogVideo(fixtureLogs[0]!), '');
 });
 
-test('filterLabLogsByProfile routes omitted profile to primary and isolates secondary entries', () => {
-  const mixed: LabLogEntry[] = [
-    {id: 'p1', timestamp: '2026-11-25T10:00:00Z', caption: {en: 'Default primary'}},
-    {id: 'p2', timestamp: '2026-11-25T11:00:00Z', profile: 'primary', caption: {en: 'Explicit primary'}},
-    {id: 's1', timestamp: '2026-11-25T12:00:00Z', profile: 'secondary', caption: {en: 'Secondary channel'}},
-  ];
-  assert.deepEqual(
-    filterLabLogsByProfile(mixed, 'primary').map((e) => e.id),
-    ['p1', 'p2'],
-  );
-  assert.deepEqual(
-    filterLabLogsByProfile(mixed, 'secondary').map((e) => e.id),
-    ['s1'],
-  );
-});
-
 test('computeThreadConnections links consecutive dispatches sharing identical threadId', () => {
   const entries: LabLogEntry[] = [
     {id: 'a1', timestamp: '2026-11-25T12:00:00Z', threadId: 't-alpha', caption: {en: 'Thread 1'}},
@@ -155,32 +138,19 @@ test('computeThreadConnections links consecutive dispatches sharing identical th
   assert.equal(connected[4]?.connectsToNext, false);
 });
 
-test('resolveProfileIdentity preserves exact casing and resolves red vs blue badges', () => {
+test('resolveProfileIdentity preserves exact casing and routes to /log', () => {
   const customConfig = {
     ...siteConfig,
     displayName: 'QrB_LaB_Alpha',
     handle: '@QrB_01',
     profileCoverVideo: 'images/founder-hero.mp4',
-    secondaryProfile: {
-      displayName: 'Second_Lab_Channel',
-      handle: '@Second_Channel',
-      profileCoverVideo: 'images/alt-loop.mp4',
-    },
   };
 
-  const primary = resolveProfileIdentity('primary', customConfig);
+  const primary = resolveProfileIdentity(customConfig);
   assert.equal(primary.displayName, 'QrB_LaB_Alpha');
   assert.equal(primary.handle, '@QrB_01');
   assert.equal(primary.profileCoverVideo, 'images/founder-hero.mp4');
-  assert.equal(primary.badgeVariant, 'red');
   assert.equal(primary.routePath, '/log');
-
-  const secondary = resolveProfileIdentity('secondary', customConfig);
-  assert.equal(secondary.displayName, 'Second_Lab_Channel');
-  assert.equal(secondary.handle, '@Second_Channel');
-  assert.equal(secondary.profileCoverVideo, 'images/alt-loop.mp4');
-  assert.equal(secondary.badgeVariant, 'blue');
-  assert.equal(secondary.routePath, '/profile-2');
 });
 
 test('formatLabLogTimestamp formats UTC ISO timestamps cleanly and preserves invalid input', () => {

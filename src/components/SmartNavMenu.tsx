@@ -1,10 +1,12 @@
-import {useEffect, useRef} from 'react';
+import {useEffect, useRef, useState, type CSSProperties} from 'react';
 import {Link} from 'react-router-dom';
-import {RotateCcw, Sparkles} from 'lucide-react';
+import {RotateCcw} from 'lucide-react';
 import {siteConfig, siteCopy} from '../data/siteConfig';
-import {clearAllLocalData} from '../utils/ratings';
-import {getAutoSortedSections} from '../utils/navigationRegistry';
+import {prefersReducedMotion} from '../hooks/useScrollReveal';
+import {useQScore} from '../hooks/useQScore';
 import {resolveProfileIdentity} from '../utils/labLog';
+import {getAutoSortedSections} from '../utils/navigationRegistry';
+import {clearAllLocalData} from '../utils/ratings';
 import {VerifiedBadge} from './VerifiedBadge';
 
 interface SmartNavMenuProps {
@@ -14,13 +16,53 @@ interface SmartNavMenuProps {
   onResetSuccess: (message: string) => void;
 }
 
+const MENU_EXIT_DURATION_MS = 190;
+
 export function SmartNavMenu({
   open,
   onClose,
   activePathname,
   onResetSuccess,
 }: SmartNavMenuProps) {
+  const [isRendered, setIsRendered] = useState(open);
+  const [isClosing, setIsClosing] = useState(false);
+  const qScore = useQScore();
   const panelRef = useRef<HTMLDivElement | null>(null);
+  const exitTimerRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    if (exitTimerRef.current !== null) {
+      window.clearTimeout(exitTimerRef.current);
+      exitTimerRef.current = null;
+    }
+
+    if (open) {
+      setIsRendered(true);
+      setIsClosing(false);
+      return;
+    }
+
+    if (isRendered) {
+      if (prefersReducedMotion()) {
+        setIsClosing(false);
+        setIsRendered(false);
+        return;
+      }
+      setIsClosing(true);
+      exitTimerRef.current = window.setTimeout(() => {
+        setIsClosing(false);
+        setIsRendered(false);
+        exitTimerRef.current = null;
+      }, MENU_EXIT_DURATION_MS);
+    }
+
+    return () => {
+      if (exitTimerRef.current !== null) {
+        window.clearTimeout(exitTimerRef.current);
+        exitTimerRef.current = null;
+      }
+    };
+  }, [open, isRendered]);
 
   useEffect(() => {
     if (!open) return;
@@ -48,201 +90,127 @@ export function SmartNavMenu({
     };
   }, [open, onClose]);
 
-  if (!open) {
+  if (!isRendered) {
     return null;
   }
 
-  const primaryProfile = resolveProfileIdentity('primary', siteConfig);
-  const secondaryProfile = resolveProfileIdentity('secondary', siteConfig);
-
-  // Filter out the legacy lab-log entry from auto-sorted list since Profile 1 & Profile 2 are dedicated
+  const primaryProfile = resolveProfileIdentity(siteConfig);
   const dynamicSections = getAutoSortedSections().filter(
     (section) => section.id !== 'lab-log',
   );
+
   const isHomeActive = activePathname === '/';
   const isProfile1Active =
     activePathname === '/log' || activePathname.startsWith('/log/');
-  const isProfile2Active =
-    activePathname === '/profile-2' || activePathname.startsWith('/profile-2/');
   const isAboutActive =
     activePathname === '/about' || activePathname.startsWith('/about/');
+
+  const chipMotionClass = isClosing ? 'visionos-chip-exit' : 'visionos-chip-enter';
+  const backdropMotionClass = isClosing
+    ? 'smart-backdrop-exit'
+    : 'smart-backdrop-enter';
+
+  const getChipDelayStyle = (index: number): CSSProperties | undefined =>
+    isClosing
+      ? undefined
+      : ({'--chip-delay': `${index * 28}ms`} as CSSProperties);
 
   const handleClearLocalData = () => {
     clearAllLocalData();
     onResetSuccess(siteCopy.settings.clearDataSuccess);
   };
 
+  let chipIndex = 0;
+
   return (
     <>
-      {/* Subtle backdrop scrim for touch & outside click dismissal */}
+      {/* Subtle translucent backdrop scrim for touch & outside click dismissal */}
       <div
         aria-hidden="true"
         onClick={onClose}
-        className="fixed inset-0 z-40 bg-black/60 backdrop-blur-[2px] transition-opacity duration-200"
+        className={`fixed inset-0 z-40 bg-black/50 backdrop-blur-[3px] ${backdropMotionClass}`}
       />
 
-      {/* Floating Translucent Obsidian Glass Menu Panel */}
+      {/* Transparent container holding separated VisionOS floating frosted-glass chips */}
       <div
         id="smart-nav-menu"
         ref={panelRef}
         role="dialog"
         aria-modal="true"
         aria-label="Navigation Menu"
-        className="fixed top-16 right-4 sm:top-20 sm:right-6 z-50 w-76 sm:w-84 max-w-[calc(100vw-2rem)] rounded-2xl border border-white/[0.14] bg-[#0A0A0A]/95 p-3 text-[var(--text-primary)] shadow-2xl backdrop-blur-2xl smart-menu-enter"
-        style={{
-          boxShadow:
-            '0 24px 60px rgba(0, 0, 0, 0.85), inset 0 1px 0 rgba(255, 255, 255, 0.12)',
-        }}
+        data-state={isClosing ? 'closing' : 'open'}
+        className="fixed top-16 right-4 sm:top-20 sm:right-6 z-50 w-76 sm:w-80 max-w-[calc(100vw-2rem)] text-[var(--text-primary)]"
       >
-        {/* Subtle Panel Header */}
-        <div className="flex items-center justify-between px-2.5 pt-1 pb-2">
-          <div className="flex items-center gap-1.5 text-[10px] font-mono-tabular tracking-wider uppercase text-white/45">
-            <Sparkles className="h-3 w-3 text-white/50" />
-            <span>Navigation System</span>
-          </div>
-          <span className="font-mono-tabular text-[9px] uppercase tracking-widest text-white/35">
-            Verified
-          </span>
-        </div>
-
-        <nav aria-label="Main Navigation" className="flex flex-col gap-1">
-          {/* =========================================================================
-              1. PINNED HOME (Always pinned first at the very top)
-              ========================================================================= */}
+        <nav aria-label="Main Navigation" className="flex flex-col gap-2">
+          {/* 1. Pinned Home Chip */}
           <Link
             to="/"
             onClick={onClose}
             aria-current={isHomeActive ? 'page' : undefined}
-            className={`group flex items-center justify-between rounded-xl px-3 py-2.5 text-xs transition-all duration-150 ${
-              isHomeActive
-                ? 'bg-white/[0.1] border border-white/[0.22] font-semibold text-white shadow-xs'
-                : 'border border-transparent text-[var(--text-secondary)] hover:bg-white/[0.05] hover:text-white'
-            }`}
+            data-active={isHomeActive ? 'true' : 'false'}
+            style={getChipDelayStyle(chipIndex++)}
+            className={`visionos-nav-chip ${chipMotionClass} group flex min-h-[52px] items-center justify-between gap-3 rounded-2xl px-4 py-3 text-xs active:scale-[0.985] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white`}
           >
-            <div className="flex flex-col">
-              <span className="text-sm font-semibold tracking-tight text-white">
+            <div className="flex min-w-0 flex-col">
+              <span className="truncate text-sm font-semibold tracking-tight text-white">
                 {siteCopy.nav.home}
               </span>
-              <span className="text-[11px] text-white/50">
+              <span className="truncate text-[11px] text-white/55">
                 Overview &amp; void index
               </span>
             </div>
             <span
-              className={`rounded px-1.5 py-0.5 text-[9px] font-mono-tabular uppercase tracking-wider ${
-                isHomeActive
-                  ? 'bg-white/20 text-white border border-white/30 font-semibold'
-                  : 'bg-white/[0.04] text-white/40 border border-white/[0.06]'
+              className={`shrink-0 whitespace-nowrap font-mono-tabular text-[10px] uppercase tracking-wider ${
+                isHomeActive ? 'font-semibold text-white/90' : 'text-white/45'
               }`}
             >
               Pinned
             </span>
           </Link>
 
-          {/* Section Divider Hairline beneath Home */}
-          <div className="my-1.5 h-[1px] w-full bg-white/[0.08]" />
-
-          {/* =========================================================================
-              2. PROFILE 1 (Red Verified Seal Badge + Counter 1)
-              ========================================================================= */}
+          {/* 2. Profile 1 Chip (Counter 1 + Deep Crimson Verified Seal) */}
           <Link
             to="/log"
             onClick={onClose}
             aria-current={isProfile1Active ? 'page' : undefined}
-            className={`group flex items-center justify-between rounded-xl px-3 py-2.5 text-xs transition-all duration-150 ${
-              isProfile1Active
-                ? 'bg-white/[0.1] border border-white/[0.22] font-semibold text-white shadow-xs'
-                : 'border border-transparent text-[var(--text-secondary)] hover:bg-white/[0.05] hover:text-white'
-            }`}
+            data-active={isProfile1Active ? 'true' : 'false'}
+            style={getChipDelayStyle(chipIndex++)}
+            className={`visionos-nav-chip ${chipMotionClass} group flex min-h-[52px] items-center justify-between gap-3 rounded-2xl px-4 py-3 text-xs active:scale-[0.985] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white`}
           >
-            <div className="flex flex-col">
+            <div className="flex min-w-0 flex-col">
               <div className="flex items-center gap-2">
                 <span
-                  className="text-sm font-semibold tracking-tight text-white"
+                  className="whitespace-nowrap text-sm font-semibold tracking-tight text-white"
                   style={{textTransform: 'none'}}
                 >
                   Profile 1
                 </span>
-                <span className="inline-flex min-w-[18px] items-center justify-center rounded-full border border-white/[0.14] bg-white/[0.08] px-1.5 py-0.5 text-[10px] font-mono-tabular font-medium leading-none text-white/80">
+                <span className="font-mono-tabular text-[11px] font-medium tabular-nums text-white/65">
                   1
                 </span>
-                <VerifiedBadge
-                  size={16}
-                  variant="red"
-                  label="Verified Profile 1"
-                />
+                <VerifiedBadge size={16} label="Verified Profile 1" />
               </div>
               <span
-                className="text-[11px] text-white/50"
+                className="truncate text-[11px] text-white/55"
                 style={{textTransform: 'none'}}
               >
                 {primaryProfile.displayName} · {primaryProfile.handle}
               </span>
             </div>
             <span
-              className={`rounded px-1.5 py-0.5 text-[9px] font-mono-tabular uppercase tracking-wider ${
+              data-testid="smart-menu-q-score"
+              className={`shrink-0 whitespace-nowrap font-mono-tabular text-[10px] tabular-nums tracking-wider ${
                 isProfile1Active
-                  ? 'bg-white/20 text-white border border-white/30 font-semibold'
-                  : 'bg-white/[0.04] text-white/40 border border-white/[0.06]'
+                  ? 'font-semibold text-white/90'
+                  : 'text-white/65'
               }`}
+              style={{textTransform: 'none'}}
             >
-              Primary
+              {qScore.label}
             </span>
           </Link>
 
-          {/* Section Divider Hairline beneath Profile 1 */}
-          <div className="my-1.5 h-[1px] w-full bg-white/[0.08]" />
-
-          {/* =========================================================================
-              3. PROFILE 2 (Blue Verified Seal Badge)
-              ========================================================================= */}
-          <Link
-            to="/profile-2"
-            onClick={onClose}
-            aria-current={isProfile2Active ? 'page' : undefined}
-            className={`group flex items-center justify-between rounded-xl px-3 py-2.5 text-xs transition-all duration-150 ${
-              isProfile2Active
-                ? 'bg-white/[0.1] border border-white/[0.22] font-semibold text-white shadow-xs'
-                : 'border border-transparent text-[var(--text-secondary)] hover:bg-white/[0.05] hover:text-white'
-            }`}
-          >
-            <div className="flex flex-col">
-              <div className="flex items-center gap-2">
-                <span
-                  className="text-sm font-semibold tracking-tight text-white"
-                  style={{textTransform: 'none'}}
-                >
-                  Profile 2
-                </span>
-                <VerifiedBadge
-                  size={16}
-                  variant="blue"
-                  label="Verified Profile 2"
-                />
-              </div>
-              <span
-                className="text-[11px] text-white/50"
-                style={{textTransform: 'none'}}
-              >
-                {secondaryProfile.displayName} · {secondaryProfile.handle}
-              </span>
-            </div>
-            <span
-              className={`rounded px-1.5 py-0.5 text-[9px] font-mono-tabular uppercase tracking-wider ${
-                isProfile2Active
-                  ? 'bg-white/20 text-white border border-white/30 font-semibold'
-                  : 'bg-white/[0.04] text-white/40 border border-white/[0.06]'
-              }`}
-            >
-              Secondary
-            </span>
-          </Link>
-
-          {/* Section Divider Hairline beneath Profile 2 */}
-          <div className="my-1.5 h-[1px] w-full bg-white/[0.08]" />
-
-          {/* =========================================================================
-              4. DYNAMIC SECTION (qrb lab)
-              ========================================================================= */}
+          {/* 3. Dynamic qrb lab Chip */}
           {dynamicSections.map((section) => {
             const isMatch =
               section.id === 'qrb-lab'
@@ -251,25 +219,21 @@ export function SmartNavMenu({
                 : activePathname === section.to ||
                   activePathname.startsWith(`${section.to}/`);
 
-            const caseClass = section.lowercaseStrict
-              ? 'normal-case lowercase font-sans '
-              : '';
-
             return (
               <Link
                 key={section.id}
                 to={section.to}
                 onClick={onClose}
                 aria-current={isMatch ? 'page' : undefined}
-                className={`group flex items-center justify-between rounded-xl px-3 py-2.5 text-xs transition-all duration-150 ${
-                  isMatch
-                    ? 'bg-white/[0.1] border border-white/[0.22] font-semibold text-white shadow-xs'
-                    : 'border border-transparent text-[var(--text-secondary)] hover:bg-white/[0.05] hover:text-white'
-                }`}
+                data-active={isMatch ? 'true' : 'false'}
+                style={getChipDelayStyle(chipIndex++)}
+                className={`visionos-nav-chip ${chipMotionClass} group flex min-h-[52px] items-center justify-between gap-3 rounded-2xl px-4 py-3 text-xs active:scale-[0.985] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white`}
               >
-                <div className="flex flex-col">
+                <div className="flex min-w-0 flex-col">
                   <span
-                    className={`${caseClass}text-sm font-semibold tracking-tight text-white`}
+                    className={`${
+                      section.lowercaseStrict ? 'normal-case font-sans ' : ''
+                    }truncate text-sm font-semibold tracking-tight text-white`}
                     style={
                       section.lowercaseStrict
                         ? {textTransform: 'none'}
@@ -278,84 +242,68 @@ export function SmartNavMenu({
                   >
                     {section.label}
                   </span>
-                  <span className="text-[11px] text-white/50">
+                  <span className="truncate text-[11px] text-white/55">
                     {section.description}
                   </span>
                 </div>
-
-                <div className="flex items-center gap-1.5">
-                  <span
-                    className={`rounded px-1.5 py-0.5 text-[10px] font-mono-tabular tabular-nums tracking-wider ${
-                      section.latestTimestamp !== null
-                        ? 'bg-white/[0.08] text-white/80 border border-white/[0.12]'
-                        : 'bg-white/[0.03] text-white/35 border border-white/[0.05]'
-                    }`}
-                  >
-                    {section.badgeText}
-                  </span>
-                </div>
+                <span
+                  className={`shrink-0 whitespace-nowrap font-mono-tabular text-[10px] tabular-nums tracking-wider ${
+                    isMatch
+                      ? 'font-semibold text-white/90'
+                      : section.latestTimestamp !== null
+                        ? 'text-white/75'
+                        : 'text-white/45'
+                  }`}
+                >
+                  {section.badgeText}
+                </span>
               </Link>
             );
           })}
 
-          {/* Section Divider Hairline beneath dynamic section */}
-          <div className="my-1.5 h-[1px] w-full bg-white/[0.08]" />
-
-          {/* =========================================================================
-              5. FIXED ABOUT SECTION
-              ========================================================================= */}
+          {/* 4. Fixed About Chip */}
           <Link
             to="/about"
             onClick={onClose}
             aria-current={isAboutActive ? 'page' : undefined}
-            className={`group flex items-center justify-between rounded-xl px-3 py-2.5 text-xs transition-all duration-150 ${
-              isAboutActive
-                ? 'bg-white/[0.1] border border-white/[0.22] font-semibold text-white shadow-xs'
-                : 'border border-transparent text-[var(--text-secondary)] hover:bg-white/[0.05] hover:text-white'
-            }`}
+            data-active={isAboutActive ? 'true' : 'false'}
+            style={getChipDelayStyle(chipIndex++)}
+            className={`visionos-nav-chip ${chipMotionClass} group flex min-h-[52px] items-center justify-between gap-3 rounded-2xl px-4 py-3 text-xs active:scale-[0.985] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white`}
           >
-            <div className="flex flex-col">
-              <span className="text-sm font-semibold tracking-tight text-white">
+            <div className="flex min-w-0 flex-col">
+              <span className="truncate text-sm font-semibold tracking-tight text-white">
                 {siteCopy.nav.about}
               </span>
-              <span className="text-[11px] text-white/50">
+              <span className="truncate text-[11px] text-white/55">
                 Platform charter &amp; mission
               </span>
             </div>
             <span
-              className={`rounded px-1.5 py-0.5 text-[9px] font-mono-tabular uppercase tracking-wider ${
-                isAboutActive
-                  ? 'bg-white/20 text-white border border-white/30 font-semibold'
-                  : 'bg-white/[0.03] text-white/35 border border-white/[0.05]'
+              className={`shrink-0 whitespace-nowrap font-mono-tabular text-[10px] uppercase tracking-wider ${
+                isAboutActive ? 'font-semibold text-white/90' : 'text-white/45'
               }`}
             >
               Info
             </span>
           </Link>
-        </nav>
 
-        {/* Section Divider Hairline beneath About */}
-        <div className="my-1.5 h-[1px] w-full bg-white/[0.08]" />
-
-        {/* =========================================================================
-            6. DISCREET LOCAL DATA RESET FOOTER (Clean, quiet, zero clutter)
-            ========================================================================= */}
-        <div className="pt-0.5">
+          {/* 5. Discreet Local Data Reset Chip */}
           <button
             type="button"
             onClick={handleClearLocalData}
             aria-label={siteCopy.settings.clearDataButton}
-            className="flex min-h-[38px] w-full items-center justify-between rounded-xl px-2.5 py-1.5 text-xs text-white/45 transition-colors hover:bg-white/[0.05] hover:text-white active:scale-[0.985] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+            style={getChipDelayStyle(chipIndex++)}
+            className={`visionos-nav-chip ${chipMotionClass} flex min-h-[46px] w-full items-center justify-between gap-3 rounded-2xl px-4 py-2.5 text-xs text-white/65 hover:text-white active:scale-[0.985] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white`}
           >
-            <span className="flex items-center gap-2">
-              <RotateCcw className="h-3.5 w-3.5 shrink-0 text-white/40" />
-              <span>Clear local ratings</span>
+            <span className="flex min-w-0 items-center gap-2">
+              <RotateCcw className="h-3.5 w-3.5 shrink-0 text-white/50" />
+              <span className="truncate">Clear local ratings</span>
             </span>
-            <span className="font-mono-tabular text-[9px] uppercase tracking-wider text-white/30">
+            <span className="shrink-0 whitespace-nowrap font-mono-tabular text-[10px] uppercase tracking-wider text-white/40">
               Reset
             </span>
           </button>
-        </div>
+        </nav>
       </div>
     </>
   );

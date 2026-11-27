@@ -99,6 +99,9 @@ export function clearPaperRating(
   }
 }
 
+const Q_INTERACTIONS_KEY = 'qrb-lab:q-interactions';
+const Q_UPDATED_EVENT = 'qrb-lab:q-score-updated';
+
 export function clearAllLocalData(
   storage: StorageLike | null = getDefaultStorage(),
 ): number {
@@ -122,8 +125,12 @@ export function clearAllLocalData(
         clearedRatings += 1;
       }
     }
+    storage.removeItem(Q_INTERACTIONS_KEY);
     for (const legacyKey of LEGACY_STORAGE_KEYS) {
       storage.removeItem(legacyKey);
+    }
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent(Q_UPDATED_EVENT));
     }
   } catch {
     // Ignore storage quota or privacy-mode failures cleanly

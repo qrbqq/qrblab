@@ -1,12 +1,15 @@
 import {useState} from 'react';
 import {Link} from 'react-router-dom';
 import {siteConfig, siteCopy} from '../data/siteConfig';
+import {useQScore} from '../hooks/useQScore';
 import {getActiveChannels, getLocalizedText, resolveAssetUrl} from '../utils/papers';
+import {QMetricBadge} from './QMetricBadge';
 import {ScrollReveal} from './ScrollReveal';
 
 export function Footer() {
   const [logoError, setLogoError] = useState(false);
   const currentYear = new Date().getFullYear();
+  const qScore = useQScore();
   const activeChannels = getActiveChannels(siteConfig);
   const tagline =
     getLocalizedText(siteConfig.tagline).trim() || siteCopy.footer.tagline;
@@ -86,9 +89,21 @@ export function Footer() {
         </ScrollReveal>
 
         <ScrollReveal staggerIndex={2}>
-          <p className="font-mono-tabular text-xs text-[var(--text-secondary)]">
-            © {currentYear} {siteCopy.footer.copyright}
-          </p>
+          <div className="flex flex-wrap items-center gap-2.5 text-xs text-[var(--text-secondary)]">
+            <p className="font-mono-tabular">
+              © {currentYear} {siteCopy.footer.copyright}
+            </p>
+            <span aria-hidden="true" className="text-white/25">
+              ·
+            </span>
+            <Link
+              to="/log"
+              aria-label={`View Founder Profile (${qScore.label})`}
+              className="inline-flex items-center transition-opacity hover:opacity-100 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--focus-ring)]"
+            >
+              <QMetricBadge score={qScore} variant="inline" />
+            </Link>
+          </div>
         </ScrollReveal>
       </div>
     </footer>

@@ -54,8 +54,8 @@ export function LabLogCard({
   const relativeTime = formatRelativeTime(entry.timestamp, nowMs);
   const safeSourceUrl = sanitizeExternalUrl(entry.sourceUrl);
   const profileIdentity = useMemo(
-    () => resolveProfileIdentity(entry.profile ?? 'primary', siteConfig),
-    [entry.profile],
+    () => resolveProfileIdentity(siteConfig),
+    [],
   );
 
   const rawImagePaths = useMemo(() => resolveLabLogImages(entry), [entry]);
@@ -73,10 +73,7 @@ export function LabLogCard({
     [rawVideoPath],
   );
 
-  const badgeLabel =
-    profileIdentity.badgeVariant === 'blue'
-      ? `Verified ${profileIdentity.displayName}`
-      : `Verified ${profileIdentity.displayName}`;
+  const badgeLabel = `Verified ${profileIdentity.displayName}`;
 
   const topPadClass = connectsFromPrev
     ? 'pt-3.5'
@@ -155,11 +152,7 @@ export function LabLogCard({
             >
               {profileIdentity.displayName}
             </span>
-            <VerifiedBadge
-              size={18}
-              variant={profileIdentity.badgeVariant}
-              label={badgeLabel}
-            />
+            <VerifiedBadge size={18} label={badgeLabel} />
             {profileIdentity.handle &&
             profileIdentity.handle !== profileIdentity.displayName ? (
               <span
@@ -215,9 +208,9 @@ export function LabLogCard({
           </div>
         ) : null}
 
-        {/* Multi-Image / Animated GIF Horizontal Carousel OR Single Natural-Aspect Image */}
+        {/* Multi-Image / Animated GIF Horizontal Carousel OR Single 1:1 Bounded Image */}
         {resolvedImageUrls.length === 1 ? (
-          <div className="mt-3.5 w-full overflow-hidden rounded-xl border border-white/[0.08] bg-[#0A0A0A]">
+          <div className="mt-3.5 w-full max-w-sm sm:max-w-md aspect-square overflow-hidden rounded-xl border border-white/[0.08] bg-[#0A0A0A]">
             {resolvedImageUrls[0] && !failedImages[0] ? (
               <button
                 type="button"
@@ -230,7 +223,7 @@ export function LabLogCard({
                   )
                 }
                 aria-label={siteCopy.labLog.zoomImage}
-                className="group relative block w-full overflow-hidden text-start focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--focus-ring)]"
+                className="group relative block h-full w-full overflow-hidden text-start focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--focus-ring)]"
               >
                 <img
                   src={resolvedImageUrls[0]}
@@ -240,7 +233,7 @@ export function LabLogCard({
                   onError={() =>
                     setFailedImages((prev) => ({...prev, 0: true}))
                   }
-                  className="block h-auto max-h-[540px] w-full object-contain transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.01]"
+                  className="h-full w-full object-cover transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.02]"
                   style={{
                     imageRendering: '-webkit-optimize-contrast',
                     backfaceVisibility: 'hidden',
@@ -255,7 +248,7 @@ export function LabLogCard({
                 </span>
               </button>
             ) : (
-              <div className="flex aspect-video w-full items-center justify-center gap-2 text-xs text-[var(--text-secondary)]">
+              <div className="flex h-full w-full items-center justify-center gap-2 text-xs text-[var(--text-secondary)]">
                 <ImageOff className="h-4 w-4" strokeWidth={1.6} />
                 <span className="truncate px-2">{rawImagePaths[0]}</span>
               </div>
@@ -271,7 +264,7 @@ export function LabLogCard({
             {resolvedImageUrls.map((imgUrl, imgIndex) => (
               <div
                 key={`${entry.id}-media-${imgIndex}`}
-                className="relative shrink-0 snap-start overflow-hidden rounded-xl border border-white/[0.08] bg-[#0A0A0A]"
+                className="relative w-64 sm:w-72 aspect-square shrink-0 snap-start overflow-hidden rounded-xl border border-white/[0.08] bg-[#0A0A0A]"
               >
                 {imgUrl && !failedImages[imgIndex] ? (
                   <button
@@ -285,7 +278,7 @@ export function LabLogCard({
                       )
                     }
                     aria-label={`${siteCopy.labLog.zoomImage} (${imgIndex + 1} of ${resolvedImageUrls.length})`}
-                    className="group relative block overflow-hidden text-start focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--focus-ring)]"
+                    className="group relative block h-full w-full overflow-hidden text-start focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--focus-ring)]"
                   >
                     <img
                       src={imgUrl}
@@ -298,7 +291,7 @@ export function LabLogCard({
                           [imgIndex]: true,
                         }))
                       }
-                      className="block h-56 w-auto max-w-[80vw] object-contain transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.01] sm:h-68 sm:max-w-[520px]"
+                      className="h-full w-full object-cover transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.02]"
                       style={{
                         imageRendering: '-webkit-optimize-contrast',
                         backfaceVisibility: 'hidden',
@@ -313,7 +306,7 @@ export function LabLogCard({
                     </span>
                   </button>
                 ) : (
-                  <div className="flex h-56 w-64 items-center justify-center gap-2 text-xs text-[var(--text-secondary)] sm:h-68">
+                  <div className="flex h-full w-full items-center justify-center gap-2 text-xs text-[var(--text-secondary)]">
                     <ImageOff className="h-4 w-4" strokeWidth={1.6} />
                     <span className="truncate px-2">
                       {rawImagePaths[imgIndex]}
@@ -325,9 +318,9 @@ export function LabLogCard({
           </div>
         ) : null}
 
-        {/* Optional Native MP4 Video Attachment */}
+        {/* Optional Native MP4 Video Attachment (Strict 16:9 aspect-video) */}
         {resolvedVideoUrl ? (
-          <div className="mt-3.5 w-full overflow-hidden rounded-xl border border-white/[0.08] bg-[#0A0A0A]">
+          <div className="mt-3.5 w-full max-w-2xl aspect-video overflow-hidden rounded-xl border border-white/[0.08] bg-[#0A0A0A]">
             {!videoFailed ? (
               <video
                 src={resolvedVideoUrl}
@@ -336,10 +329,10 @@ export function LabLogCard({
                 preload="metadata"
                 aria-label={caption || 'Dispatch video'}
                 onError={() => setVideoFailed(true)}
-                className="block max-h-[540px] w-full bg-black object-contain"
+                className="h-full w-full bg-black object-contain"
               />
             ) : (
-              <div className="flex aspect-video w-full items-center justify-center gap-2 text-xs text-[var(--text-secondary)]">
+              <div className="flex h-full w-full items-center justify-center gap-2 text-xs text-[var(--text-secondary)]">
                 <VideoOff className="h-4 w-4" strokeWidth={1.6} />
                 <span className="truncate px-2">{rawVideoPath}</span>
               </div>

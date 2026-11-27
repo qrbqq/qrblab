@@ -7,6 +7,7 @@ import {ScrollReveal} from '../components/ScrollReveal';
 import {siteCopy} from '../data/siteConfig';
 import {papers} from '../data/papers';
 import {extractFolders, filterPapers} from '../utils/papers';
+import {recordQInteraction} from '../utils/qScore';
 
 export function QrbLabPage() {
   const [query, setQuery] = useState('');
@@ -103,7 +104,12 @@ export function QrbLabPage() {
               <button
                 key={folder}
                 type="button"
-                onClick={() => setSelectedFolder(folder)}
+                onClick={() => {
+                  if (activeFolder !== folder) {
+                    recordQInteraction('tool-trigger');
+                  }
+                  setSelectedFolder(folder);
+                }}
                 aria-pressed={activeFolder === folder}
                 className={`inline-flex min-h-[40px] shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full px-4 py-2 text-xs font-medium transition-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--focus-ring)] ${
                   activeFolder === folder

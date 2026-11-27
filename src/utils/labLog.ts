@@ -1,4 +1,4 @@
-import type {LabLogEntry, LabLogProfileVariant} from '../data/labLog';
+import type {LabLogEntry} from '../data/labLog';
 import {siteConfig, type SiteConfig} from '../data/siteConfig';
 import {getLocalizedText} from './papers';
 export {isSafeExternalUrl, sanitizeExternalUrl} from './url';
@@ -74,16 +74,6 @@ export function resolveLabLogVideo(entry: LabLogEntry): string {
   return entry.video.trim();
 }
 
-/**
- * Filters Lab Log entries by profile variant ('primary' defaults when entry.profile is omitted).
- */
-export function filterLabLogsByProfile(
-  entries: readonly LabLogEntry[],
-  variant: LabLogProfileVariant,
-): LabLogEntry[] {
-  return entries.filter((entry) => (entry.profile ?? 'primary') === variant);
-}
-
 export interface ThreadedLabLogItem {
   entry: LabLogEntry;
   connectsFromPrev: boolean;
@@ -118,51 +108,31 @@ export function computeThreadConnections(
 }
 
 export interface ResolvedProfileIdentity {
-  variant: LabLogProfileVariant;
   displayName: string;
   handle: string;
   profileAvatar: string;
   profileBannerText: string;
   profileCoverVideo: string;
   profileBio: string;
-  badgeVariant: 'red' | 'blue';
-  routePath: '/log' | '/profile-2';
+  routePath: '/log';
 }
 
 const DEFAULT_PROFILE_BIO =
   'Independent personal research & technical dispatches in Artificial Intelligence, Mechatronics, Robotics & Autonomous Systems.';
 
 /**
- * Resolves case-agnostic profile identity and media settings for Profile 1 or Profile 2.
+ * Resolves case-agnostic profile identity and media settings for Profile 1.
  */
 export function resolveProfileIdentity(
-  variant: LabLogProfileVariant,
   config: SiteConfig = siteConfig,
 ): ResolvedProfileIdentity {
-  if (variant === 'secondary') {
-    const sec = config.secondaryProfile;
-    return {
-      variant: 'secondary',
-      displayName: sec?.displayName ?? 'Profile 2',
-      handle: sec?.handle ?? '@qrbqq2',
-      profileAvatar: sec?.profileAvatar ?? config.profileAvatar,
-      profileBannerText: sec?.profileBannerText ?? config.profileBannerText,
-      profileCoverVideo: sec?.profileCoverVideo ?? config.profileCoverVideo ?? '',
-      profileBio: sec?.profileBio || config.profileBio || DEFAULT_PROFILE_BIO,
-      badgeVariant: 'blue',
-      routePath: '/profile-2',
-    };
-  }
-
   return {
-    variant: 'primary',
     displayName: config.displayName,
     handle: config.handle,
     profileAvatar: config.profileAvatar,
     profileBannerText: config.profileBannerText,
     profileCoverVideo: config.profileCoverVideo ?? '',
     profileBio: config.profileBio || DEFAULT_PROFILE_BIO,
-    badgeVariant: 'red',
     routePath: '/log',
   };
 }

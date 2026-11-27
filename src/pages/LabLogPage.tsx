@@ -1,36 +1,25 @@
 import {useEffect, useMemo, useRef, useState} from 'react';
-import {useLocation} from 'react-router-dom';
 import {EmptyStateCard} from '../components/EmptyStateCard';
 import {FounderAvatar} from '../components/FounderAvatar';
 import {LabLogCard} from '../components/LabLogCard';
+import {QMetricBadge} from '../components/QMetricBadge';
 import {ScreenshotLightbox} from '../components/ScreenshotLightbox';
 import {ScrollReveal} from '../components/ScrollReveal';
 import {VerifiedBadge} from '../components/VerifiedBadge';
 import {siteConfig, siteCopy} from '../data/siteConfig';
-import {labLogs, type LabLogProfileVariant} from '../data/labLog';
+import {labLogs} from '../data/labLog';
+import {useQScore} from '../hooks/useQScore';
 import {
   computeThreadConnections,
-  filterLabLogsByProfile,
   resolveProfileIdentity,
   sortLabLogsDesc,
 } from '../utils/labLog';
 import {resolveAssetUrl} from '../utils/papers';
+import {recordQInteraction} from '../utils/qScore';
 
-interface LabLogPageProps {
-  profileVariant?: LabLogProfileVariant;
-}
-
-export function LabLogPage({profileVariant}: LabLogPageProps) {
-  const location = useLocation();
-  const activeVariant: LabLogProfileVariant =
-    profileVariant === 'secondary' || location.pathname === '/profile-2'
-      ? 'secondary'
-      : 'primary';
-
-  const identity = useMemo(
-    () => resolveProfileIdentity(activeVariant, siteConfig),
-    [activeVariant],
-  );
+export function LabLogPage() {
+  const identity = useMemo(() => resolveProfileIdentity(siteConfig), []);
+  const qScore = useQScore();
 
   const coverVideoUrl = useMemo(() => {
     const raw = identity.profileCoverVideo.trim();
@@ -63,10 +52,9 @@ export function LabLogPage({profileVariant}: LabLogPageProps) {
   } | null>(null);
 
   const threadedLogs = useMemo(() => {
-    const profileFiltered = filterLabLogsByProfile(labLogs, activeVariant);
-    const sorted = sortLabLogsDesc(profileFiltered);
+    const sorted = sortLabLogsDesc(labLogs);
     return computeThreadConnections(sorted);
-  }, [activeVariant]);
+  }, []);
 
   const showVideoCover = Boolean(coverVideoUrl) && !coverVideoFailed;
 
@@ -154,9 +142,9 @@ export function LabLogPage({profileVariant}: LabLogPageProps) {
             />
           </div>
 
-          {/* Case-Agnostic Display Name + Custom Verified Seal (Red for Profile 1, Blue for Profile 2) */}
+          {/* Case-Agnostic Display Name + Crimson Verified Seal + Q Metric Badge */}
           <div className="mt-4">
-            <div className="flex items-center gap-2.5">
+            <div className="flex flex-wrap items-center gap-x-2.5 gap-y-2">
               <h1
                 className="font-display-heading text-3xl font-bold text-[#F5F5F5] md:text-4xl"
                 style={{textTransform: 'none'}}
@@ -165,9 +153,9 @@ export function LabLogPage({profileVariant}: LabLogPageProps) {
               </h1>
               <VerifiedBadge
                 size={26}
-                variant={identity.badgeVariant}
                 label={`Verified ${identity.displayName}`}
               />
+              <QMetricBadge score={qScore} />
             </div>
             <p
               className="font-mono-tabular mt-1 text-sm text-[#8A8A8A]"
@@ -220,7 +208,8 @@ export function LabLogPage({profileVariant}: LabLogPageProps) {
                     showBottomBorder={
                       !connectsToNext && index < threadedLogs.length - 1
                     }
-                    onInspectImage={(url, caption, galleryImages, idx) =>
+                    onInspectImage={(url, caption, galleryImages, idx) => {
+                      recordQInteraction('tool-trigger');
                       setLightboxState({
                         images:
                           galleryImages && galleryImages.length > 0
@@ -228,8 +217,8 @@ export function LabLogPage({profileVariant}: LabLogPageProps) {
                             : [url],
                         activeIndex: idx ?? 0,
                         caption,
-                      })
-                    }
+                      });
+                    }}
                   />
                 ),
               )}

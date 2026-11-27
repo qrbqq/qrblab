@@ -34,6 +34,7 @@ import {
   getPaperRating,
   savePaperRating,
 } from '../utils/ratings';
+import {recordQInteraction} from '../utils/qScore';
 
 export function PaperDetailPage() {
   const {slug} = useParams<{slug: string}>();
@@ -78,6 +79,7 @@ export function PaperDetailPage() {
   const copyToClipboard = async (value: string, successText: string) => {
     try {
       await navigator.clipboard.writeText(value);
+      recordQInteraction('citation-copy');
       showToast(successText, 'success');
     } catch {
       showToast(siteCopy.paperDetail.copyFailed, 'error');
@@ -119,6 +121,7 @@ export function PaperDetailPage() {
   const handleRate = (stars: number) => {
     const saved = savePaperRating(paper.slug, stars);
     if (saved) {
+      recordQInteraction('paper-rate');
       setRating(saved.stars);
       showToast(siteCopy.paperDetail.ratingSaved, 'success');
     }
@@ -236,6 +239,7 @@ export function PaperDetailPage() {
                   <a
                     href={pdfUrl}
                     download
+                    onClick={() => recordQInteraction('pdf-download')}
                     className="inline-flex min-h-[46px] items-center justify-center gap-2.5 rounded-xl bg-[#F5F5F5] px-6 py-2.5 text-sm font-semibold text-[#050505] shadow-sm transition-all duration-200 hover:bg-white active:scale-[0.985] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
                   >
                     <Download className="h-4 w-4" strokeWidth={2} />
@@ -245,7 +249,12 @@ export function PaperDetailPage() {
                   {/* View Inside Page (Neutral Frosted Glass, NO BLUE!) */}
                   <button
                     type="button"
-                    onClick={() => setShowInlinePdf((prev) => !prev)}
+                    onClick={() => {
+                      if (!showInlinePdf) {
+                        recordQInteraction('pdf-open');
+                      }
+                      setShowInlinePdf((prev) => !prev);
+                    }}
                     aria-expanded={showInlinePdf}
                     className="inline-flex min-h-[46px] items-center justify-center gap-2 rounded-xl border border-white/[0.16] bg-white/[0.06] px-4 py-2.5 text-sm font-medium text-[#F5F5F5] backdrop-blur-sm shadow-xs transition-all duration-200 hover:bg-white/[0.12] hover:border-white/[0.28] active:scale-[0.985] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
                   >
@@ -262,6 +271,7 @@ export function PaperDetailPage() {
                     href={pdfUrl}
                     target="_blank"
                     rel="noopener noreferrer"
+                    onClick={() => recordQInteraction('pdf-open')}
                     className="inline-flex min-h-[46px] items-center justify-center gap-2 rounded-xl border border-white/[0.16] bg-white/[0.06] px-4 py-2.5 text-sm font-medium text-[#F5F5F5] backdrop-blur-sm shadow-xs transition-all duration-200 hover:bg-white/[0.12] hover:border-white/[0.28] active:scale-[0.985] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
                   >
                     <ExternalLink className="h-4 w-4 text-white/80" strokeWidth={1.75} />

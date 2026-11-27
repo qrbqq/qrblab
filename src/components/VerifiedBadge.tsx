@@ -2,25 +2,19 @@ interface VerifiedBadgeProps {
   size?: number;
   className?: string;
   label?: string;
-  variant?: 'red' | 'blue';
-  fillColor?: string;
 }
 
 /**
  * Official Verified Checkmark Seal SVG (12-point scalloped seal).
- * - Crimson Red variant (#C81E1E)
- * - Classic Blue variant (#1D9BF0)
- * Flat, razor-sharp solid vector seal with pure #FFFFFF checkmark
- * and zero outer drop-shadow, blur, or halo glow.
+ * Strictly reserved Deep Crimson Red (#C81E1E) with pure #FFFFFF checkmark,
+ * sharp micro-contrast border, and zero outer drop-shadow, blur, or halo glow.
  */
 export function VerifiedBadge({
   size = 20,
   className = '',
   label = 'Verified founder',
-  variant = 'red',
-  fillColor,
 }: VerifiedBadgeProps) {
-  const sealColor = fillColor || (variant === 'blue' ? '#1D9BF0' : '#C81E1E');
+  const sealColor = '#C81E1E';
 
   return (
     <span
