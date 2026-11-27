@@ -55,6 +55,11 @@ export function FounderAvatar({
           referrerPolicy="no-referrer"
           onError={() => setCustomFailed(true)}
           className="h-full w-full object-cover object-top select-none"
+          style={{
+            imageRendering: '-webkit-optimize-contrast',
+            backfaceVisibility: 'hidden',
+            transform: 'translateZ(0)',
+          }}
         />
       ) : !logoFailed ? (
         <img
@@ -62,6 +67,11 @@ export function FounderAvatar({
           alt={alt}
           onError={() => setLogoFailed(true)}
           className="brand-logo-img h-full w-full object-contain mix-blend-screen select-none"
+          style={{
+            imageRendering: '-webkit-optimize-contrast',
+            backfaceVisibility: 'hidden',
+            transform: 'translateZ(0)',
+          }}
         />
       ) : (
         <span className="font-display-heading text-xs font-bold text-[#F5F5F5]">

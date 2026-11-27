@@ -46,7 +46,10 @@ function getDocumentTitleForPath(pathname: string): string {
     return 'qrb lab — qrbqq';
   }
   if (pathname === '/log') {
-    return 'Lab Log — qrbqq';
+    return 'Profile 1 — qrbqq';
+  }
+  if (pathname === '/profile-2') {
+    return 'Profile 2 — qrbqq';
   }
   if (pathname === '/about') {
     return 'About — qrbqq';
@@ -169,8 +172,7 @@ function AppShell() {
   };
 
   const displayIsHome = displayLocation.pathname === '/';
-  const displayIsFullBleedTop =
-    displayIsHome || displayLocation.pathname === '/log';
+  const displayIsFullBleedTop = displayIsHome;
   const transitionClass =
     phase === 'exiting'
       ? 'page-transition-exit '
@@ -194,7 +196,8 @@ function AppShell() {
             <Route path="/" element={<HomePage />} />
             <Route path="/qrb-lab" element={<QrbLabPage />} />
             <Route path="/qrb-lab/:slug" element={<PaperDetailPage />} />
-            <Route path="/log" element={<LabLogPage />} />
+            <Route path="/log" element={<LabLogPage profileVariant="primary" />} />
+            <Route path="/profile-2" element={<LabLogPage profileVariant="secondary" />} />
             <Route path="/about" element={<AboutPage />} />
             <Route path="/research" element={<Navigate to="/qrb-lab" replace />} />
             <Route path="/research/:slug" element={<LegacyPaperRedirect />} />

@@ -130,8 +130,11 @@ export function Navbar({activePathname}: NavbarProps) {
               className="brand-logo-img h-8 w-auto shrink-0 object-contain"
             />
           ) : null}
-          <span className="normal-case text-base font-semibold tracking-tight text-[var(--text-primary)] sm:text-lg">
-            qrbqq
+          <span
+            className="normal-case text-base font-semibold tracking-tight text-[var(--text-primary)] sm:text-lg"
+            style={{textTransform: 'none'}}
+          >
+            qrb
           </span>
         </Link>
 

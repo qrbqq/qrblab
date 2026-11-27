@@ -45,6 +45,11 @@ export function PaperCard({paper, staticMode = false}: PaperCardProps) {
             loading="lazy"
             onError={() => setImgError(true)}
             className="h-full w-full object-cover transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-[1.03]"
+            style={{
+              imageRendering: '-webkit-optimize-contrast',
+              backfaceVisibility: 'hidden',
+              transform: 'translateZ(0)',
+            }}
           />
         ) : (
           <PosterPlaceholder

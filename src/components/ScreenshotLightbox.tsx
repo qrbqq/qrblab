@@ -81,6 +81,11 @@ export function ScreenshotLightbox({
             alt={`${title} — ${activeIndex + 1}`}
             referrerPolicy="no-referrer"
             className="max-h-[70vh] w-auto object-contain"
+            style={{
+              imageRendering: '-webkit-optimize-contrast',
+              backfaceVisibility: 'hidden',
+              transform: 'translateZ(0)',
+            }}
           />
         </div>
 

@@ -2,7 +2,10 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import type {LabLogEntry} from '../data/labLog';
 import {labLogs} from '../data/labLog';
+import {siteConfig} from '../data/siteConfig';
 import {
+  computeThreadConnections,
+  filterLabLogsByProfile,
   formatLabLogTimestamp,
   formatRelativeTime,
   getLabLogCaption,
@@ -10,6 +13,9 @@ import {
   getLatestLabLogs,
   HOME_LAB_LOG_PREVIEW_LIMIT,
   isSafeExternalUrl,
+  resolveLabLogImages,
+  resolveLabLogVideo,
+  resolveProfileIdentity,
   sanitizeExternalUrl,
   sortLabLogsDesc,
 } from './labLog';
@@ -80,6 +86,103 @@ test('getLabLogCaption resolves English copy reliably', () => {
   );
 });
 
+test('resolveLabLogImages supports multi-image arrays with GIFs, deduplication, and legacy image field', () => {
+  const multiEntry: LabLogEntry = {
+    id: 'm1',
+    timestamp: '2026-11-25T10:00:00Z',
+    caption: {en: 'Multi media'},
+    images: ['images/a.png', 'images/loop.gif', ' ', 'images/a.png'],
+    image: 'images/b.jpg',
+  };
+  assert.deepEqual(resolveLabLogImages(multiEntry), [
+    'images/a.png',
+    'images/loop.gif',
+    'images/b.jpg',
+  ]);
+  assert.deepEqual(resolveLabLogImages(fixtureLogs[1]!), []);
+});
+
+test('resolveLabLogVideo trims and returns MP4 attachment path cleanly', () => {
+  const videoEntry: LabLogEntry = {
+    id: 'v1',
+    timestamp: '2026-11-25T10:00:00Z',
+    caption: {en: 'Video test'},
+    video: '  images/founder-hero.mp4  ',
+  };
+  assert.equal(resolveLabLogVideo(videoEntry), 'images/founder-hero.mp4');
+  assert.equal(resolveLabLogVideo(fixtureLogs[0]!), '');
+});
+
+test('filterLabLogsByProfile routes omitted profile to primary and isolates secondary entries', () => {
+  const mixed: LabLogEntry[] = [
+    {id: 'p1', timestamp: '2026-11-25T10:00:00Z', caption: {en: 'Default primary'}},
+    {id: 'p2', timestamp: '2026-11-25T11:00:00Z', profile: 'primary', caption: {en: 'Explicit primary'}},
+    {id: 's1', timestamp: '2026-11-25T12:00:00Z', profile: 'secondary', caption: {en: 'Secondary channel'}},
+  ];
+  assert.deepEqual(
+    filterLabLogsByProfile(mixed, 'primary').map((e) => e.id),
+    ['p1', 'p2'],
+  );
+  assert.deepEqual(
+    filterLabLogsByProfile(mixed, 'secondary').map((e) => e.id),
+    ['s1'],
+  );
+});
+
+test('computeThreadConnections links consecutive dispatches sharing identical threadId', () => {
+  const entries: LabLogEntry[] = [
+    {id: 'a1', timestamp: '2026-11-25T12:00:00Z', threadId: 't-alpha', caption: {en: 'Thread 1'}},
+    {id: 'a2', timestamp: '2026-11-25T11:55:00Z', threadId: 't-alpha', caption: {en: 'Thread 2'}},
+    {id: 'a3', timestamp: '2026-11-25T11:50:00Z', threadId: 't-alpha', caption: {en: 'Thread 3'}},
+    {id: 'solo', timestamp: '2026-11-25T10:00:00Z', caption: {en: 'Standalone'}},
+    {id: 'b1', timestamp: '2026-11-25T09:00:00Z', threadId: 't-beta', caption: {en: 'Thread B1'}},
+  ];
+
+  const connected = computeThreadConnections(entries);
+  assert.equal(connected[0]?.connectsFromPrev, false);
+  assert.equal(connected[0]?.connectsToNext, true);
+
+  assert.equal(connected[1]?.connectsFromPrev, true);
+  assert.equal(connected[1]?.connectsToNext, true);
+
+  assert.equal(connected[2]?.connectsFromPrev, true);
+  assert.equal(connected[2]?.connectsToNext, false);
+
+  assert.equal(connected[3]?.connectsFromPrev, false);
+  assert.equal(connected[3]?.connectsToNext, false);
+
+  assert.equal(connected[4]?.connectsFromPrev, false);
+  assert.equal(connected[4]?.connectsToNext, false);
+});
+
+test('resolveProfileIdentity preserves exact casing and resolves red vs blue badges', () => {
+  const customConfig = {
+    ...siteConfig,
+    displayName: 'QrB_LaB_Alpha',
+    handle: '@QrB_01',
+    profileCoverVideo: 'images/founder-hero.mp4',
+    secondaryProfile: {
+      displayName: 'Second_Lab_Channel',
+      handle: '@Second_Channel',
+      profileCoverVideo: 'images/alt-loop.mp4',
+    },
+  };
+
+  const primary = resolveProfileIdentity('primary', customConfig);
+  assert.equal(primary.displayName, 'QrB_LaB_Alpha');
+  assert.equal(primary.handle, '@QrB_01');
+  assert.equal(primary.profileCoverVideo, 'images/founder-hero.mp4');
+  assert.equal(primary.badgeVariant, 'red');
+  assert.equal(primary.routePath, '/log');
+
+  const secondary = resolveProfileIdentity('secondary', customConfig);
+  assert.equal(secondary.displayName, 'Second_Lab_Channel');
+  assert.equal(secondary.handle, '@Second_Channel');
+  assert.equal(secondary.profileCoverVideo, 'images/alt-loop.mp4');
+  assert.equal(secondary.badgeVariant, 'blue');
+  assert.equal(secondary.routePath, '/profile-2');
+});
+
 test('formatLabLogTimestamp formats UTC ISO timestamps cleanly and preserves invalid input', () => {
   const formatted = formatLabLogTimestamp('2026-11-23T18:30:00Z');
   assert.ok(formatted.includes('2026'));
@@ -108,9 +211,7 @@ test('formatRelativeTime computes accurate buckets from Just now through years a
   assert.equal(formatRelativeTime(new Date(now - 340 * DAY).toISOString(), now), '11mo ago');
   assert.equal(formatRelativeTime(new Date(now - 365 * DAY).toISOString(), now), '1y ago');
   assert.equal(formatRelativeTime(new Date(now - 800 * DAY).toISOString(), now), '2y ago');
-  // Supports YYYY-MM-DD date-only strings cleanly
   assert.equal(formatRelativeTime('2026-11-24', now), '2d ago');
-  // Preserves invalid strings cleanly
   assert.equal(formatRelativeTime('not-a-date', now), 'not-a-date');
 });
 
@@ -127,3 +228,4 @@ test('isSafeExternalUrl and sanitizeExternalUrl allow http/https and reject java
   assert.equal(sanitizeExternalUrl('data:text/html,<script>1</script>'), '');
   assert.equal(sanitizeExternalUrl('//evil.com/path'), '');
 });
+

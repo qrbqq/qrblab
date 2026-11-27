@@ -1,4 +1,5 @@
-import type {LabLogEntry} from '../data/labLog';
+import type {LabLogEntry, LabLogProfileVariant} from '../data/labLog';
+import {siteConfig, type SiteConfig} from '../data/siteConfig';
 import {getLocalizedText} from './papers';
 export {isSafeExternalUrl, sanitizeExternalUrl} from './url';
 
@@ -31,6 +32,139 @@ export function getLatestLabLog(entries: readonly LabLogEntry[]): LabLogEntry | 
 
 export function getLabLogCaption(entry: LabLogEntry): string {
   return getLocalizedText(entry.caption);
+}
+
+/**
+ * Resolves ordered, deduplicated relative image/GIF paths for a Lab Log entry.
+ * Supports both modern `images: string[]` arrays and legacy single `image: string`.
+ */
+export function resolveLabLogImages(entry: LabLogEntry): string[] {
+  const seen = new Set<string>();
+  const result: string[] = [];
+
+  if (Array.isArray(entry.images)) {
+    for (const raw of entry.images) {
+      if (typeof raw !== 'string') continue;
+      const trimmed = raw.trim();
+      if (trimmed && !seen.has(trimmed)) {
+        seen.add(trimmed);
+        result.push(trimmed);
+      }
+    }
+  }
+
+  if (typeof entry.image === 'string') {
+    const trimmed = entry.image.trim();
+    if (trimmed && !seen.has(trimmed)) {
+      seen.add(trimmed);
+      result.push(trimmed);
+    }
+  }
+
+  return result;
+}
+
+/**
+ * Resolves the optional native MP4 video attachment path for a Lab Log entry.
+ */
+export function resolveLabLogVideo(entry: LabLogEntry): string {
+  if (typeof entry.video !== 'string') {
+    return '';
+  }
+  return entry.video.trim();
+}
+
+/**
+ * Filters Lab Log entries by profile variant ('primary' defaults when entry.profile is omitted).
+ */
+export function filterLabLogsByProfile(
+  entries: readonly LabLogEntry[],
+  variant: LabLogProfileVariant,
+): LabLogEntry[] {
+  return entries.filter((entry) => (entry.profile ?? 'primary') === variant);
+}
+
+export interface ThreadedLabLogItem {
+  entry: LabLogEntry;
+  connectsFromPrev: boolean;
+  connectsToNext: boolean;
+}
+
+/**
+ * Computes consecutive thread connection flags for an ordered list of dispatches.
+ * Consecutive dispatches sharing a non-empty `threadId` connect visually via a vertical rail.
+ */
+export function computeThreadConnections(
+  orderedEntries: readonly LabLogEntry[],
+): ThreadedLabLogItem[] {
+  return orderedEntries.map((entry, index) => {
+    const currentThread = typeof entry.threadId === 'string' ? entry.threadId.trim() : '';
+    const prevThread =
+      index > 0 && typeof orderedEntries[index - 1]?.threadId === 'string'
+        ? orderedEntries[index - 1]!.threadId!.trim()
+        : '';
+    const nextThread =
+      index < orderedEntries.length - 1 &&
+      typeof orderedEntries[index + 1]?.threadId === 'string'
+        ? orderedEntries[index + 1]!.threadId!.trim()
+        : '';
+
+    return {
+      entry,
+      connectsFromPrev: Boolean(currentThread && prevThread === currentThread),
+      connectsToNext: Boolean(currentThread && nextThread === currentThread),
+    };
+  });
+}
+
+export interface ResolvedProfileIdentity {
+  variant: LabLogProfileVariant;
+  displayName: string;
+  handle: string;
+  profileAvatar: string;
+  profileBannerText: string;
+  profileCoverVideo: string;
+  profileBio: string;
+  badgeVariant: 'red' | 'blue';
+  routePath: '/log' | '/profile-2';
+}
+
+const DEFAULT_PROFILE_BIO =
+  'Independent personal research & technical dispatches in Artificial Intelligence, Mechatronics, Robotics & Autonomous Systems.';
+
+/**
+ * Resolves case-agnostic profile identity and media settings for Profile 1 or Profile 2.
+ */
+export function resolveProfileIdentity(
+  variant: LabLogProfileVariant,
+  config: SiteConfig = siteConfig,
+): ResolvedProfileIdentity {
+  if (variant === 'secondary') {
+    const sec = config.secondaryProfile;
+    return {
+      variant: 'secondary',
+      displayName: sec?.displayName ?? 'Profile 2',
+      handle: sec?.handle ?? '@qrbqq2',
+      profileAvatar: sec?.profileAvatar ?? config.profileAvatar,
+      profileBannerText: sec?.profileBannerText ?? config.profileBannerText,
+      profileCoverVideo: sec?.profileCoverVideo ?? config.profileCoverVideo ?? '',
+      profileBio: sec?.profileBio || config.profileBio || DEFAULT_PROFILE_BIO,
+      badgeVariant: 'blue',
+      routePath: '/profile-2',
+    };
+  }
+
+  return {
+    variant: 'primary',
+    displayName: config.displayName,
+    handle: config.handle,
+    profileAvatar: config.profileAvatar,
+    profileBannerText: config.profileBannerText,
+    profileCoverVideo: config.profileCoverVideo ?? '',
+    profileBio: config.profileBio || DEFAULT_PROFILE_BIO,
+    badgeVariant: 'red',
+    routePath: '/log',
+  };
 }
 
 export function formatLabLogTimestamp(isoTimestamp: string): string {

@@ -3,7 +3,7 @@ import {Link} from 'react-router-dom';
 import {ArrowRight} from 'lucide-react';
 import {labLogs} from '../data/labLog';
 import {siteCopy} from '../data/siteConfig';
-import {sortLabLogsDesc} from '../utils/labLog';
+import {computeThreadConnections, sortLabLogsDesc} from '../utils/labLog';
 import {ArchitecturalFrame} from './ArchitecturalFrame';
 import {KineticHeadline} from './KineticHeadline';
 import {LabLogCard} from './LabLogCard';
@@ -17,14 +17,19 @@ interface LatestLabLogSectionProps {
 export function LatestLabLogSection({
   id = 'lab-log',
 }: LatestLabLogSectionProps) {
-  const [lightboxImage, setLightboxImage] = useState<{
-    url: string;
+  const [lightboxState, setLightboxState] = useState<{
+    images: string[];
+    activeIndex: number;
     caption: string;
   } | null>(null);
 
   const sortedLogs = useMemo(() => sortLabLogsDesc(labLogs), []);
-  const homeDispatches = useMemo(() => sortedLogs.slice(0, 8), [sortedLogs]);
-  const hasMore = sortedLogs.length > 8;
+  const homeDispatches = useMemo(() => sortedLogs.slice(0, 3), [sortedLogs]);
+  const threadedDispatches = useMemo(
+    () => computeThreadConnections(homeDispatches),
+    [homeDispatches],
+  );
+  const hasMore = sortedLogs.length > 3;
 
   return (
     <ArchitecturalFrame
@@ -52,7 +57,7 @@ export function LatestLabLogSection({
           />
         </div>
 
-        {homeDispatches.length === 0 ? (
+        {threadedDispatches.length === 0 ? (
           <ScrollReveal staggerIndex={2}>
             <div className="border-t border-b border-white/[0.08] py-10 text-start">
               <p className="font-eyebrow-mono text-[11px] font-medium text-[var(--text-eyebrow)]">
@@ -67,20 +72,35 @@ export function LatestLabLogSection({
             </div>
           </ScrollReveal>
         ) : (
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            {homeDispatches.map((entry, index) => (
-              <ScrollReveal
-                key={entry.id}
-                staggerIndex={index % 4}
-                className="h-full border-t border-white/[0.08] pt-1"
-              >
-                <LabLogCard
-                  entry={entry}
-                  compact
-                  onInspectImage={(url, caption) => setLightboxImage({url, caption})}
-                />
-              </ScrollReveal>
-            ))}
+          <div className="flex flex-col border-t border-b border-white/[0.08]">
+            {threadedDispatches.map(
+              ({entry, connectsFromPrev, connectsToNext}, index) => (
+                <ScrollReveal
+                  key={entry.id}
+                  staggerIndex={index}
+                  className="w-full"
+                >
+                  <LabLogCard
+                    entry={entry}
+                    connectsFromPrev={connectsFromPrev}
+                    connectsToNext={connectsToNext}
+                    showBottomBorder={
+                      !connectsToNext && index < threadedDispatches.length - 1
+                    }
+                    onInspectImage={(url, caption, galleryImages, idx) =>
+                      setLightboxState({
+                        images:
+                          galleryImages && galleryImages.length > 0
+                            ? galleryImages
+                            : [url],
+                        activeIndex: idx ?? 0,
+                        caption,
+                      })
+                    }
+                  />
+                </ScrollReveal>
+              ),
+            )}
           </div>
         )}
 
@@ -89,7 +109,11 @@ export function LatestLabLogSection({
             to="/log"
             className="group inline-flex min-h-[44px] items-center gap-2.5 border-b border-white/[0.16] pb-1.5 text-sm font-medium text-[var(--text-primary)] transition-colors duration-200 hover:border-white hover:text-white focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--focus-ring)]"
           >
-            <span>{hasMore ? 'View all dispatches on profile →' : siteCopy.home.viewAllLogs}</span>
+            <span>
+              {hasMore
+                ? 'View all dispatches on profile →'
+                : siteCopy.home.viewAllLogs}
+            </span>
             <ArrowRight
               className="h-4 w-4 transition-transform duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:translate-x-1.5"
               strokeWidth={1.75}
@@ -99,12 +123,17 @@ export function LatestLabLogSection({
       </div>
 
       <ScreenshotLightbox
-        images={lightboxImage ? [lightboxImage.url] : []}
-        activeIndex={lightboxImage ? 0 : null}
-        title={lightboxImage?.caption || siteCopy.home.labLogHeading}
-        onClose={() => setLightboxImage(null)}
-        onSelectIndex={() => {}}
+        images={lightboxState?.images ?? []}
+        activeIndex={lightboxState ? lightboxState.activeIndex : null}
+        title={lightboxState?.caption || siteCopy.home.labLogHeading}
+        onClose={() => setLightboxState(null)}
+        onSelectIndex={(nextIndex) =>
+          setLightboxState((prev) =>
+            prev ? {...prev, activeIndex: nextIndex} : null,
+          )
+        }
       />
     </ArchitecturalFrame>
   );
 }
+

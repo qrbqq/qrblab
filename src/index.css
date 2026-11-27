@@ -196,9 +196,10 @@ input[type="search"]::-webkit-search-cancel-button {
   font-variant-numeric: tabular-nums;
 }
 
-/* Protected Brand Lockup Logo Inversion (Pure White) */
+/* Protected Brand Lockup Logo */
 .brand-logo-img {
-  filter: brightness(0) invert(1);
+  image-rendering: -webkit-optimize-contrast;
+  filter: none;
 }
 
 .glass-surface {
@@ -821,3 +822,14 @@ input[type="search"]::-webkit-search-cancel-button {
   animation-play-state: running !important;
 }
 
+/* =========================================================================
+   CLEAN HIDDEN SCROLLBAR FOR HORIZONTAL MEDIA CAROUSELS
+   ========================================================================= */
+.scrollbar-none {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
