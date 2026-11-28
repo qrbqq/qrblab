@@ -193,11 +193,6 @@ input[type="search"]::-webkit-search-cancel-button {
   font-variant-numeric: tabular-nums;
 }
 
-/* Protected Brand Lockup Logo */
-.brand-logo-img {
-  image-rendering: -webkit-optimize-contrast;
-  filter: none;
-}
 
 .glass-surface {
   background-color: var(--bg-surface);
@@ -674,7 +669,8 @@ input[type="search"]::-webkit-search-cancel-button {
   .hairline-draw-accent,
   .home-hero-stagger,
   .home-periphery-marker,
-  .home-border-tick {
+  .home-border-tick,
+  .museum-modal-enter {
     animation: none !important;
   }
   .page-transition-exit,
@@ -877,4 +873,121 @@ input[type="search"]::-webkit-search-cancel-button {
 .scrollbar-none::-webkit-scrollbar {
   display: none;
 }
+
+/* =========================================================================
+   RETROSPECTIVE MEMORIAL PAVILION & 3D ARCHITECTURAL CORRIDOR
+   ========================================================================= */
+.museum-stage-perspective {
+  perspective: 1100px;
+  perspective-origin: 50% 48%;
+}
+
+.museum-stage-preserve {
+  transform-style: preserve-3d;
+}
+
+.museum-spotlight-cone {
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.24) 0%,
+    rgba(255, 255, 255, 0.08) 38%,
+    rgba(255, 255, 255, 0.015) 75%,
+    transparent 100%
+  );
+  clip-path: polygon(36% 0%, 64% 0%, 100% 100%, 0% 100%);
+  pointer-events: none;
+}
+
+.museum-wall-panel {
+  background: linear-gradient(
+    180deg,
+    rgba(18, 18, 18, 0.86) 0%,
+    rgba(11, 11, 11, 0.94) 55%,
+    rgba(6, 6, 6, 0.98) 100%
+  );
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+.museum-floor-beam {
+  background: radial-gradient(
+    ellipse 60% 50% at 50% 50%,
+    rgba(255, 255, 255, 0.09) 0%,
+    rgba(255, 255, 255, 0.025) 52%,
+    transparent 100%
+  );
+  pointer-events: none;
+}
+
+.museum-glass-pill {
+  backdrop-filter: blur(22px) saturate(165%);
+  -webkit-backdrop-filter: blur(22px) saturate(165%);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  box-shadow:
+    0 14px 36px rgba(0, 0, 0, 0.65),
+    inset 0 1px 0 rgba(255, 255, 255, 0.14);
+}
+
+.museum-glass-pill:hover {
+  background: rgba(255, 255, 255, 0.09);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.museum-statue-blend {
+  -webkit-mask-image: radial-gradient(
+    86% 96% at 50% 52%,
+    #000 72%,
+    rgba(0, 0, 0, 0.65) 88%,
+    transparent 100%
+  );
+  mask-image: radial-gradient(
+    86% 96% at 50% 52%,
+    #000 72%,
+    rgba(0, 0, 0, 0.65) 88%,
+    transparent 100%
+  );
+}
+
+.museum-statement-halo {
+  text-shadow:
+    0 0 28px rgba(255, 255, 255, 0.24),
+    0 0 64px rgba(255, 255, 255, 0.09);
+}
+
+.museum-white-pedestal-top {
+  background: linear-gradient(180deg, #ffffff 0%, #eaeaea 100%);
+  transform: perspective(260px) rotateX(48deg);
+  transform-origin: bottom center;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.95);
+}
+
+.museum-white-pedestal-column {
+  background: linear-gradient(
+    180deg,
+    #f2f2f2 0%,
+    #e5e5e5 42%,
+    #d2d2d2 85%,
+    #b8b8b8 100%
+  );
+  box-shadow:
+    inset 8px 0 16px rgba(0, 0, 0, 0.07),
+    inset -8px 0 16px rgba(0, 0, 0, 0.09),
+    0 24px 38px rgba(0, 0, 0, 0.92);
+}
+
+@keyframes museum-modal-fade-in {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 10px, 0) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+.museum-modal-enter {
+  animation: museum-modal-fade-in 240ms var(--ease-precision) both;
+}
+
 

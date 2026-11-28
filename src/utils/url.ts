@@ -73,7 +73,7 @@ export function isValidEmailAddress(rawEmail: string | undefined): boolean {
  * Sanitizes asset and document paths (PDFs, thumbnails, avatars, preview screenshots).
  * Strictly permits:
  *   - Safe external `http:` or `https:` URLs
- *   - Safe relative local paths (e.g. "papers/doc.pdf", "./images/logo.png", "/images/logo.png")
+ *   - Safe relative local paths (e.g. "papers/doc.pdf", "./favicon.svg", "/images/founder-portrait.png")
  * Explicitly blocks:
  *   - `javascript:`, `data:`, `vbscript:`, `blob:`, `file:` schemes
  *   - Protocol-relative `//host` URLs and path traversal (`..` segments)

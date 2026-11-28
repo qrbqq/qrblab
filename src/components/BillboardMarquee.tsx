@@ -115,26 +115,23 @@ function BillboardEmblem({
   emblem: BillboardEmblemKind;
   label: string;
 }) {
-  const [logoError, setLogoError] = useState(false);
-  const logoSrc = resolveAssetUrl('images/logo.png', import.meta.env.BASE_URL);
-
   switch (emblem) {
     case 'brand-logo':
       return (
-        <span className="inline-flex shrink-0 items-center justify-center select-none">
-          {!logoError ? (
-            <img
-              src={logoSrc}
-              alt={label}
-              draggable={false}
-              onError={() => setLogoError(true)}
-              className="brand-logo-img h-10 w-auto object-contain sm:h-12 md:h-14"
-            />
-          ) : (
-            <span className="font-billboard text-3xl text-[#F5F5F5] sm:text-4xl">
-              Q
-            </span>
-          )}
+        <span
+          role="img"
+          aria-label={label}
+          className="inline-flex shrink-0 items-center justify-center select-none"
+        >
+          <span
+            className="px-3.5 py-1.5 rounded-lg border border-white/[0.22] bg-white/[0.05] font-bold text-2xl sm:text-3xl md:text-4xl text-[#FFFFFF] tracking-[0.08em] tabular-nums leading-none shadow-[0_0_24px_rgba(255,255,255,0.06)]"
+            style={{
+              fontFamily: 'var(--font-oxanium)',
+              fontVariantNumeric: 'tabular-nums',
+            }}
+          >
+            0101
+          </span>
         </span>
       );
 

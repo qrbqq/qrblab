@@ -123,7 +123,7 @@ export function PosterPlaceholder({
           fontWeight="bold"
           letterSpacing="0.18em"
         >
-          QRB LAB // ARCHIVE
+          0101 // ARCHIVE
         </text>
 
         <text

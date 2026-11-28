@@ -12,6 +12,7 @@ import {ArchitecturalMarquee} from '../components/ArchitecturalMarquee';
 import {BillboardMarquee} from '../components/BillboardMarquee';
 import {EditorialMethodologySection} from '../components/EditorialMethodologySection';
 import {KineticHeadline} from '../components/KineticHeadline';
+import {RetrospectiveGallerySection} from '../components/RetrospectiveGallerySection';
 import {StatementCard} from '../components/StatementCard';
 import {siteConfig, siteCopy} from '../data/siteConfig';
 import {prefersReducedMotion} from '../hooks/useScrollReveal';
@@ -151,7 +152,10 @@ export function HomePage() {
         {/* 2. Full-Bleed Continuous Billboard Marquee */}
         <BillboardMarquee />
 
-        {/* 3. Unboxed Founder Dispatch Feed (Auto-synced with src/data/labLog.ts) */}
+        {/* 3. Retrospective Memorial Pavilion & Curved 3D Museum Gallery */}
+        <RetrospectiveGallerySection />
+
+        {/* 4. Unboxed Founder Dispatch Feed (Auto-synced with src/data/labLog.ts) */}
         <LatestLabLogSection id="lab-log" />
 
         {/* 4. Latest Publications Showcase */}

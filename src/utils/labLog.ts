@@ -34,9 +34,31 @@ export function getLabLogCaption(entry: LabLogEntry): string {
   return getLocalizedText(entry.caption);
 }
 
+function isSafeMediaPath(rawPath: string): boolean {
+  if (!rawPath || /[\u0000-\u001F\u007F]/.test(rawPath) || rawPath.startsWith('//')) {
+    return false;
+  }
+  const schemeMatch = rawPath
+    .replace(/\s+/g, '')
+    .match(/^([a-zA-Z][a-zA-Z\d+\-.]*):/);
+  if (schemeMatch) {
+    const scheme = schemeMatch[1]?.toLowerCase();
+    if (scheme !== 'http' && scheme !== 'https') {
+      return false;
+    }
+    return true;
+  }
+  const cleanPath = rawPath.replace(/^(\.\/)+/, '').replace(/^\/+/, '');
+  if (!cleanPath || cleanPath.startsWith('//')) {
+    return false;
+  }
+  return !cleanPath.split(/[\\/]/).some((seg) => seg === '..');
+}
+
 /**
  * Resolves ordered, deduplicated relative image/GIF paths for a Lab Log entry.
  * Supports both modern `images: string[]` arrays and legacy single `image: string`.
+ * Validates against dangerous schemes (javascript:, data:) and path traversal.
  */
 export function resolveLabLogImages(entry: LabLogEntry): string[] {
   const seen = new Set<string>();
@@ -46,7 +68,7 @@ export function resolveLabLogImages(entry: LabLogEntry): string[] {
     for (const raw of entry.images) {
       if (typeof raw !== 'string') continue;
       const trimmed = raw.trim();
-      if (trimmed && !seen.has(trimmed)) {
+      if (trimmed && isSafeMediaPath(trimmed) && !seen.has(trimmed)) {
         seen.add(trimmed);
         result.push(trimmed);
       }
@@ -55,7 +77,7 @@ export function resolveLabLogImages(entry: LabLogEntry): string[] {
 
   if (typeof entry.image === 'string') {
     const trimmed = entry.image.trim();
-    if (trimmed && !seen.has(trimmed)) {
+    if (trimmed && isSafeMediaPath(trimmed) && !seen.has(trimmed)) {
       seen.add(trimmed);
       result.push(trimmed);
     }
@@ -66,12 +88,17 @@ export function resolveLabLogImages(entry: LabLogEntry): string[] {
 
 /**
  * Resolves the optional native MP4 video attachment path for a Lab Log entry.
+ * Validates against dangerous schemes (javascript:, data:) and path traversal.
  */
 export function resolveLabLogVideo(entry: LabLogEntry): string {
   if (typeof entry.video !== 'string') {
     return '';
   }
-  return entry.video.trim();
+  const trimmed = entry.video.trim();
+  if (!trimmed || !isSafeMediaPath(trimmed)) {
+    return '';
+  }
+  return trimmed;
 }
 
 export interface ThreadedLabLogItem {

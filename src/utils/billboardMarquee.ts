@@ -35,7 +35,7 @@ export interface BillboardSequenceResult {
 
 const CORE_ANCHORS: BillboardItem[] = [
   {id: 'disc-ai', kind: 'label', label: 'Artificial Intelligence'},
-  {id: 'emblem-logo', kind: 'emblem', emblem: 'brand-logo', label: 'qrbqq brand mark'},
+  {id: 'emblem-logo', kind: 'emblem', emblem: 'brand-logo', label: '0101 brand mark'},
   {id: 'disc-mechatronics', kind: 'label', label: 'Mechatronics'},
   {
     id: 'emblem-verified',

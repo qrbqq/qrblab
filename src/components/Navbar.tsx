@@ -6,7 +6,6 @@ import {
 import {Link, useLocation} from 'react-router-dom';
 import {Search, User} from 'lucide-react';
 import {siteCopy} from '../data/siteConfig';
-import {resolveAssetUrl} from '../utils/papers';
 import {LiveSearchOverlay} from './LiveSearchOverlay';
 import {SmartNavMenu} from './SmartNavMenu';
 import {Toast, type ToastMessage} from './Toast';
@@ -20,7 +19,6 @@ interface NavbarProps {
 export function Navbar({activePathname}: NavbarProps) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
-  const [logoError, setLogoError] = useState(false);
   const [toast, setToast] = useState<ToastMessage | null>(null);
   const timerRef = useRef<number | null>(null);
   const location = useLocation();
@@ -38,8 +36,6 @@ export function Navbar({activePathname}: NavbarProps) {
       !isAutostart
     );
   });
-
-  const logoSrc = resolveAssetUrl('images/logo.png', import.meta.env.BASE_URL);
 
   useEffect(() => {
     setMenuOpen(false);
@@ -112,29 +108,24 @@ export function Navbar({activePathname}: NavbarProps) {
         }}
         className="fixed top-4 left-4 sm:top-5 sm:left-6 z-40 flex items-center gap-3 sm:gap-4 transition-opacity duration-300"
       >
-        {/* Protected Brand Lockup (100% untouched text, font, white color, size, appearance) */}
+        {/* Crisp Geometric 0101 Brand Mark (Navigates to /) */}
         <Link
           to="/"
           onClick={() => {
             setMenuOpen(false);
             setSearchOpen(false);
           }}
-          className="inline-flex items-center gap-2.5 whitespace-nowrap py-1 transition-opacity active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--focus-ring)]"
+          aria-label="0101 Home"
+          className="inline-flex items-center whitespace-nowrap py-1 transition-opacity hover:opacity-90 active:scale-[0.97] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--focus-ring)]"
         >
-          {!logoError ? (
-            <img
-              src={logoSrc}
-              alt=""
-              aria-hidden="true"
-              onError={() => setLogoError(true)}
-              className="brand-logo-img h-8 w-auto shrink-0 object-contain"
-            />
-          ) : null}
           <span
-            className="normal-case text-base font-semibold tracking-tight text-[var(--text-primary)] sm:text-lg"
-            style={{textTransform: 'none'}}
+            className="text-lg sm:text-xl font-bold text-[#FFFFFF] leading-none select-none tracking-[0.06em] tabular-nums"
+            style={{
+              fontFamily: 'var(--font-oxanium)',
+              fontVariantNumeric: 'tabular-nums',
+            }}
           >
-            qrb
+            0101
           </span>
         </Link>
 

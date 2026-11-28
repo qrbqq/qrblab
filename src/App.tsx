@@ -32,10 +32,10 @@ function LegacyPaperRedirect() {
 
 function getDocumentTitleForPath(pathname: string): string {
   if (pathname === '/') {
-    return 'qrbqq';
+    return '0101';
   }
   if (pathname === '/qrb-lab') {
-    return 'qrb lab — qrbqq';
+    return 'qrb lab — 0101';
   }
   if (pathname.startsWith('/qrb-lab/')) {
     const slug = pathname.slice('/qrb-lab/'.length);
@@ -43,15 +43,15 @@ function getDocumentTitleForPath(pathname: string): string {
     if (paper) {
       return `${getLocalizedText(paper.title)} — qrb lab`;
     }
-    return 'qrb lab — qrbqq';
+    return 'qrb lab — 0101';
   }
   if (pathname === '/log') {
-    return 'Profile 1 — qrbqq';
+    return 'Lab Log — 0101';
   }
   if (pathname === '/about') {
-    return 'About — qrbqq';
+    return 'About — 0101';
   }
-  return '404 — qrbqq';
+  return '404 — 0101';
 }
 
 function usePrefersReducedMotion(): boolean {

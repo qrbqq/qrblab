@@ -1,42 +1,42 @@
-import {useState} from 'react';
 import {Link} from 'react-router-dom';
 import {siteConfig, siteCopy} from '../data/siteConfig';
 import {useQScore} from '../hooks/useQScore';
-import {getActiveChannels, getLocalizedText, resolveAssetUrl} from '../utils/papers';
+import {getActiveChannels, getLocalizedText} from '../utils/papers';
 import {QMetricBadge} from './QMetricBadge';
 import {ScrollReveal} from './ScrollReveal';
 
 export function Footer() {
-  const [logoError, setLogoError] = useState(false);
   const currentYear = new Date().getFullYear();
   const qScore = useQScore();
   const activeChannels = getActiveChannels(siteConfig);
   const tagline =
     getLocalizedText(siteConfig.tagline).trim() || siteCopy.footer.tagline;
-  const logoSrc = resolveAssetUrl('images/logo.png', import.meta.env.BASE_URL);
 
   return (
     <footer className="font-ui-sans mt-auto border-t border-[var(--border-hairline)] bg-[var(--bg-canvas)]">
       <div className="mx-auto flex max-w-7xl flex-col gap-6 px-4 py-10 sm:px-6 md:flex-row md:items-center md:justify-between lg:px-8">
         <ScrollReveal staggerIndex={0} className="flex items-center gap-3">
-          {!logoError ? (
-            <img
-              src={logoSrc}
-              alt=""
-              aria-hidden="true"
-              onError={() => setLogoError(true)}
-              className="brand-logo-img h-7 w-auto shrink-0 object-contain"
-            />
-          ) : null}
-          <div>
-            <Link
-              to="/"
-              className="normal-case text-sm font-bold tracking-tight text-[var(--text-primary)]"
+          <Link
+            to="/"
+            aria-label="0101 Home"
+            className="group flex items-center gap-3 transition-opacity hover:opacity-95 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--focus-ring)]"
+          >
+            <span
+              className="inline-flex h-8 px-2.5 items-center justify-center rounded-lg border border-white/[0.18] bg-white/[0.04] font-bold text-[#FFFFFF] text-xs sm:text-sm tracking-[0.06em] tabular-nums select-none shadow-[0_2px_10px_rgba(0,0,0,0.5)] group-hover:border-white/30"
+              style={{
+                fontFamily: 'var(--font-oxanium)',
+                fontVariantNumeric: 'tabular-nums',
+              }}
             >
-              {siteConfig.brandName}
-            </Link>
-            <p className="mt-0.5 text-xs text-[var(--text-secondary)]">{tagline}</p>
-          </div>
+              0101
+            </span>
+            <div>
+              <span className="normal-case text-sm font-bold tracking-tight text-[var(--text-primary)]">
+                {siteConfig.brandName}
+              </span>
+              <p className="mt-0.5 text-xs text-[var(--text-secondary)]">{tagline}</p>
+            </div>
+          </Link>
         </ScrollReveal>
 
         <ScrollReveal staggerIndex={1}>

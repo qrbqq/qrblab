@@ -14,7 +14,7 @@ interface FounderAvatarProps {
  * Circular Founder Avatar used exclusively on `/log` and Lab Log post cards.
  * - When `siteConfig.profileAvatar` (or `avatarSrc`) is configured, renders that photo
  *   naturally (`object-cover object-top`, zero `invert(1)` filter, zero padding).
- * - When empty or unavailable, falls back cleanly to the padded white-inverted `Q` mark (`logo.png`)
+ * - When empty or unavailable, falls back cleanly to the crisp `0101` brand mark
  *   centered inside a `#0A0A0A` circle.
  */
 export function FounderAvatar({
@@ -25,14 +25,12 @@ export function FounderAvatar({
   avatarSrc,
 }: FounderAvatarProps) {
   const [customFailed, setCustomFailed] = useState(false);
-  const [logoFailed, setLogoFailed] = useState(false);
 
   const configuredAvatar = (avatarSrc ?? siteConfig.profileAvatar).trim();
   const customAvatarUrl = configuredAvatar
     ? resolveAssetUrl(configuredAvatar, import.meta.env.BASE_URL)
     : '';
   const showCustomAvatar = Boolean(customAvatarUrl) && !customFailed;
-  const logoSrc = resolveAssetUrl('images/logo.png', import.meta.env.BASE_URL);
 
   return (
     <span
@@ -61,21 +59,15 @@ export function FounderAvatar({
             transform: 'translateZ(0)',
           }}
         />
-      ) : !logoFailed ? (
-        <img
-          src={logoSrc}
-          alt={alt}
-          onError={() => setLogoFailed(true)}
-          className="brand-logo-img h-full w-full object-contain mix-blend-screen select-none"
-          style={{
-            imageRendering: '-webkit-optimize-contrast',
-            backfaceVisibility: 'hidden',
-            transform: 'translateZ(0)',
-          }}
-        />
       ) : (
-        <span className="font-display-heading text-xs font-bold text-[#F5F5F5]">
-          Q
+        <span
+          className="font-bold text-[#FFFFFF] tracking-[0.06em] tabular-nums leading-none select-none text-[10px] sm:text-[11px]"
+          style={{
+            fontFamily: 'var(--font-oxanium)',
+            fontVariantNumeric: 'tabular-nums',
+          }}
+        >
+          0101
         </span>
       )}
     </span>

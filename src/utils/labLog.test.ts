@@ -74,7 +74,7 @@ test('getLatestLabLogs caps preview at max 3 newest posts by default', () => {
   );
 });
 
-test('getLabLogCaption resolves English copy reliably', () => {
+test('getLabLogCaption resolves English copy reliably and supports string captions', () => {
   assert.equal(
     getLabLogCaption(fixtureLogs[0]!),
     'First actuator bench sweep.',
@@ -83,6 +83,20 @@ test('getLabLogCaption resolves English copy reliably', () => {
     getLabLogCaption(fixtureLogs[1]!),
     'DMA ADC trigger timing locked under 1.2 us jitter.',
   );
+  const plainStringEntry: LabLogEntry = {
+    id: 'plain-1',
+    timestamp: '2026-11-28T10:00:00Z',
+    caption: 'Direct string caption support',
+  };
+  assert.equal(
+    getLabLogCaption(plainStringEntry),
+    'Direct string caption support',
+  );
+  const noCaptionEntry: LabLogEntry = {
+    id: 'no-cap',
+    timestamp: '2026-11-28T10:00:00Z',
+  };
+  assert.equal(getLabLogCaption(noCaptionEntry), '');
 });
 
 test('resolveLabLogImages supports multi-image arrays with GIFs, deduplication, and legacy image field', () => {
@@ -90,7 +104,7 @@ test('resolveLabLogImages supports multi-image arrays with GIFs, deduplication, 
     id: 'm1',
     timestamp: '2026-11-25T10:00:00Z',
     caption: {en: 'Multi media'},
-    images: ['images/a.png', 'images/loop.gif', ' ', 'images/a.png'],
+    images: ['images/a.png', 'images/loop.gif', ' ', 'images/a.png', 'javascript:alert(1)', '../secret.png'],
     image: 'images/b.jpg',
   };
   assert.deepEqual(resolveLabLogImages(multiEntry), [
@@ -101,7 +115,7 @@ test('resolveLabLogImages supports multi-image arrays with GIFs, deduplication, 
   assert.deepEqual(resolveLabLogImages(fixtureLogs[1]!), []);
 });
 
-test('resolveLabLogVideo trims and returns MP4 attachment path cleanly', () => {
+test('resolveLabLogVideo trims and returns MP4 attachment path cleanly while blocking unsafe schemes', () => {
   const videoEntry: LabLogEntry = {
     id: 'v1',
     timestamp: '2026-11-25T10:00:00Z',
@@ -110,6 +124,34 @@ test('resolveLabLogVideo trims and returns MP4 attachment path cleanly', () => {
   };
   assert.equal(resolveLabLogVideo(videoEntry), 'images/founder-hero.mp4');
   assert.equal(resolveLabLogVideo(fixtureLogs[0]!), '');
+
+  const unsafeVideoA: LabLogEntry = {
+    id: 'u1',
+    timestamp: '2026-11-28T10:00:00Z',
+    video: 'javascript:alert(1)',
+  };
+  assert.equal(resolveLabLogVideo(unsafeVideoA), '');
+
+  const unsafeVideoB: LabLogEntry = {
+    id: 'u2',
+    timestamp: '2026-11-28T10:00:00Z',
+    video: 'data:video/mp4;base64,...',
+  };
+  assert.equal(resolveLabLogVideo(unsafeVideoB), '');
+
+  const unsafeVideoC: LabLogEntry = {
+    id: 'u3',
+    timestamp: '2026-11-28T10:00:00Z',
+    video: '//evil.com/video.mp4',
+  };
+  assert.equal(resolveLabLogVideo(unsafeVideoC), '');
+
+  const unsafeVideoD: LabLogEntry = {
+    id: 'u4',
+    timestamp: '2026-11-28T10:00:00Z',
+    video: '../etc/passwd.mp4',
+  };
+  assert.equal(resolveLabLogVideo(unsafeVideoD), '');
 });
 
 test('computeThreadConnections links consecutive dispatches sharing identical threadId', () => {
