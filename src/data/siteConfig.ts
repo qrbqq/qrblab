@@ -200,8 +200,8 @@ export interface SiteCopy {
  */
 export const siteConfig: SiteConfig = {
   profileBannerText: "DON'T FORGET GAZA",
-  handle: "@AbdoAhmed",
-  displayName: "AbdoAhmed",
+  handle: "@qrbqq",
+  displayName: "qrbqq",
   brandName: 'qrblab',
   profileAvatar: "images/profile-avatar.png",
   tagline: {
