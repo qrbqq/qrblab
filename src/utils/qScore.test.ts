@@ -74,12 +74,12 @@ test('computeQScore deterministically weights papers, lab logs, and interactions
     labLogsCount: 6,
     interactionPoints: 12,
   });
-  assert.equal(sample.paperContribution, 10 * Q_PAPER_WEIGHT);
-  assert.equal(sample.labLogContribution, 6 * Q_LAB_LOG_WEIGHT);
+  assert.equal(sample.paperContribution, 10);
+  assert.equal(sample.labLogContribution, 6);
   assert.equal(sample.interactionContribution, 12);
-  assert.equal(sample.total, 1428);
-  assert.equal(sample.formatted, '1,428');
-  assert.equal(sample.label, 'Q · 1,428');
+  assert.equal(sample.total, 28);
+  assert.equal(sample.formatted, '28');
+  assert.equal(sample.label, 'Q · 28');
 });
 
 test('computeQScore clamps negative and non-finite inputs safely', () => {
@@ -104,7 +104,7 @@ test('getCurrentQScore updates automatically when papers or labLogs arrays grow'
   });
   assert.equal(
     prodScore.total,
-    papers.length * Q_PAPER_WEIGHT + labLogs.length * Q_LAB_LOG_WEIGHT,
+    papers.length + labLogs.length,
   );
 
   const afterOnePaper = getCurrentQScore({
@@ -112,8 +112,8 @@ test('getCurrentQScore updates automatically when papers or labLogs arrays grow'
     labLogsList: [],
     storage,
   });
-  assert.equal(afterOnePaper.total, Q_PAPER_WEIGHT);
-  assert.equal(afterOnePaper.label, `Q · ${Q_PAPER_WEIGHT}`);
+  assert.equal(afterOnePaper.total, 1);
+  assert.equal(afterOnePaper.label, 'Q · 1');
 
   const afterMoreData = getCurrentQScore({
     papersList: [makePaper('p1'), makePaper('p2')],
@@ -122,9 +122,9 @@ test('getCurrentQScore updates automatically when papers or labLogs arrays grow'
   });
   assert.equal(
     afterMoreData.total,
-    2 * Q_PAPER_WEIGHT + 3 * Q_LAB_LOG_WEIGHT,
+    5,
   );
-  assert.equal(afterMoreData.label, 'Q · 348');
+  assert.equal(afterMoreData.label, 'Q · 5');
 });
 
 test('recordQInteraction persists weighted interactions in storage and clearQInteractions resets them', () => {
@@ -154,7 +154,7 @@ test('recordQInteraction persists weighted interactions in storage and clearQInt
     labLogsList: [makeLog('l1')],
     storage,
   });
-  assert.equal(current.total, Q_PAPER_WEIGHT + Q_LAB_LOG_WEIGHT + afterTool);
+  assert.equal(current.total, 1 + 1 + afterTool);
 
   clearQInteractions(storage);
   assert.equal(getLocalInteractionPoints(storage), 0);

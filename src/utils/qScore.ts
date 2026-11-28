@@ -87,8 +87,8 @@ export function computeQScore(input: QScoreInput): QScoreBreakdown {
     input.interactionPoints ?? 0,
   );
 
-  const paperContribution = papersCount * Q_PAPER_WEIGHT;
-  const labLogContribution = labLogsCount * Q_LAB_LOG_WEIGHT;
+  const paperContribution = papersCount;
+  const labLogContribution = labLogsCount;
   const total =
     paperContribution + labLogContribution + interactionContribution;
   const formatted = formatQNumber(total);

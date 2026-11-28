@@ -24,12 +24,12 @@ export function LatestLabLogSection({
   } | null>(null);
 
   const sortedLogs = useMemo(() => sortLabLogsDesc(labLogs), []);
-  const homeDispatches = useMemo(() => sortedLogs.slice(0, 3), [sortedLogs]);
+  const homeDispatches = useMemo(() => sortedLogs.slice(0, 4), [sortedLogs]);
   const threadedDispatches = useMemo(
     () => computeThreadConnections(homeDispatches),
     [homeDispatches],
   );
-  const hasMore = sortedLogs.length > 3;
+  const hasMore = sortedLogs.length > 4;
 
   return (
     <ArchitecturalFrame

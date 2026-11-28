@@ -142,7 +142,7 @@ export function LabLogPage() {
             />
           </div>
 
-          {/* Case-Agnostic Display Name + Crimson Verified Seal + Q Metric Badge */}
+          {/* Case-Agnostic Display Name + Crimson Verified Seal + Q Metric Badge + Twin Dispatches Counter Badge */}
           <div className="mt-4">
             <div className="flex flex-wrap items-center gap-x-2.5 gap-y-2">
               <h1
@@ -156,6 +156,21 @@ export function LabLogPage() {
                 label={`Verified ${identity.displayName}`}
               />
               <QMetricBadge score={qScore} />
+              <span
+                data-testid="twin-dispatches-counter-badge"
+                className="font-mono-tabular inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-lg border border-white/[0.14] bg-white/[0.045] px-2.5 py-1 text-xs font-medium tracking-wide tabular-nums text-[#E5E5E5] backdrop-blur-md sm:text-[13px]"
+                style={{
+                  textTransform: 'none',
+                  boxShadow:
+                    'inset 0 1px 0 rgba(255, 255, 255, 0.14), 0 6px 18px rgba(0, 0, 0, 0.45)',
+                }}
+              >
+                <span className="text-white/60">Dispatches</span>
+                <span aria-hidden="true" className="text-white/35">
+                  ·
+                </span>
+                <span className="font-semibold text-[#F5F5F5] tabular-nums">{labLogs.length}</span>
+              </span>
             </div>
             <p
               className="font-mono-tabular mt-1 text-sm text-[#8A8A8A]"
@@ -179,13 +194,66 @@ export function LabLogPage() {
         </header>
       </div>
 
+      {/* =========================================================================
+          2. FOUNDER & EXECUTIVE LEADERSHIP MONOGRAPH SECTION (Directly Above Dispatches)
+          ========================================================================= */}
+      <div className="mx-auto w-full max-w-3xl px-4 pt-8 pb-12 md:px-6">
+        <ScrollReveal staggerIndex={1}>
+          <div className="flex flex-col gap-2">
+            <p className="font-eyebrow-mono text-[11px] font-medium tracking-[0.14em] text-[#707070]">
+              01 / LEADERSHIP &amp; ARCHITECTURE
+            </p>
+            <h2
+              className="font-display-bebas text-2xl font-bold tracking-[0.03em] text-[#F5F5F5] sm:text-3xl"
+              style={{textTransform: 'none'}}
+            >
+              FOUNDER, OWNER &amp; CHIEF EXECUTIVE OFFICER
+            </h2>
+          </div>
+        </ScrollReveal>
+
+        <ScrollReveal staggerIndex={2} className="mt-6">
+          <div className="grid grid-cols-1 items-start gap-6 sm:grid-cols-12 sm:gap-8">
+            {/* Authoritative Studio Portrait Frame */}
+            <div className="w-full sm:col-span-5 md:col-span-4">
+              <div
+                className="relative aspect-[4/5] w-full overflow-hidden rounded-xl border border-white/[0.14] bg-[#0A0A0A] shadow-2xl"
+                style={{
+                  boxShadow:
+                    '0 16px 40px rgba(0, 0, 0, 0.75), inset 0 1px 0 rgba(255, 255, 255, 0.16)',
+                }}
+              >
+                <img
+                  src={resolveAssetUrl('images/founder-executive.jpg', import.meta.env.BASE_URL)}
+                  alt="Founder & Executive Leadership Portrait"
+                  loading="eager"
+                  className="h-full w-full object-cover object-center transition-transform duration-500 hover:scale-[1.02]"
+                  style={{
+                    imageRendering: '-webkit-optimize-contrast',
+                    backfaceVisibility: 'hidden',
+                  }}
+                />
+              </div>
+            </div>
+
+            {/* Executive Manifesto & Professional Statement */}
+            <div className="flex flex-col justify-center sm:col-span-7 md:col-span-8">
+              <p className="font-body-prose text-sm leading-relaxed text-[var(--text-primary)]/90 sm:text-base sm:leading-relaxed">
+                Directing independent research at the intersection of high-bandwidth electro-mechanical actuation, deep perceptual models, and distributed autonomous systems. Dedicated to physical-in-the-loop validation, mathematical rigor, and verifiable engineering architectures.
+              </p>
+            </div>
+          </div>
+        </ScrollReveal>
+      </div>
+
+      {/* Full-Width Structural Hairline Divider separating Monograph from Dispatches */}
       <div className="h-px w-full bg-white/[0.08]" />
 
       {/* =========================================================================
           3. BORDERLESS UNBOXED PROFILE FEED (All dispatches & connected threads)
           ========================================================================= */}
       <div className="mx-auto w-full max-w-3xl px-4 md:px-6">
-        <section aria-label={siteCopy.labLog.title} className="mt-6">
+        <section aria-label={siteCopy.labLog.title} className="pt-10">
           {threadedLogs.length === 0 ? (
             <ScrollReveal staggerIndex={2}>
               <EmptyStateCard
