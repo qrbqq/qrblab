@@ -9,11 +9,18 @@ export interface LabLogEntry {
     es?: string;
   };
   image?: string; // Path relative to public/ e.g. "images/starship-schematic.png"
+  video?: string;
   sourceUrl?: string; // Optional external reference link
   tags?: string[];
 }
 
 export const labLogs: LabLogEntry[] = [
+  {
+    id: 'log-20261128-144246',
+    timestamp: '2026-11-28T12:42:46Z',
+    caption: "And where do you think the space industry might be headed?",
+    video: 'images/log-20261128-144246-vid.mp4',
+  },
   {
     id: 'log-20261128-094106',
     timestamp: '2026-11-28T07:41:06Z',
@@ -24,6 +31,7 @@ export const labLogs: LabLogEntry[] = [
     timestamp: "2026-11-26T16:03:50Z",
     caption: "النقلة الحقيقية ليست في عدد المعاملات، بل في test-time compute: نماذج مدرَّبة بالتعلم المعزز تولّد chain-of-thought، وتراجع مساراتها بـverifier، وتصحح أخطاءها قبل الجواب. الآلية ما زالت next-token prediction، لكن الاستدلال نفسه صار قابلاً للتوسع بالحوسبة.",
     image: "images/log-20261126-160350.jpg",
+  video?: string;
   },
 {
     id: "log-20261126-155756",
