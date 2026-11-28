@@ -1,7 +1,7 @@
 export interface LabLogEntry {
   id: string;
   timestamp: string; // ISO date string e.g. "2026-11-23T18:00:00Z"
-  caption: {
+  caption: string | {
     en: string;
     ar?: string;
     fr?: string;
@@ -14,6 +14,11 @@ export interface LabLogEntry {
 }
 
 export const labLogs: LabLogEntry[] = [
+  {
+    id: 'log-20261128-094106',
+    timestamp: '2026-11-28T07:41:06Z',
+    caption: "From chatbots to agentic AI, and from the cloud to local AI—we are seeing the rise of open-weight models that run locally and can be customized through fine-tuning, alongside hybrid architectures and AI agents capable of executing real-world tasks. We may soon see smaller companies managed by lean teams, perhaps even operating entirely from home. I believe this is one of the defining features of the future of business.",
+  },
   {
     id: "log-20261126-160350",
     timestamp: "2026-11-26T16:03:50Z",
